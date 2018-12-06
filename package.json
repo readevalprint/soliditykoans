@@ -4,7 +4,7 @@
   "description": "Enlightenment through practice",
   "main": "index.js",
   "scripts": {
-    "watch-js": "watchify -d -p [ browserify-livereload --host 127.0.0.1 --port 8034 ] main.js -o bundle.js -v"
+    "watch-js": "watchify -d -p [ browserify-livereload --host 127.0.0.1 --port 8034 ] index.js -o bundle.js -v"
   },
   "author": "",
   "license": "MIT",
