@@ -4310,6 +4310,10 @@ function _Browser_load(url)
 		}
 	}));
 }
+var author$project$Main$Message = F2(
+	function (title, body) {
+		return {body: body, title: title};
+	});
 var elm$core$Basics$False = {$: 'False'};
 var elm$core$Basics$True = {$: 'True'};
 var elm$core$Result$isOk = function (result) {
@@ -4789,21 +4793,36 @@ var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(
-		{message: 'Elm program is ready. Get started!'},
+		{
+			messages: _List_fromArray(
+				[
+					A2(author$project$Main$Message, 'a title', 'Elm program is ready. Get started!')
+				]),
+			next: A2(author$project$Main$Message, 'first', 'message')
+		},
 		elm$core$Platform$Cmd$none);
 };
-var author$project$Main$UpdateStr = function (a) {
-	return {$: 'UpdateStr', a: a};
+var author$project$Main$Noop = {$: 'Noop'};
+var author$project$Main$UpdateNext = function (a) {
+	return {$: 'UpdateNext', a: a};
 };
-var elm$json$Json$Decode$decodeValue = _Json_run;
+var elm$json$Json$Decode$field = _Json_decodeField;
+var elm$json$Json$Decode$map2 = _Json_map2;
 var elm$json$Json$Decode$string = _Json_decodeString;
+var author$project$Main$messageDecoder = A3(
+	elm$json$Json$Decode$map2,
+	author$project$Main$Message,
+	A2(elm$json$Json$Decode$field, 'title', elm$json$Json$Decode$string),
+	A2(elm$json$Json$Decode$field, 'body', elm$json$Json$Decode$string));
+var elm$json$Json$Decode$decodeValue = _Json_run;
 var author$project$Main$decodeValue = function (x) {
-	var result = A2(elm$json$Json$Decode$decodeValue, elm$json$Json$Decode$string, x);
+	var result = A2(elm$json$Json$Decode$decodeValue, author$project$Main$messageDecoder, x);
 	if (result.$ === 'Ok') {
-		var string = result.a;
-		return author$project$Main$UpdateStr(string);
+		var next = result.a;
+		return author$project$Main$UpdateNext(next);
 	} else {
-		return author$project$Main$UpdateStr('Silly JavaScript, you can\'t kill me!');
+		var e = result.a;
+		return author$project$Main$Noop;
 	}
 };
 var elm$json$Json$Decode$value = _Json_decodeValue;
@@ -4811,32 +4830,130 @@ var author$project$Main$toElm = _Platform_incomingPort('toElm', elm$json$Json$De
 var author$project$Main$subscriptions = function (model) {
 	return author$project$Main$toElm(author$project$Main$decodeValue);
 };
-var elm$json$Json$Encode$string = _Json_wrap;
-var author$project$Main$toJs = _Platform_outgoingPort('toJs', elm$json$Json$Encode$string);
-var author$project$Main$update = F2(
-	function (msg, model) {
-		if (msg.$ === 'UpdateStr') {
-			var str = msg.a;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{message: str}),
-				elm$core$Platform$Cmd$none);
-		} else {
-			var str = msg.a;
-			return _Utils_Tuple2(
+var author$project$Main$setField = F3(
+	function (model, field, value) {
+		if (field.$ === 'Title') {
+			return _Utils_update(
 				model,
-				author$project$Main$toJs(str));
+				{
+					next: A2(author$project$Main$Message, value, model.next.body)
+				});
+		} else {
+			return _Utils_update(
+				model,
+				{
+					next: A2(author$project$Main$Message, model.next.title, value)
+				});
 		}
 	});
-var author$project$Main$SendToJs = function (a) {
-	return {$: 'SendToJs', a: a};
+var elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			elm$core$List$foldl,
+			F2(
+				function (_n0, obj) {
+					var k = _n0.a;
+					var v = _n0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
 };
+var elm$json$Json$Encode$string = _Json_wrap;
+var author$project$Main$toJs = _Platform_outgoingPort(
+	'toJs',
+	function ($) {
+		return elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'messages',
+					elm$json$Json$Encode$list(
+						function ($) {
+							return elm$json$Json$Encode$object(
+								_List_fromArray(
+									[
+										_Utils_Tuple2(
+										'body',
+										elm$json$Json$Encode$string($.body)),
+										_Utils_Tuple2(
+										'title',
+										elm$json$Json$Encode$string($.title))
+									]));
+						})($.messages)),
+					_Utils_Tuple2(
+					'next',
+					function ($) {
+						return elm$json$Json$Encode$object(
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'body',
+									elm$json$Json$Encode$string($.body)),
+									_Utils_Tuple2(
+									'title',
+									elm$json$Json$Encode$string($.title))
+								]));
+					}($.next))
+				]));
+	});
+var author$project$Main$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'SendToJs':
+				return _Utils_Tuple2(
+					model,
+					author$project$Main$toJs(model));
+			case 'UpdateNext':
+				var next = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{next: next}),
+					elm$core$Platform$Cmd$none);
+			case 'AddMessage':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							messages: _Utils_ap(
+								model.messages,
+								_List_fromArray(
+									[model.next])),
+							next: A2(author$project$Main$Message, '', '')
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'SetField':
+				var field = msg.a;
+				var value = msg.b;
+				return _Utils_Tuple2(
+					A3(author$project$Main$setField, model, field, value),
+					elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+		}
+	});
+var author$project$Main$AddMessage = {$: 'AddMessage'};
+var author$project$Main$Body = {$: 'Body'};
+var author$project$Main$SendToJs = {$: 'SendToJs'};
+var author$project$Main$SetField = F2(
+	function (a, b) {
+		return {$: 'SetField', a: a, b: b};
+	});
+var author$project$Main$Title = {$: 'Title'};
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
 var elm$json$Json$Decode$map = _Json_map1;
-var elm$json$Json$Decode$map2 = _Json_map2;
 var elm$json$Json$Decode$succeed = _Json_succeed;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
@@ -4850,9 +4967,11 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
+var elm$html$Html$br = _VirtualDom_node('br');
 var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$div = _VirtualDom_node('div');
 var elm$html$Html$input = _VirtualDom_node('input');
+var elm$html$Html$label = _VirtualDom_node('label');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
 var elm$html$Html$Attributes$stringProperty = F2(
@@ -4862,6 +4981,7 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			elm$json$Json$Encode$string(string));
 	});
+var elm$html$Html$Attributes$name = elm$html$Html$Attributes$stringProperty('name');
 var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
@@ -4949,7 +5069,6 @@ var elm$core$List$foldr = F3(
 	function (fn, acc, ls) {
 		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
 	});
-var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
 		return A3(elm$core$List$foldr, elm$json$Json$Decode$field, decoder, fields);
@@ -4975,31 +5094,67 @@ var author$project$Main$view = function (model) {
 		_List_fromArray(
 			[
 				A2(
-				elm$html$Html$input,
-				_List_fromArray(
-					[
-						elm$html$Html$Attributes$type_('text'),
-						elm$html$Html$Events$onInput(author$project$Main$UpdateStr),
-						elm$html$Html$Attributes$value(model.message)
-					]),
-				_List_Nil),
-				A2(
 				elm$html$Html$div,
 				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text(model.message)
-					])),
-				A2(
-				elm$html$Html$button,
-				_List_fromArray(
-					[
-						elm$html$Html$Events$onClick(
-						author$project$Main$SendToJs(model.message))
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text('Send To JS')
+						A2(
+						elm$html$Html$label,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('title'),
+								A2(
+								elm$html$Html$input,
+								_List_fromArray(
+									[
+										elm$html$Html$Attributes$type_('text'),
+										elm$html$Html$Attributes$name('title'),
+										elm$html$Html$Attributes$value(model.next.title),
+										elm$html$Html$Events$onInput(
+										author$project$Main$SetField(author$project$Main$Title))
+									]),
+								_List_Nil)
+							])),
+						A2(elm$html$Html$br, _List_Nil, _List_Nil),
+						A2(
+						elm$html$Html$label,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('body'),
+								A2(
+								elm$html$Html$input,
+								_List_fromArray(
+									[
+										elm$html$Html$Attributes$type_('text'),
+										elm$html$Html$Attributes$name('body'),
+										elm$html$Html$Attributes$value(model.next.body),
+										elm$html$Html$Events$onInput(
+										author$project$Main$SetField(author$project$Main$Body))
+									]),
+								_List_Nil)
+							])),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onClick(author$project$Main$SendToJs)
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Send to JS')
+							])),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onClick(author$project$Main$AddMessage)
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Add Message')
+							]))
 					]))
 			]));
 };

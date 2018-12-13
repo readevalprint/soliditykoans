@@ -23,94 +23,171 @@
         // Required
         sources:
         {
+          "remix_tests.sol": {"content": RemixTests.assertLibCode},
+
           // The keys here are the "global" names of the source files,
           // imports can use other files via remappings (see below).
-          "foo.sol": {"content": `
-            pragma solidity ^0.5.0;
+          "bar_test.sol": {"content":`pragma solidity ^0.5.0;
 
-            contract Foo {
-              uint public num;
-              event Log(
-              uint _value
-              );
-              constructor() public payable {
-                num = block.timestamp;
-                emit Log(num);
-              }
-              function deposit(uint _num) public payable returns(uint) {
-                emit Log(num);
-                uint old_num = num;
-                num = _num;
-                return old_num;
-              }
-            }`
-          },
-          "bar.sol": {"content": `
-            pragma solidity ^0.5.0;
+            //import "browser/Assertions.sol";
+            import "remix_tests.sol";
 
-            contract Bar {
-              uint public num;
-              event Log(
-              uint _value
-              );
-              constructor() public payable {
-                num = block.timestamp;
-                emit Log(num);
+            /// @title A simulator for Bug Bunny, the most famous Rabbit
+            /// @author Warned Bros
+            /// @notice You can use this contract for only the most basic simulation
+            /// @dev All function calls are currently implement without side effects
+            contract ReflectionsOnTruth {
+
+              /// @notice To be quite honest.
+              function huh() public {  
+                trueOrFalse();
+              }              
+
+              /// @notice Consider that boolean values are either true/false.
+              function trueOrFalse() public {
+
+                // ======= Fix the following line so that value = true
+                bool value = true;
+                // =======
+
+                Assert.equal(true, value, "value should be true");
+
+                // ===== Uncomment the following line so that value = false again
+                // value = false;
+                // =======
+
+                Assert.equal(false, value, "value should now be false");
+
               }
-              function deposit(uint _num) public payable returns(uint) {
-                emit Log(num);
-                uint old_num = num;
-                num = _num;
-                return old_num;
+
+            }
+
+
+
+            contract ReflectionsOnNumbers {
+              function numbersCanBeDivided() public {
+                // ======= Fix the following lines so that a is twice as large as b and b is greater
+                int a = -1;
+                int b = 1;
+                // =======
+
+                Assert.greaterThan(a, int(1), "a should be greater than 1");
+                Assert.greaterThan(b, int(1), "b should be greater than 1");
+
+                int result = a / b;
+
+                Assert.equal(b, 2, "a should be twice as great as b");
+              }             
+              function numbersCanBeMultiplied() public {
+                // ======= Fix the following lines so that a is twice as large as b and b is greater
+                int a = 10;
+                int b = 10;
+                // =======
+
+                Assert.greaterThan(a, int(0), "a should be greater than 1");
+                Assert.greaterThan(b, int(0), "b should be greater than 1");
+
+                int result = a * b;
+
+                Assert.equal(result, 100, "a * b should equal 100");
               }
-            }`
-            //"pragma solidity ^0.5.0;contract Hell {    uint last_timestamp; constructor() public {        last_timestamp = block.timestamp;           }   }"}
-        }
-      },
-      settings: {
-        metadata: {
-          // Use only literal content and not URLs (false by default)
-          useLiteralContent: true
-        },
-        outputSelection: {
-          // Enable the metadata and bytecode outputs of every single contract.
-          "*": {
-            "*": [ "evm.bytecode", "abi", "devdoc", "userdoc"]
+
+            }
+
+            contract ReflectionsOnArrays {
+
+              // ======= Extend this line so that the array has 10 integers
+              int[5] list = [1,2,3,4,5];
+              // =======
+
+              function arraysHaveLength() public {
+                Assert.equal(list.length, 10, "list should have 10 items");
+              }
+            }
+
+            `
           }
+        },
+        settings: {
+          metadata: {
+            // Use only literal content and not URLs (false by default)
+            useLiteralContent: true
+          },
+          outputSelection: {
+            // Enable the metadata and bytecode outputs of every single contract.
+            "*": {
+              "*": [ "abi", "devdoc", "userdoc", "evm.methodIdentifiers"]
+            }
+          }
+
         }
 
       }
 
-    }
-    out = solc.compile(JSON.stringify(input), console.log)
-    solc_out = JSON.parse(out)
-    contractBytecode = solc_out.contracts["foo.sol"]['Foo'].evm.bytecode.object
-    contractABI = solc_out.contracts["foo.sol"]['Foo'].abi
+      out = solc.compile(JSON.stringify(input), console.log)
+      solc_out = JSON.parse(out)
+      console.log(solc_out)
+      content = input["sources"]["bar_test.sol"]["content"];
+
+      test_results = {}
+      testCallback=(result) => {
+        console.log("test:", result);
+
+        if(result.type === "contract") {
+          test_results[result.value] = {
+            notice: solc_out["contracts"][result.filename][result.value]["userdoc"]["notice"] || "",
+            loc:  content.indexOf(result.errMsg || result.value),
+            functions: {},
+          }
+        } 
+        if (result.type === "testFailure" || result.type === "testPass"){
+          test_results[result.context].functions[result.value] =  {
+            notice: (solc_out["contracts"][result.filename][result.context]["userdoc"]["methods"][result.value + "()"] || {})["notice"] || "",
+            loc:  content.indexOf(result.errMsg || result.value),
+            msg: result.errMsg || "",
+            type: result.type,
+          }
+        };
+      }
+      runningTest = {}
+      //runningTest["bar_test.sol"] = { content: "pragma solidity ^0.5.0; import \"remix_tests.sol\"; contract Foo {function lesson_01_bb() public view returns (bool) {return true;} function lesson_02_cc() public { Assert.equal(int(2), int(2), \"it should be 2\");}}" };
+      runningTest["bar_test.sol"] = { content: content};
+      //runningTest["remix_tests.sol"] = { content: "" };
+      RemixTests.runTestSources(runningTest ,testCallback, (error, result) => {console.log("result", error, result)},(error, result) => {console.log("final", error, result)}, (url, cb) => { console.log("import", url, cb); cb(null,input["sources"][url]["content"]) })
 
 
-    // web3.setProvider(new sim.Provider())
-    // eth = new Eth(new sim.Provider())
-    web3.eth.getAccounts().then((accounts) => {web3.eth.defaultAccount = accounts[0]
-
-      contract1 = new web3.eth.Contract(contractABI)
+      /*
+      contractBytecode = solc_out.contracts["bar_test.sol"]['Foo'].evm.bytecode.object
+      contractABI = solc_out.contracts["foo.sol"]['Foo'].abi
 
 
-      return contract1.deploy({data: contractBytecode}).send({from: web3.eth.defaultAccount}).then(function(newContractInstance){
-        console.log(newContractInstance.options.address) // instance with the new contract address
-        contract1.options.address = newContractInstance.options.address
+      // web3.setProvider(new sim.Provider())
+      // eth = new Eth(new sim.Provider())
+      web3.eth.getAccounts().then((accounts) => {web3.eth.defaultAccount = accounts[0]
+
+        contract1 = new web3.eth.Contract(contractABI)
 
 
-
-        return contract1.methods.deposit(123).send({from: web3.eth.defaultAccount}).on('receipt', function(receipt){
+        return contract1.deploy({data: contractBytecode}).send({from: web3.eth.defaultAccount, gas: 100000000000}).on('receipt', function(receipt){
           // receipt example
           console.log(receipt)
         })
+        .then(function(newContractInstance){
+          console.log("new address", newContractInstance.options.address) // instance with the new contract address
+          contract1.options.address = newContractInstance.options.address
+
+
+
+          return contract1.methods.deposit(123).send({from: web3.eth.defaultAccount}).on('receipt', function(receipt){
+            // receipt example
+            console.log(receipt)
+          })
+        })
+
       })
 
-    })
+      */
 
-
-
-  </script>
-</body>
+    </script>
+  </body>
 </html>

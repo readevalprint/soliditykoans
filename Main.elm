@@ -1,10 +1,10 @@
 port module Main exposing (main)
 
 import Browser
-import Html exposing (Html, button, div, input, text)
-import Html.Attributes exposing (type_, value)
-import Html.Events exposing (onClick, onInput)
-import Json.Decode as Decode exposing (Decoder, dict, float, int, list, string)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Json.Decode as Decode exposing (Decoder, dict, field, float, int, list, map2, string)
 import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode exposing (Value)
 
@@ -22,14 +22,25 @@ main =
 -- TYPES
 
 
+type alias Message =
+    { title : String
+    , body : String
+    }
+
+
 type alias Model =
-    { message : String
+    { next : Message
+    , messages : List Message
     }
 
 
 type Msg
-    = UpdateStr String
-    | SendToJs String
+    = AddMessage
+    | SendToJs
+    | ClearNext
+    | UpdateNext Message
+    | SetField FormField String
+    | Noop
 
 
 
@@ -38,14 +49,29 @@ type Msg
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { message = "Elm program is ready. Get started!" }, Cmd.none )
+    ( { next = Message "first" "message", messages = [ Message "a title" "Elm program is ready. Get started!" ] }, Cmd.none )
 
 
 
 ----- UPDATE
 
 
-port toJs : String -> Cmd msg
+type FormField
+    = Title
+    | Body
+
+
+setField : Model -> FormField -> String -> Model
+setField model field value =
+    case field of
+        Title ->
+            { model | next = Message value model.next.body }
+
+        Body ->
+            { model | next = Message model.next.title value }
+
+
+port toJs : Model -> Cmd msg
 
 
 port toElm : (Value -> msg) -> Sub msg
@@ -54,25 +80,68 @@ port toElm : (Value -> msg) -> Sub msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        UpdateStr str ->
-            ( { model | message = str }, Cmd.none )
+        SendToJs ->
+            ( model, toJs model )
 
-        SendToJs str ->
-            ( model, toJs str )
+        UpdateNext next ->
+            ( { model | next = next }, Cmd.none )
+
+        AddMessage ->
+            ( { model | next = Message "" "", messages = model.messages ++ [ model.next ] }, Cmd.none )
+
+        SetField field value ->
+            ( setField model field value, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 
 -- VIEW
 
 
+onEnter : msg -> Attribute msg
+onEnter msg =
+    keyCode
+        |> Decode.andThen
+            (\key ->
+                if key == 13 then
+                    Decode.succeed msg
+
+                else
+                    Decode.fail "Not enter"
+            )
+        |> on "keyup"
+
+
 view : Model -> Html Msg
 view model =
     div []
-        [ input [ type_ "text", onInput UpdateStr, value model.message ] []
-        , div [] [ text model.message ]
-        , button
-            [ onClick (SendToJs model.message) ]
-            [ text "Send To JS" ]
+        [ div []
+            [ label []
+                [ text "title"
+                , input
+                    [ type_ "text"
+                    , name "title"
+                    , value model.next.title
+                    , onInput <| SetField Title
+                    ]
+                    []
+                ]
+            , br [] []
+            , label []
+                [ text "body"
+                , input
+                    [ type_ "text"
+                    , name "body"
+                    , value model.next.body
+                    , onInput <| SetField Body
+                    ]
+                    []
+                ]
+            , button [ onClick SendToJs ] [ text "Send to JS" ]
+            , button [ onClick AddMessage ] [ text "Add Message" ]
+            ]
         ]
 
 
@@ -80,18 +149,25 @@ view model =
 -- SUBSCRIPTIONS
 
 
+messageDecoder : Decoder Message
+messageDecoder =
+    map2 Message
+        (field "title" string)
+        (field "body" string)
+
+
 decodeValue : Value -> Msg
 decodeValue x =
     let
         result =
-            Decode.decodeValue Decode.string x
+            Decode.decodeValue messageDecoder x
     in
     case result of
-        Ok string ->
-            UpdateStr string
+        Ok next ->
+            UpdateNext next
 
-        Err _ ->
-            UpdateStr "Silly JavaScript, you can't kill me!"
+        Err e ->
+            Noop
 
 
 subscriptions : Model -> Sub Msg
