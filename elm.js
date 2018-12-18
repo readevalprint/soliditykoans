@@ -4310,10 +4310,6 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$Main$Message = F2(
-	function (title, body) {
-		return {body: body, title: title};
-	});
 var elm$core$Basics$False = {$: 'False'};
 var elm$core$Basics$True = {$: 'True'};
 var elm$core$Result$isOk = function (result) {
@@ -4793,227 +4789,147 @@ var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(
-		{
-			messages: _List_fromArray(
-				[
-					A2(author$project$Main$Message, 'a title', 'Elm program is ready. Get started!')
-				]),
-			next: A2(author$project$Main$Message, 'first', 'message')
-		},
+		_Utils_Tuple2(_List_Nil, ''),
 		elm$core$Platform$Cmd$none);
 };
-var author$project$Main$Noop = {$: 'Noop'};
-var author$project$Main$UpdateNext = function (a) {
-	return {$: 'UpdateNext', a: a};
+var author$project$Main$Display = function (a) {
+	return {$: 'Display', a: a};
 };
-var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$map2 = _Json_map2;
+var NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = elm$json$Json$Decode$map2(elm$core$Basics$apR);
+var elm$json$Json$Decode$field = _Json_decodeField;
+var NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
+	function (key, valDecoder, decoder) {
+		return A2(
+			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+			A2(elm$json$Json$Decode$field, key, valDecoder),
+			decoder);
+	});
+var author$project$Main$Contract = F3(
+	function (functions, notice, loc) {
+		return {functions: functions, loc: loc, notice: notice};
+	});
+var author$project$Main$Function = F4(
+	function (assertions, notice, loc, fail) {
+		return {assertions: assertions, fail: fail, loc: loc, notice: notice};
+	});
+var elm$json$Json$Decode$bool = _Json_decodeBool;
+var elm$json$Json$Decode$int = _Json_decodeInt;
+var elm$json$Json$Decode$list = _Json_decodeList;
 var elm$json$Json$Decode$string = _Json_decodeString;
-var author$project$Main$messageDecoder = A3(
-	elm$json$Json$Decode$map2,
-	author$project$Main$Message,
-	A2(elm$json$Json$Decode$field, 'title', elm$json$Json$Decode$string),
-	A2(elm$json$Json$Decode$field, 'body', elm$json$Json$Decode$string));
+var elm$json$Json$Decode$succeed = _Json_succeed;
+var author$project$Main$functionDecoder = A3(
+	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'fail',
+	elm$json$Json$Decode$bool,
+	A3(
+		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'loc',
+		elm$json$Json$Decode$int,
+		A3(
+			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'notice',
+			elm$json$Json$Decode$string,
+			A3(
+				NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'assertions',
+				elm$json$Json$Decode$list(elm$json$Json$Decode$string),
+				elm$json$Json$Decode$succeed(author$project$Main$Function)))));
+var elm$json$Json$Decode$keyValuePairs = _Json_decodeKeyValuePairs;
+var author$project$Main$contractDecoder = A3(
+	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'loc',
+	elm$json$Json$Decode$int,
+	A3(
+		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'notice',
+		elm$json$Json$Decode$string,
+		A3(
+			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'functions',
+			elm$json$Json$Decode$keyValuePairs(author$project$Main$functionDecoder),
+			elm$json$Json$Decode$succeed(author$project$Main$Contract))));
+var elm$core$Basics$compare = _Utils_compare;
+var elm$core$List$sortWith = _List_sortWith;
+var author$project$Main$displayTestResults = function (contracts) {
+	return A2(
+		elm$core$List$sortWith,
+		F2(
+			function (_n0, _n1) {
+				var name_a = _n0.a;
+				var contract_a = _n0.b;
+				var name_b = _n1.a;
+				var contract_b = _n1.b;
+				return A2(elm$core$Basics$compare, contract_a.loc, contract_b.loc);
+			}),
+		contracts);
+};
 var elm$json$Json$Decode$decodeValue = _Json_run;
 var author$project$Main$decodeValue = function (x) {
-	var result = A2(elm$json$Json$Decode$decodeValue, author$project$Main$messageDecoder, x);
+	var result = A2(
+		elm$json$Json$Decode$decodeValue,
+		elm$json$Json$Decode$keyValuePairs(author$project$Main$contractDecoder),
+		x);
 	if (result.$ === 'Ok') {
-		var next = result.a;
-		return author$project$Main$UpdateNext(next);
+		var value = result.a;
+		return author$project$Main$Display(
+			author$project$Main$displayTestResults(value));
 	} else {
-		var e = result.a;
-		return author$project$Main$Noop;
+		return author$project$Main$Display(_List_Nil);
 	}
 };
 var elm$json$Json$Decode$value = _Json_decodeValue;
 var author$project$Main$toElm = _Platform_incomingPort('toElm', elm$json$Json$Decode$value);
-var author$project$Main$subscriptions = function (model) {
+var author$project$Main$subscriptions = function (_n0) {
+	var tests = _n0.a;
+	var code = _n0.b;
 	return author$project$Main$toElm(author$project$Main$decodeValue);
 };
-var author$project$Main$setField = F3(
-	function (model, field, value) {
-		if (field.$ === 'Title') {
-			return _Utils_update(
-				model,
-				{
-					next: A2(author$project$Main$Message, value, model.next.body)
-				});
-		} else {
-			return _Utils_update(
-				model,
-				{
-					next: A2(author$project$Main$Message, model.next.title, value)
-				});
-		}
-	});
-var elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
-var elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			elm$core$List$foldl,
-			F2(
-				function (_n0, obj) {
-					var k = _n0.a;
-					var v = _n0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var elm$json$Json$Encode$string = _Json_wrap;
-var author$project$Main$toJs = _Platform_outgoingPort(
-	'toJs',
-	function ($) {
-		return elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'messages',
-					elm$json$Json$Encode$list(
-						function ($) {
-							return elm$json$Json$Encode$object(
-								_List_fromArray(
-									[
-										_Utils_Tuple2(
-										'body',
-										elm$json$Json$Encode$string($.body)),
-										_Utils_Tuple2(
-										'title',
-										elm$json$Json$Encode$string($.title))
-									]));
-						})($.messages)),
-					_Utils_Tuple2(
-					'next',
-					function ($) {
-						return elm$json$Json$Encode$object(
-							_List_fromArray(
-								[
-									_Utils_Tuple2(
-									'body',
-									elm$json$Json$Encode$string($.body)),
-									_Utils_Tuple2(
-									'title',
-									elm$json$Json$Encode$string($.title))
-								]));
-					}($.next))
-				]));
-	});
-var author$project$Main$update = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'SendToJs':
-				return _Utils_Tuple2(
-					model,
-					author$project$Main$toJs(model));
-			case 'UpdateNext':
-				var next = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{next: next}),
-					elm$core$Platform$Cmd$none);
-			case 'AddMessage':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							messages: _Utils_ap(
-								model.messages,
-								_List_fromArray(
-									[model.next])),
-							next: A2(author$project$Main$Message, '', '')
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'SetField':
-				var field = msg.a;
-				var value = msg.b;
-				return _Utils_Tuple2(
-					A3(author$project$Main$setField, model, field, value),
-					elm$core$Platform$Cmd$none);
-			default:
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-		}
-	});
-var author$project$Main$AddMessage = {$: 'AddMessage'};
-var author$project$Main$Body = {$: 'Body'};
-var author$project$Main$SendToJs = {$: 'SendToJs'};
-var author$project$Main$SetField = F2(
-	function (a, b) {
-		return {$: 'SetField', a: a, b: b};
-	});
-var author$project$Main$Title = {$: 'Title'};
-var elm$core$Basics$identity = function (x) {
-	return x;
-};
-var elm$json$Json$Decode$map = _Json_map1;
-var elm$json$Json$Decode$succeed = _Json_succeed;
-var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
-	switch (handler.$) {
-		case 'Normal':
-			return 0;
-		case 'MayStopPropagation':
-			return 1;
-		case 'MayPreventDefault':
-			return 2;
-		default:
-			return 3;
+var elm$json$Json$Decode$decodeString = _Json_runOnString;
+var author$project$Main$decodeString = function (x) {
+	var result = A2(
+		elm$json$Json$Decode$decodeString,
+		elm$json$Json$Decode$keyValuePairs(author$project$Main$contractDecoder),
+		x);
+	if (result.$ === 'Ok') {
+		var value = result.a;
+		return author$project$Main$displayTestResults(value);
+	} else {
+		return _List_Nil;
 	}
 };
-var elm$html$Html$br = _VirtualDom_node('br');
-var elm$html$Html$button = _VirtualDom_node('button');
-var elm$html$Html$div = _VirtualDom_node('div');
-var elm$html$Html$input = _VirtualDom_node('input');
-var elm$html$Html$label = _VirtualDom_node('label');
-var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
-var elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			elm$json$Json$Encode$string(string));
+var elm$json$Json$Encode$string = _Json_wrap;
+var author$project$Main$toJs = _Platform_outgoingPort('toJs', elm$json$Json$Encode$string);
+var author$project$Main$update = F2(
+	function (msg, _n0) {
+		var test = _n0.a;
+		var code = _n0.b;
+		switch (msg.$) {
+			case 'Display':
+				var value = msg.a;
+				return _Utils_Tuple2(
+					_Utils_Tuple2(value, code),
+					elm$core$Platform$Cmd$none);
+			case 'Decode':
+				var value = msg.a;
+				return _Utils_Tuple2(
+					_Utils_Tuple2(
+						author$project$Main$decodeString(value),
+						code),
+					elm$core$Platform$Cmd$none);
+			default:
+				var str = msg.a;
+				return _Utils_Tuple2(
+					_Utils_Tuple2(test, str),
+					author$project$Main$toJs(str));
+		}
 	});
-var elm$html$Html$Attributes$name = elm$html$Html$Attributes$stringProperty('name');
-var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
-var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
-var elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
+var author$project$Main$Decode = function (a) {
+	return {$: 'Decode', a: a};
 };
-var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			elm$virtual_dom$VirtualDom$on,
-			event,
-			elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		elm$html$Html$Events$on,
-		'click',
-		elm$json$Json$Decode$succeed(msg));
+var author$project$Main$Run = function (a) {
+	return {$: 'Run', a: a};
 };
-var elm$html$Html$Events$alwaysStop = function (x) {
-	return _Utils_Tuple2(x, true);
-};
-var elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 'MayStopPropagation', a: a};
-};
-var elm$html$Html$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			elm$virtual_dom$VirtualDom$on,
-			event,
-			elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
 var elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
 		if (!ls.b) {
@@ -5069,6 +4985,203 @@ var elm$core$List$foldr = F3(
 	function (fn, acc, ls) {
 		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
 	});
+var elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var elm$core$Basics$identity = function (x) {
+	return x;
+};
+var elm$json$Json$Decode$map = _Json_map1;
+var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
+	switch (handler.$) {
+		case 'Normal':
+			return 0;
+		case 'MayStopPropagation':
+			return 1;
+		case 'MayPreventDefault':
+			return 2;
+		default:
+			return 3;
+	}
+};
+var elm$html$Html$div = _VirtualDom_node('div');
+var elm$html$Html$li = _VirtualDom_node('li');
+var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
+var elm$html$Html$ul = _VirtualDom_node('ul');
+var author$project$Main$displayAssertions = function (assertions) {
+	return (elm$core$List$length(assertions) > 0) ? A2(
+		elm$html$Html$ul,
+		_List_Nil,
+		A2(
+			elm$core$List$map,
+			function (a) {
+				return A2(
+					elm$html$Html$li,
+					_List_Nil,
+					_List_fromArray(
+						[
+							elm$html$Html$text(a)
+						]));
+			},
+			assertions)) : A2(elm$html$Html$div, _List_Nil, _List_Nil);
+};
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var elm$core$Tuple$second = function (_n0) {
+	var y = _n0.b;
+	return y;
+};
+var elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			elm$json$Json$Encode$string(string));
+	});
+var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var elm$html$Html$Attributes$classList = function (classes) {
+	return elm$html$Html$Attributes$class(
+		A2(
+			elm$core$String$join,
+			' ',
+			A2(
+				elm$core$List$map,
+				elm$core$Tuple$first,
+				A2(elm$core$List$filter, elm$core$Tuple$second, classes))));
+};
+var author$project$Main$displayFunction = function (_n0) {
+	var name = _n0.a;
+	var _function = _n0.b;
+	return A2(
+		elm$html$Html$li,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$classList(
+				_List_fromArray(
+					[
+						_Utils_Tuple2('failed', _function.fail)
+					]))
+			]),
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(name)
+					])),
+				author$project$Main$displayAssertions(_function.assertions)
+			]));
+};
+var elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
+var author$project$Main$displayContract = function (_n0) {
+	var name = _n0.a;
+	var contract = _n0.b;
+	return A2(
+		elm$html$Html$li,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$classList(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'failed',
+						A2(
+							elm$core$List$any,
+							function (_n1) {
+								var n = _n1.a;
+								var c = _n1.b;
+								return c.fail;
+							},
+							contract.functions))
+					]))
+			]),
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(name)
+					])),
+				A2(
+				elm$html$Html$ul,
+				_List_Nil,
+				A2(
+					elm$core$List$map,
+					author$project$Main$displayFunction,
+					A2(
+						elm$core$List$sortWith,
+						F2(
+							function (_n2, _n3) {
+								var name_a = _n2.a;
+								var function_a = _n2.b;
+								var name_b = _n3.a;
+								var function_b = _n3.b;
+								return A2(elm$core$Basics$compare, function_a.loc, function_b.loc);
+							}),
+						contract.functions)))
+			]));
+};
+var elm$html$Html$textarea = _VirtualDom_node('textarea');
+var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
+var elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			elm$virtual_dom$VirtualDom$on,
+			event,
+			elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
 var elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
 		return A3(elm$core$List$foldr, elm$json$Json$Decode$field, decoder, fields);
@@ -5087,75 +5200,33 @@ var elm$html$Html$Events$onInput = function (tagger) {
 			elm$html$Html$Events$alwaysStop,
 			A2(elm$json$Json$Decode$map, tagger, elm$html$Html$Events$targetValue)));
 };
-var author$project$Main$view = function (model) {
+var author$project$Main$view = function (_n0) {
+	var tests = _n0.a;
+	var code = _n0.b;
 	return A2(
 		elm$html$Html$div,
 		_List_Nil,
 		_List_fromArray(
 			[
 				A2(
-				elm$html$Html$div,
+				elm$html$Html$ul,
 				_List_Nil,
+				A2(elm$core$List$map, author$project$Main$displayContract, tests)),
+				A2(
+				elm$html$Html$textarea,
 				_List_fromArray(
 					[
-						A2(
-						elm$html$Html$label,
-						_List_Nil,
-						_List_fromArray(
-							[
-								elm$html$Html$text('title'),
-								A2(
-								elm$html$Html$input,
-								_List_fromArray(
-									[
-										elm$html$Html$Attributes$type_('text'),
-										elm$html$Html$Attributes$name('title'),
-										elm$html$Html$Attributes$value(model.next.title),
-										elm$html$Html$Events$onInput(
-										author$project$Main$SetField(author$project$Main$Title))
-									]),
-								_List_Nil)
-							])),
-						A2(elm$html$Html$br, _List_Nil, _List_Nil),
-						A2(
-						elm$html$Html$label,
-						_List_Nil,
-						_List_fromArray(
-							[
-								elm$html$Html$text('body'),
-								A2(
-								elm$html$Html$input,
-								_List_fromArray(
-									[
-										elm$html$Html$Attributes$type_('text'),
-										elm$html$Html$Attributes$name('body'),
-										elm$html$Html$Attributes$value(model.next.body),
-										elm$html$Html$Events$onInput(
-										author$project$Main$SetField(author$project$Main$Body))
-									]),
-								_List_Nil)
-							])),
-						A2(
-						elm$html$Html$button,
-						_List_fromArray(
-							[
-								elm$html$Html$Events$onClick(author$project$Main$SendToJs)
-							]),
-						_List_fromArray(
-							[
-								elm$html$Html$text('Send to JS')
-							])),
-						A2(
-						elm$html$Html$button,
-						_List_fromArray(
-							[
-								elm$html$Html$Events$onClick(author$project$Main$AddMessage)
-							]),
-						_List_fromArray(
-							[
-								elm$html$Html$text('Add Message')
-							]))
-					]))
+						elm$html$Html$Events$onInput(author$project$Main$Decode)
+					]),
+				_List_Nil),
+				A2(
+				elm$html$Html$textarea,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$value(code),
+						elm$html$Html$Events$onInput(author$project$Main$Run)
+					]),
+				_List_Nil)
 			]));
 };
 var elm$browser$Browser$External = function (a) {
@@ -5181,20 +5252,6 @@ var elm$core$Task$Perform = function (a) {
 };
 var elm$core$Task$succeed = _Scheduler_succeed;
 var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
-var elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
 var elm$core$Task$andThen = _Scheduler_andThen;
 var elm$core$Task$map = F2(
 	function (func, taskA) {

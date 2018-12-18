@@ -14,8 +14,11 @@
       var app = Elm.Main.init({
         node: document.getElementById('elm')
       });
-
-      app.ports.toJs.subscribe(console.log)
+      app.ports.toJs.subscribe(function (str) {
+        console.log( str);
+        runningTest["bar_test.sol"] = { content: str};
+        RemixTests.runTestSources(runningTest ,testCallback,resultCallback,finalCallback,importCallback)
+      })
 
       input = {
         // Required: Source code language, such as "Solidity", "Vyper", "lll", "assembly", etc.
@@ -136,24 +139,40 @@
         if(result.type === "contract") {
           test_results[result.value] = {
             notice: solc_out["contracts"][result.filename][result.value]["userdoc"]["notice"] || "",
-            loc:  content.indexOf(result.errMsg || result.value),
+            loc: content.indexOf(result.value),
             functions: {},
           }
         } 
         if (result.type === "testFailure" || result.type === "testPass"){
-          test_results[result.context].functions[result.value] =  {
-            notice: (solc_out["contracts"][result.filename][result.context]["userdoc"]["methods"][result.value + "()"] || {})["notice"] || "",
-            loc:  content.indexOf(result.errMsg || result.value),
-            msg: result.errMsg || "",
-            type: result.type,
+          if(test_results[result.context].functions[result.value] === undefined) {
+
+            test_results[result.context].functions[result.value] = {
+              notice: (solc_out["contracts"][result.filename][result.context]["userdoc"]["methods"][result.value + "()"] || {})["notice"] || "",
+              loc: content.indexOf(result.value),
+              assertions: result.errMsg && [result.errMsg] || [],
+              fail: result.type === "testFailure",
+            }
+              
+          
           }
+          else {
+            test_results[result.context].functions[result.value].assertions.push(result.errMsg)
+          }
+
         };
       }
+
+      resultCallback=(error, result) => {console.log("result", error, result)}
+      finalCallback=(error, result) => {
+        console.log("final", error, result)
+        app.ports.toElm.send(test_results)
+      }
+      importCallback=(url, cb) => { console.log("import", url, cb); cb(null,input["sources"][url]["content"]) }
       runningTest = {}
       //runningTest["bar_test.sol"] = { content: "pragma solidity ^0.5.0; import \"remix_tests.sol\"; contract Foo {function lesson_01_bb() public view returns (bool) {return true;} function lesson_02_cc() public { Assert.equal(int(2), int(2), \"it should be 2\");}}" };
       runningTest["bar_test.sol"] = { content: content};
       //runningTest["remix_tests.sol"] = { content: "" };
-      RemixTests.runTestSources(runningTest ,testCallback, (error, result) => {console.log("result", error, result)},(error, result) => {console.log("final", error, result)}, (url, cb) => { console.log("import", url, cb); cb(null,input["sources"][url]["content"]) })
+      RemixTests.runTestSources(runningTest ,testCallback,resultCallback,finalCallback,importCallback)
 
 
       /*
