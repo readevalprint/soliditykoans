@@ -2314,6 +2314,52 @@ function _Platform_mergeExportsDebug(moduleName, obj, exports)
 
 
 
+function _Time_now(millisToPosix)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(millisToPosix(Date.now())));
+	});
+}
+
+var _Time_setInterval = F2(function(interval, task)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
+		return function() { clearInterval(id); };
+	});
+});
+
+function _Time_here()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(
+			A2(elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
+		));
+	});
+}
+
+
+function _Time_getZoneName()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		try
+		{
+			var name = elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		}
+		catch (e)
+		{
+			var name = elm$time$Time$Offset(new Date().getTimezoneOffset());
+		}
+		callback(_Scheduler_succeed(name));
+	});
+}
+
+
+
 
 // HELPERS
 
@@ -4310,15 +4356,6 @@ function _Browser_load(url)
 		}
 	}));
 }
-var elm$core$Basics$False = {$: 'False'};
-var elm$core$Basics$True = {$: 'True'};
-var elm$core$Result$isOk = function (result) {
-	if (result.$ === 'Ok') {
-		return true;
-	} else {
-		return false;
-	}
-};
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -4399,6 +4436,94 @@ var elm$core$Array$foldr = F3(
 var elm$core$Array$toList = function (array) {
 	return A3(elm$core$Array$foldr, elm$core$List$cons, _List_Nil, array);
 };
+var elm$core$Basics$mul = _Basics_mul;
+var elm$core$Basics$round = _Basics_round;
+var Gizra$elm_debouncer$Debouncer$Internal$fromSeconds = function (s) {
+	return elm$core$Basics$round(s * 1000);
+};
+var Gizra$elm_debouncer$Debouncer$Messages$fromSeconds = Gizra$elm_debouncer$Debouncer$Internal$fromSeconds;
+var Gizra$elm_debouncer$Debouncer$Internal$Config = function (a) {
+	return {$: 'Config', a: a};
+};
+var elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
+};
+var Gizra$elm_debouncer$Debouncer$Internal$lastInput = F2(
+	function (i, o) {
+		return elm$core$Maybe$Just(i);
+	});
+var elm$core$Basics$identity = function (x) {
+	return x;
+};
+var elm$core$Maybe$Nothing = {$: 'Nothing'};
+var Gizra$elm_debouncer$Debouncer$Internal$manual = Gizra$elm_debouncer$Debouncer$Internal$Config(
+	{accumulator: Gizra$elm_debouncer$Debouncer$Internal$lastInput, emitWhenUnsettled: elm$core$Maybe$Nothing, emitWhileUnsettled: elm$core$Maybe$Nothing, settleWhenQuietFor: elm$core$Maybe$Nothing});
+var Gizra$elm_debouncer$Debouncer$Basic$manual = Gizra$elm_debouncer$Debouncer$Internal$manual;
+var Gizra$elm_debouncer$Debouncer$Messages$manual = Gizra$elm_debouncer$Debouncer$Basic$manual;
+var Gizra$elm_debouncer$Debouncer$Internal$settleWhenQuietFor = F2(
+	function (time, _n0) {
+		var config = _n0.a;
+		return Gizra$elm_debouncer$Debouncer$Internal$Config(
+			_Utils_update(
+				config,
+				{settleWhenQuietFor: time}));
+	});
+var Gizra$elm_debouncer$Debouncer$Basic$settleWhenQuietFor = Gizra$elm_debouncer$Debouncer$Internal$settleWhenQuietFor;
+var Gizra$elm_debouncer$Debouncer$Messages$settleWhenQuietFor = Gizra$elm_debouncer$Debouncer$Basic$settleWhenQuietFor;
+var Gizra$elm_debouncer$Debouncer$Internal$Debouncer = F2(
+	function (a, b) {
+		return {$: 'Debouncer', a: a, b: b};
+	});
+var Gizra$elm_debouncer$Debouncer$Internal$Settled = {$: 'Settled'};
+var elm$core$Basics$lt = _Utils_lt;
+var elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return elm$core$Maybe$Nothing;
+		}
+	});
+var Gizra$elm_debouncer$Debouncer$Internal$nothingIfNegative = elm$core$Maybe$andThen(
+	function (num) {
+		return (num < 0) ? elm$core$Maybe$Nothing : elm$core$Maybe$Just(num);
+	});
+var Gizra$elm_debouncer$Debouncer$Internal$sanitizeConfig = function (_n0) {
+	var config = _n0.a;
+	return Gizra$elm_debouncer$Debouncer$Internal$Config(
+		{
+			accumulator: config.accumulator,
+			emitWhenUnsettled: Gizra$elm_debouncer$Debouncer$Internal$nothingIfNegative(config.emitWhenUnsettled),
+			emitWhileUnsettled: Gizra$elm_debouncer$Debouncer$Internal$nothingIfNegative(config.emitWhileUnsettled),
+			settleWhenQuietFor: Gizra$elm_debouncer$Debouncer$Internal$nothingIfNegative(config.settleWhenQuietFor)
+		});
+};
+var Gizra$elm_debouncer$Debouncer$Internal$toDebouncer = function (config) {
+	return A2(
+		Gizra$elm_debouncer$Debouncer$Internal$Debouncer,
+		Gizra$elm_debouncer$Debouncer$Internal$sanitizeConfig(config),
+		Gizra$elm_debouncer$Debouncer$Internal$Settled);
+};
+var Gizra$elm_debouncer$Debouncer$Basic$toDebouncer = Gizra$elm_debouncer$Debouncer$Internal$toDebouncer;
+var Gizra$elm_debouncer$Debouncer$Messages$toDebouncer = Gizra$elm_debouncer$Debouncer$Basic$toDebouncer;
+var elm$core$Basics$apL = F2(
+	function (f, x) {
+		return f(x);
+	});
+var elm$core$Basics$apR = F2(
+	function (x, f) {
+		return f(x);
+	});
+var elm$core$Basics$False = {$: 'False'};
+var elm$core$Basics$True = {$: 'True'};
+var elm$core$Result$isOk = function (result) {
+	if (result.$ === 'Ok') {
+		return true;
+	} else {
+		return false;
+	}
+};
 var elm$core$Array$branchFactor = 32;
 var elm$core$Array$Array_elm_builtin = F4(
 	function (a, b, c, d) {
@@ -4466,10 +4591,6 @@ var elm$core$Array$compressNodes = F2(
 			}
 		}
 	});
-var elm$core$Basics$apR = F2(
-	function (x, f) {
-		return f(x);
-	});
 var elm$core$Basics$eq = _Utils_equal;
 var elm$core$Tuple$first = function (_n0) {
 	var x = _n0.a;
@@ -4492,17 +4613,12 @@ var elm$core$Array$treeFromBuilder = F2(
 		}
 	});
 var elm$core$Basics$add = _Basics_add;
-var elm$core$Basics$apL = F2(
-	function (f, x) {
-		return f(x);
-	});
 var elm$core$Basics$floor = _Basics_floor;
 var elm$core$Basics$gt = _Utils_gt;
 var elm$core$Basics$max = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) > 0) ? x : y;
 	});
-var elm$core$Basics$mul = _Basics_mul;
 var elm$core$Basics$sub = _Basics_sub;
 var elm$core$Elm$JsArray$length = _JsArray_length;
 var elm$core$Array$builderToArray = F2(
@@ -4529,7 +4645,6 @@ var elm$core$Array$builderToArray = F2(
 		}
 	});
 var elm$core$Basics$idiv = _Basics_idiv;
-var elm$core$Basics$lt = _Utils_lt;
 var elm$core$Elm$JsArray$initialize = _JsArray_initialize;
 var elm$core$Array$initializeHelp = F5(
 	function (fn, fromIndex, len, nodeList, tail) {
@@ -4570,10 +4685,6 @@ var elm$core$Array$initialize = F2(
 			return A5(elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
-var elm$core$Maybe$Just = function (a) {
-	return {$: 'Just', a: a};
-};
-var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -4789,146 +4900,37 @@ var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(
-		_Utils_Tuple2(_List_Nil, ''),
+		{
+			code: '',
+			error: _List_Nil,
+			quietForOneSecond: Gizra$elm_debouncer$Debouncer$Messages$toDebouncer(
+				A2(
+					Gizra$elm_debouncer$Debouncer$Messages$settleWhenQuietFor,
+					elm$core$Maybe$Just(
+						Gizra$elm_debouncer$Debouncer$Messages$fromSeconds(1)),
+					Gizra$elm_debouncer$Debouncer$Messages$manual)),
+			testResults: _List_Nil
+		},
 		elm$core$Platform$Cmd$none);
 };
 var author$project$Main$Display = function (a) {
 	return {$: 'Display', a: a};
 };
-var elm$json$Json$Decode$map2 = _Json_map2;
-var NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = elm$json$Json$Decode$map2(elm$core$Basics$apR);
-var elm$json$Json$Decode$field = _Json_decodeField;
-var NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
-	function (key, valDecoder, decoder) {
-		return A2(
-			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-			A2(elm$json$Json$Decode$field, key, valDecoder),
-			decoder);
-	});
-var author$project$Main$Contract = F3(
-	function (functions, notice, loc) {
-		return {functions: functions, loc: loc, notice: notice};
-	});
-var author$project$Main$Function = F4(
-	function (assertions, notice, loc, fail) {
-		return {assertions: assertions, fail: fail, loc: loc, notice: notice};
-	});
-var elm$json$Json$Decode$bool = _Json_decodeBool;
-var elm$json$Json$Decode$int = _Json_decodeInt;
-var elm$json$Json$Decode$list = _Json_decodeList;
-var elm$json$Json$Decode$string = _Json_decodeString;
-var elm$json$Json$Decode$succeed = _Json_succeed;
-var author$project$Main$functionDecoder = A3(
-	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-	'fail',
-	elm$json$Json$Decode$bool,
-	A3(
-		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-		'loc',
-		elm$json$Json$Decode$int,
-		A3(
-			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-			'notice',
-			elm$json$Json$Decode$string,
-			A3(
-				NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-				'assertions',
-				elm$json$Json$Decode$list(elm$json$Json$Decode$string),
-				elm$json$Json$Decode$succeed(author$project$Main$Function)))));
-var elm$json$Json$Decode$keyValuePairs = _Json_decodeKeyValuePairs;
-var author$project$Main$contractDecoder = A3(
-	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-	'loc',
-	elm$json$Json$Decode$int,
-	A3(
-		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-		'notice',
-		elm$json$Json$Decode$string,
-		A3(
-			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-			'functions',
-			elm$json$Json$Decode$keyValuePairs(author$project$Main$functionDecoder),
-			elm$json$Json$Decode$succeed(author$project$Main$Contract))));
-var elm$core$Basics$compare = _Utils_compare;
-var elm$core$List$sortWith = _List_sortWith;
-var author$project$Main$displayTestResults = function (contracts) {
-	return A2(
-		elm$core$List$sortWith,
-		F2(
-			function (_n0, _n1) {
-				var name_a = _n0.a;
-				var contract_a = _n0.b;
-				var name_b = _n1.a;
-				var contract_b = _n1.b;
-				return A2(elm$core$Basics$compare, contract_a.loc, contract_b.loc);
-			}),
-		contracts);
-};
 var elm$json$Json$Decode$decodeValue = _Json_run;
-var author$project$Main$decodeValue = function (x) {
-	var result = A2(
-		elm$json$Json$Decode$decodeValue,
-		elm$json$Json$Decode$keyValuePairs(author$project$Main$contractDecoder),
-		x);
+var elm$json$Json$Decode$string = _Json_decodeString;
+var author$project$Main$decodeCode = function (x) {
+	var result = A2(elm$json$Json$Decode$decodeValue, elm$json$Json$Decode$string, x);
 	if (result.$ === 'Ok') {
+		var value = result.a;
+		return author$project$Main$Display(value);
+	} else {
 		var value = result.a;
 		return author$project$Main$Display(
-			author$project$Main$displayTestResults(value));
-	} else {
-		return author$project$Main$Display(_List_Nil);
+			'//' + elm$json$Json$Decode$errorToString(value));
 	}
 };
-var elm$json$Json$Decode$value = _Json_decodeValue;
-var author$project$Main$toElm = _Platform_incomingPort('toElm', elm$json$Json$Decode$value);
-var author$project$Main$subscriptions = function (_n0) {
-	var tests = _n0.a;
-	var code = _n0.b;
-	return author$project$Main$toElm(author$project$Main$decodeValue);
-};
-var elm$json$Json$Decode$decodeString = _Json_runOnString;
-var author$project$Main$decodeString = function (x) {
-	var result = A2(
-		elm$json$Json$Decode$decodeString,
-		elm$json$Json$Decode$keyValuePairs(author$project$Main$contractDecoder),
-		x);
-	if (result.$ === 'Ok') {
-		var value = result.a;
-		return author$project$Main$displayTestResults(value);
-	} else {
-		return _List_Nil;
-	}
-};
-var elm$json$Json$Encode$string = _Json_wrap;
-var author$project$Main$toJs = _Platform_outgoingPort('toJs', elm$json$Json$Encode$string);
-var author$project$Main$update = F2(
-	function (msg, _n0) {
-		var test = _n0.a;
-		var code = _n0.b;
-		switch (msg.$) {
-			case 'Display':
-				var value = msg.a;
-				return _Utils_Tuple2(
-					_Utils_Tuple2(value, code),
-					elm$core$Platform$Cmd$none);
-			case 'Decode':
-				var value = msg.a;
-				return _Utils_Tuple2(
-					_Utils_Tuple2(
-						author$project$Main$decodeString(value),
-						code),
-					elm$core$Platform$Cmd$none);
-			default:
-				var str = msg.a;
-				return _Utils_Tuple2(
-					_Utils_Tuple2(test, str),
-					author$project$Main$toJs(str));
-		}
-	});
-var author$project$Main$Decode = function (a) {
-	return {$: 'Decode', a: a};
-};
-var author$project$Main$Run = function (a) {
-	return {$: 'Run', a: a};
+var author$project$Main$DisplayError = function (a) {
+	return {$: 'DisplayError', a: a};
 };
 var elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
@@ -4985,6 +4987,637 @@ var elm$core$List$foldr = F3(
 	function (fn, acc, ls) {
 		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
 	});
+var elm$json$Json$Decode$field = _Json_decodeField;
+var elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3(elm$core$List$foldr, elm$json$Json$Decode$field, decoder, fields);
+	});
+var elm$json$Json$Decode$list = _Json_decodeList;
+var author$project$Main$decodeError = function (x) {
+	var result = A2(
+		elm$json$Json$Decode$decodeValue,
+		elm$json$Json$Decode$list(
+			A2(
+				elm$json$Json$Decode$at,
+				_List_fromArray(
+					['formattedMessage']),
+				elm$json$Json$Decode$string)),
+		x);
+	if (result.$ === 'Ok') {
+		var value = result.a;
+		return author$project$Main$DisplayError(value);
+	} else {
+		var value = result.a;
+		return author$project$Main$DisplayError(
+			_List_fromArray(
+				[
+					elm$json$Json$Decode$errorToString(value)
+				]));
+	}
+};
+var author$project$Main$DisplayTestResults = function (a) {
+	return {$: 'DisplayTestResults', a: a};
+};
+var elm$json$Json$Decode$map2 = _Json_map2;
+var NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = elm$json$Json$Decode$map2(elm$core$Basics$apR);
+var NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
+	function (key, valDecoder, decoder) {
+		return A2(
+			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+			A2(elm$json$Json$Decode$field, key, valDecoder),
+			decoder);
+	});
+var author$project$Main$Contract = F3(
+	function (functions, notice, loc) {
+		return {functions: functions, loc: loc, notice: notice};
+	});
+var author$project$Main$Function = F4(
+	function (assertions, notice, loc, fail) {
+		return {assertions: assertions, fail: fail, loc: loc, notice: notice};
+	});
+var elm$json$Json$Decode$bool = _Json_decodeBool;
+var elm$json$Json$Decode$int = _Json_decodeInt;
+var elm$json$Json$Decode$succeed = _Json_succeed;
+var author$project$Main$functionDecoder = A3(
+	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'fail',
+	elm$json$Json$Decode$bool,
+	A3(
+		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'loc',
+		elm$json$Json$Decode$int,
+		A3(
+			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'notice',
+			elm$json$Json$Decode$string,
+			A3(
+				NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'assertions',
+				elm$json$Json$Decode$list(elm$json$Json$Decode$string),
+				elm$json$Json$Decode$succeed(author$project$Main$Function)))));
+var elm$json$Json$Decode$keyValuePairs = _Json_decodeKeyValuePairs;
+var author$project$Main$contractDecoder = A3(
+	NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'loc',
+	elm$json$Json$Decode$int,
+	A3(
+		NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'notice',
+		elm$json$Json$Decode$string,
+		A3(
+			NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'functions',
+			elm$json$Json$Decode$keyValuePairs(author$project$Main$functionDecoder),
+			elm$json$Json$Decode$succeed(author$project$Main$Contract))));
+var elm$core$Basics$compare = _Utils_compare;
+var elm$core$List$sortWith = _List_sortWith;
+var author$project$Main$displayTestResults = function (contracts) {
+	return A2(
+		elm$core$List$sortWith,
+		F2(
+			function (_n0, _n1) {
+				var name_a = _n0.a;
+				var contract_a = _n0.b;
+				var name_b = _n1.a;
+				var contract_b = _n1.b;
+				return A2(elm$core$Basics$compare, contract_a.loc, contract_b.loc);
+			}),
+		contracts);
+};
+var author$project$Main$decodeResults = function (x) {
+	var result = A2(
+		elm$json$Json$Decode$decodeValue,
+		elm$json$Json$Decode$keyValuePairs(author$project$Main$contractDecoder),
+		x);
+	if (result.$ === 'Ok') {
+		var value = result.a;
+		return author$project$Main$DisplayTestResults(
+			author$project$Main$displayTestResults(value));
+	} else {
+		var value = result.a;
+		return author$project$Main$DisplayError(
+			_List_fromArray(
+				[
+					elm$json$Json$Decode$errorToString(value)
+				]));
+	}
+};
+var elm$json$Json$Decode$value = _Json_decodeValue;
+var author$project$Main$showCode = _Platform_incomingPort('showCode', elm$json$Json$Decode$value);
+var author$project$Main$showError = _Platform_incomingPort('showError', elm$json$Json$Decode$value);
+var author$project$Main$showResults = _Platform_incomingPort('showResults', elm$json$Json$Decode$value);
+var elm$core$Platform$Sub$batch = _Platform_batch;
+var author$project$Main$subscriptions = function (model) {
+	return elm$core$Platform$Sub$batch(
+		_List_fromArray(
+			[
+				author$project$Main$showResults(author$project$Main$decodeResults),
+				author$project$Main$showError(author$project$Main$decodeError),
+				author$project$Main$showCode(author$project$Main$decodeCode)
+			]));
+};
+var Gizra$elm_debouncer$Debouncer$Basic$ProvideInput = function (a) {
+	return {$: 'ProvideInput', a: a};
+};
+var Gizra$elm_debouncer$Debouncer$Basic$provideInput = Gizra$elm_debouncer$Debouncer$Basic$ProvideInput;
+var Gizra$elm_debouncer$Debouncer$Messages$provideInput = Gizra$elm_debouncer$Debouncer$Basic$provideInput;
+var Gizra$elm_debouncer$Debouncer$Basic$MsgInternal = function (a) {
+	return {$: 'MsgInternal', a: a};
+};
+var Gizra$elm_debouncer$Debouncer$Internal$Check = function (a) {
+	return {$: 'Check', a: a};
+};
+var Gizra$elm_debouncer$Debouncer$Internal$InputProvidedAt = F2(
+	function (a, b) {
+		return {$: 'InputProvidedAt', a: a, b: b};
+	});
+var Gizra$elm_debouncer$Debouncer$Internal$ManualEmitAt = function (a) {
+	return {$: 'ManualEmitAt', a: a};
+};
+var Gizra$elm_debouncer$Debouncer$Internal$Unsettled = function (a) {
+	return {$: 'Unsettled', a: a};
+};
+var Gizra$elm_debouncer$Debouncer$Internal$cancel = function (_n0) {
+	var config = _n0.a;
+	var state = _n0.b;
+	return A2(Gizra$elm_debouncer$Debouncer$Internal$Debouncer, config, Gizra$elm_debouncer$Debouncer$Internal$Settled);
+};
+var elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var elm$core$Basics$neq = _Utils_notEqual;
+var elm$core$Basics$not = _Basics_not;
+var elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _n0 = f(mx);
+		if (_n0.$ === 'Just') {
+			var x = _n0.a;
+			return A2(elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
+var elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var elm$core$List$partition = F2(
+	function (pred, list) {
+		var step = F2(
+			function (x, _n0) {
+				var trues = _n0.a;
+				var falses = _n0.b;
+				return pred(x) ? _Utils_Tuple2(
+					A2(elm$core$List$cons, x, trues),
+					falses) : _Utils_Tuple2(
+					trues,
+					A2(elm$core$List$cons, x, falses));
+			});
+		return A3(
+			elm$core$List$foldr,
+			step,
+			_Utils_Tuple2(_List_Nil, _List_Nil),
+			list);
+	});
+var elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return elm$core$Maybe$Nothing;
+		}
+	});
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var elm$core$Tuple$mapFirst = F2(
+	function (func, _n0) {
+		var x = _n0.a;
+		var y = _n0.b;
+		return _Utils_Tuple2(
+			func(x),
+			y);
+	});
+var elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var elm$core$Dict$empty = elm$core$Dict$RBEmpty_elm_builtin;
+var elm$core$Set$Set_elm_builtin = function (a) {
+	return {$: 'Set_elm_builtin', a: a};
+};
+var elm$core$Set$empty = elm$core$Set$Set_elm_builtin(elm$core$Dict$empty);
+var elm$core$Dict$Black = {$: 'Black'};
+var elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
+	});
+var elm$core$Dict$Red = {$: 'Red'};
+var elm$core$Dict$balance = F5(
+	function (color, key, value, left, right) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
+			var _n1 = right.a;
+			var rK = right.b;
+			var rV = right.c;
+			var rLeft = right.d;
+			var rRight = right.e;
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+				var _n3 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var lLeft = left.d;
+				var lRight = left.e;
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Red,
+					key,
+					value,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					color,
+					rK,
+					rV,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, left, rLeft),
+					rRight);
+			}
+		} else {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
+				var _n5 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var _n6 = left.d;
+				var _n7 = _n6.a;
+				var llK = _n6.b;
+				var llV = _n6.c;
+				var llLeft = _n6.d;
+				var llRight = _n6.e;
+				var lRight = left.e;
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Red,
+					lK,
+					lV,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, key, value, lRight, right));
+			} else {
+				return A5(elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
+			}
+		}
+	});
+var elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, elm$core$Dict$RBEmpty_elm_builtin, elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _n1 = A2(elm$core$Basics$compare, key, nKey);
+			switch (_n1.$) {
+				case 'LT':
+					return A5(
+						elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3(elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5(elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3(elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _n0 = A3(elm$core$Dict$insertHelp, key, value, dict);
+		if ((_n0.$ === 'RBNode_elm_builtin') && (_n0.a.$ === 'Red')) {
+			var _n1 = _n0.a;
+			var k = _n0.b;
+			var v = _n0.c;
+			var l = _n0.d;
+			var r = _n0.e;
+			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _n0;
+			return x;
+		}
+	});
+var elm$core$Set$insert = F2(
+	function (key, _n0) {
+		var dict = _n0.a;
+		return elm$core$Set$Set_elm_builtin(
+			A3(elm$core$Dict$insert, key, _Utils_Tuple0, dict));
+	});
+var elm$core$Dict$get = F2(
+	function (targetKey, dict) {
+		get:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return elm$core$Maybe$Nothing;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var _n1 = A2(elm$core$Basics$compare, targetKey, key);
+				switch (_n1.$) {
+					case 'LT':
+						var $temp$targetKey = targetKey,
+							$temp$dict = left;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+					case 'EQ':
+						return elm$core$Maybe$Just(value);
+					default:
+						var $temp$targetKey = targetKey,
+							$temp$dict = right;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+				}
+			}
+		}
+	});
+var elm$core$Dict$member = F2(
+	function (key, dict) {
+		var _n0 = A2(elm$core$Dict$get, key, dict);
+		if (_n0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var elm$core$Set$member = F2(
+	function (key, _n0) {
+		var dict = _n0.a;
+		return A2(elm$core$Dict$member, key, dict);
+	});
+var elm_community$list_extra$List$Extra$uniqueHelp = F4(
+	function (f, existing, remaining, accumulator) {
+		uniqueHelp:
+		while (true) {
+			if (!remaining.b) {
+				return elm$core$List$reverse(accumulator);
+			} else {
+				var first = remaining.a;
+				var rest = remaining.b;
+				var computedFirst = f(first);
+				if (A2(elm$core$Set$member, computedFirst, existing)) {
+					var $temp$f = f,
+						$temp$existing = existing,
+						$temp$remaining = rest,
+						$temp$accumulator = accumulator;
+					f = $temp$f;
+					existing = $temp$existing;
+					remaining = $temp$remaining;
+					accumulator = $temp$accumulator;
+					continue uniqueHelp;
+				} else {
+					var $temp$f = f,
+						$temp$existing = A2(elm$core$Set$insert, computedFirst, existing),
+						$temp$remaining = rest,
+						$temp$accumulator = A2(elm$core$List$cons, first, accumulator);
+					f = $temp$f;
+					existing = $temp$existing;
+					remaining = $temp$remaining;
+					accumulator = $temp$accumulator;
+					continue uniqueHelp;
+				}
+			}
+		}
+	});
+var elm_community$list_extra$List$Extra$unique = function (list) {
+	return A4(elm_community$list_extra$List$Extra$uniqueHelp, elm$core$Basics$identity, elm$core$Set$empty, list, _List_Nil);
+};
+var Gizra$elm_debouncer$Debouncer$Internal$update = F2(
+	function (msg, debouncer) {
+		var wrappedConfig = debouncer.a;
+		var config = wrappedConfig.a;
+		var state = debouncer.b;
+		switch (msg.$) {
+			case 'InputProvidedAt':
+				var input = msg.a;
+				var time = msg.b;
+				var newState = function () {
+					if (state.$ === 'Settled') {
+						return Gizra$elm_debouncer$Debouncer$Internal$Unsettled(
+							{
+								lastEmittedAt: elm$core$Maybe$Nothing,
+								lastInputProvidedAt: time,
+								output: A2(config.accumulator, input, elm$core$Maybe$Nothing),
+								unsettledAt: time
+							});
+					} else {
+						var unsettled = state.a;
+						return Gizra$elm_debouncer$Debouncer$Internal$Unsettled(
+							_Utils_update(
+								unsettled,
+								{
+									lastInputProvidedAt: time,
+									output: A2(config.accumulator, input, unsettled.output)
+								}));
+					}
+				}();
+				var newDebouncer = A2(Gizra$elm_debouncer$Debouncer$Internal$Debouncer, wrappedConfig, newState);
+				var checks = function () {
+					if (state.$ === 'Settled') {
+						return elm_community$list_extra$List$Extra$unique(
+							A2(
+								elm$core$List$filterMap,
+								elm$core$Basics$identity,
+								_List_fromArray(
+									[config.emitWhenUnsettled, config.emitWhileUnsettled, config.settleWhenQuietFor])));
+					} else {
+						return A2(
+							elm$core$List$filterMap,
+							elm$core$Basics$identity,
+							_List_fromArray(
+								[config.settleWhenQuietFor]));
+					}
+				}();
+				var _n1 = A2(
+					elm$core$Tuple$mapFirst,
+					A2(elm$core$Basics$composeL, elm$core$Basics$not, elm$core$List$isEmpty),
+					A2(
+						elm$core$List$partition,
+						function (interval) {
+							return interval <= 0;
+						},
+						checks));
+				var checkNow = _n1.a;
+				var checkLater = _n1.b;
+				var _n2 = checkNow ? A2(
+					Gizra$elm_debouncer$Debouncer$Internal$update,
+					Gizra$elm_debouncer$Debouncer$Internal$Check(time),
+					newDebouncer) : _Utils_Tuple3(newDebouncer, _List_Nil, elm$core$Maybe$Nothing);
+				var checkedDebouncer = _n2.a;
+				var checkedIntervals = _n2.b;
+				var emit = _n2.c;
+				return _Utils_Tuple3(
+					checkedDebouncer,
+					_Utils_ap(checkedIntervals, checkLater),
+					emit);
+			case 'ManualCancel':
+				return _Utils_Tuple3(
+					Gizra$elm_debouncer$Debouncer$Internal$cancel(debouncer),
+					_List_Nil,
+					elm$core$Maybe$Nothing);
+			case 'ManualSettle':
+				var emit = function () {
+					if (state.$ === 'Settled') {
+						return elm$core$Maybe$Nothing;
+					} else {
+						var unsettled = state.a;
+						return unsettled.output;
+					}
+				}();
+				return _Utils_Tuple3(
+					Gizra$elm_debouncer$Debouncer$Internal$cancel(debouncer),
+					_List_Nil,
+					emit);
+			case 'ManualEmitAt':
+				var time = msg.a;
+				if (state.$ === 'Settled') {
+					return _Utils_Tuple3(debouncer, _List_Nil, elm$core$Maybe$Nothing);
+				} else {
+					var unsettled = state.a;
+					var _n7 = unsettled.output;
+					if (_n7.$ === 'Just') {
+						var newState = Gizra$elm_debouncer$Debouncer$Internal$Unsettled(
+							_Utils_update(
+								unsettled,
+								{
+									lastEmittedAt: elm$core$Maybe$Just(time),
+									output: elm$core$Maybe$Nothing
+								}));
+						var intervals = function () {
+							var _n8 = config.emitWhenUnsettled;
+							if (_n8.$ === 'Just') {
+								var emit = _n8.a;
+								return _List_fromArray(
+									[emit]);
+							} else {
+								return _List_Nil;
+							}
+						}();
+						return _Utils_Tuple3(
+							A2(Gizra$elm_debouncer$Debouncer$Internal$Debouncer, wrappedConfig, newState),
+							intervals,
+							unsettled.output);
+					} else {
+						return _Utils_Tuple3(debouncer, _List_Nil, elm$core$Maybe$Nothing);
+					}
+				}
+			default:
+				var time = msg.a;
+				if (state.$ === 'Settled') {
+					return _Utils_Tuple3(debouncer, _List_Nil, elm$core$Maybe$Nothing);
+				} else {
+					var unsettled = state.a;
+					var shouldSettle = A2(
+						elm$core$Maybe$withDefault,
+						false,
+						A2(
+							elm$core$Maybe$map,
+							function (interval) {
+								return _Utils_cmp(unsettled.lastInputProvidedAt + interval, time) < 1;
+							},
+							config.settleWhenQuietFor));
+					var becauseEmitWhileUnsettled = function () {
+						var _n13 = config.emitWhileUnsettled;
+						if (_n13.$ === 'Just') {
+							var interval = _n13.a;
+							var _n14 = unsettled.lastEmittedAt;
+							if (_n14.$ === 'Just') {
+								var lastEmittedAt = _n14.a;
+								return _Utils_cmp(lastEmittedAt + interval, time) < 1;
+							} else {
+								return _Utils_cmp(unsettled.unsettledAt + interval, time) < 1;
+							}
+						} else {
+							return false;
+						}
+					}();
+					var becauseEmitWhenUnsettled = function () {
+						var _n11 = config.emitWhenUnsettled;
+						if (_n11.$ === 'Just') {
+							var interval = _n11.a;
+							var _n12 = unsettled.lastEmittedAt;
+							if (_n12.$ === 'Just') {
+								return false;
+							} else {
+								return _Utils_cmp(unsettled.unsettledAt + interval, time) < 1;
+							}
+						} else {
+							return false;
+						}
+					}();
+					var shouldEmit = (!_Utils_eq(unsettled.output, elm$core$Maybe$Nothing)) && (shouldSettle || (becauseEmitWhenUnsettled || becauseEmitWhileUnsettled));
+					var emit = shouldEmit ? unsettled.output : elm$core$Maybe$Nothing;
+					var intervals = function () {
+						if (shouldEmit && (!shouldSettle)) {
+							var _n10 = config.emitWhileUnsettled;
+							if (_n10.$ === 'Just') {
+								var interval = _n10.a;
+								return _List_fromArray(
+									[interval]);
+							} else {
+								return _List_Nil;
+							}
+						} else {
+							return _List_Nil;
+						}
+					}();
+					var newState = shouldSettle ? Gizra$elm_debouncer$Debouncer$Internal$Settled : (shouldEmit ? Gizra$elm_debouncer$Debouncer$Internal$Unsettled(
+						_Utils_update(
+							unsettled,
+							{
+								lastEmittedAt: elm$core$Maybe$Just(time),
+								output: elm$core$Maybe$Nothing
+							})) : state);
+					return _Utils_Tuple3(
+						A2(Gizra$elm_debouncer$Debouncer$Internal$Debouncer, wrappedConfig, newState),
+						intervals,
+						emit);
+				}
+		}
+	});
+var elm$core$Basics$always = F2(
+	function (a, _n0) {
+		return a;
+	});
 var elm$core$List$map = F2(
 	function (f, xs) {
 		return A3(
@@ -4999,8 +5632,280 @@ var elm$core$List$map = F2(
 			_List_Nil,
 			xs);
 	});
-var elm$core$Basics$identity = function (x) {
-	return x;
+var elm$core$Process$sleep = _Process_sleep;
+var elm$core$Task$andThen = _Scheduler_andThen;
+var elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
+var elm$core$Task$succeed = _Scheduler_succeed;
+var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
+var elm$core$Task$map = F2(
+	function (func, taskA) {
+		return A2(
+			elm$core$Task$andThen,
+			function (a) {
+				return elm$core$Task$succeed(
+					func(a));
+			},
+			taskA);
+	});
+var elm$core$Task$map2 = F3(
+	function (func, taskA, taskB) {
+		return A2(
+			elm$core$Task$andThen,
+			function (a) {
+				return A2(
+					elm$core$Task$andThen,
+					function (b) {
+						return elm$core$Task$succeed(
+							A2(func, a, b));
+					},
+					taskB);
+			},
+			taskA);
+	});
+var elm$core$Task$sequence = function (tasks) {
+	return A3(
+		elm$core$List$foldr,
+		elm$core$Task$map2(elm$core$List$cons),
+		elm$core$Task$succeed(_List_Nil),
+		tasks);
+};
+var elm$core$Platform$sendToApp = _Platform_sendToApp;
+var elm$core$Task$spawnCmd = F2(
+	function (router, _n0) {
+		var task = _n0.a;
+		return _Scheduler_spawn(
+			A2(
+				elm$core$Task$andThen,
+				elm$core$Platform$sendToApp(router),
+				task));
+	});
+var elm$core$Task$onEffects = F3(
+	function (router, commands, state) {
+		return A2(
+			elm$core$Task$map,
+			function (_n0) {
+				return _Utils_Tuple0;
+			},
+			elm$core$Task$sequence(
+				A2(
+					elm$core$List$map,
+					elm$core$Task$spawnCmd(router),
+					commands)));
+	});
+var elm$core$Task$onSelfMsg = F3(
+	function (_n0, _n1, _n2) {
+		return elm$core$Task$succeed(_Utils_Tuple0);
+	});
+var elm$core$Task$cmdMap = F2(
+	function (tagger, _n0) {
+		var task = _n0.a;
+		return elm$core$Task$Perform(
+			A2(elm$core$Task$map, tagger, task));
+	});
+_Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
+var elm$core$Task$command = _Platform_leaf('Task');
+var elm$core$Task$perform = F2(
+	function (toMessage, task) {
+		return elm$core$Task$command(
+			elm$core$Task$Perform(
+				A2(elm$core$Task$map, toMessage, task)));
+	});
+var elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var elm$time$Time$customZone = elm$time$Time$Zone;
+var elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var elm$time$Time$millisToPosix = elm$time$Time$Posix;
+var elm$time$Time$now = _Time_now(elm$time$Time$millisToPosix);
+var elm$time$Time$posixToMillis = function (_n0) {
+	var millis = _n0.a;
+	return millis;
+};
+var Gizra$elm_debouncer$Debouncer$Basic$update = F2(
+	function (msg, debouncer) {
+		switch (msg.$) {
+			case 'ProvideInput':
+				var input = msg.a;
+				return _Utils_Tuple3(
+					debouncer,
+					A2(
+						elm$core$Task$perform,
+						A2(
+							elm$core$Basics$composeL,
+							A2(
+								elm$core$Basics$composeL,
+								Gizra$elm_debouncer$Debouncer$Basic$MsgInternal,
+								Gizra$elm_debouncer$Debouncer$Internal$InputProvidedAt(input)),
+							elm$time$Time$posixToMillis),
+						elm$time$Time$now),
+					elm$core$Maybe$Nothing);
+			case 'EmitNow':
+				return _Utils_Tuple3(
+					debouncer,
+					A2(
+						elm$core$Task$perform,
+						A2(
+							elm$core$Basics$composeL,
+							A2(elm$core$Basics$composeL, Gizra$elm_debouncer$Debouncer$Basic$MsgInternal, Gizra$elm_debouncer$Debouncer$Internal$ManualEmitAt),
+							elm$time$Time$posixToMillis),
+						elm$time$Time$now),
+					elm$core$Maybe$Nothing);
+			default:
+				var subMsg = msg.a;
+				var _n1 = A2(Gizra$elm_debouncer$Debouncer$Internal$update, subMsg, debouncer);
+				var updatedDebouncer = _n1.a;
+				var intervals = _n1.b;
+				var output = _n1.c;
+				var cmds = elm$core$Platform$Cmd$batch(
+					A2(
+						elm$core$List$map,
+						function (interval) {
+							return A2(
+								elm$core$Task$perform,
+								A2(
+									elm$core$Basics$composeL,
+									A2(elm$core$Basics$composeL, Gizra$elm_debouncer$Debouncer$Basic$MsgInternal, Gizra$elm_debouncer$Debouncer$Internal$Check),
+									elm$time$Time$posixToMillis),
+								A2(
+									elm$core$Task$andThen,
+									elm$core$Basics$always(elm$time$Time$now),
+									elm$core$Process$sleep(interval)));
+						},
+						intervals));
+				return _Utils_Tuple3(updatedDebouncer, cmds, output);
+		}
+	});
+var elm$core$Platform$Cmd$map = _Platform_map;
+var elm$core$Tuple$mapSecond = F2(
+	function (func, _n0) {
+		var x = _n0.a;
+		var y = _n0.b;
+		return _Utils_Tuple2(
+			x,
+			func(y));
+	});
+var Gizra$elm_debouncer$Debouncer$Messages$update = F4(
+	function (parentUpdate, config, msg, model) {
+		var _n0 = A2(
+			Gizra$elm_debouncer$Debouncer$Basic$update,
+			msg,
+			config.getDebouncer(model));
+		var updatedDebouncer = _n0.a;
+		var cmd = _n0.b;
+		var output = _n0.c;
+		var mappedCmd = A2(elm$core$Platform$Cmd$map, config.mapMsg, cmd);
+		var newModel = A2(config.setDebouncer, updatedDebouncer, model);
+		return A2(
+			elm$core$Maybe$withDefault,
+			_Utils_Tuple2(newModel, mappedCmd),
+			A2(
+				elm$core$Maybe$map,
+				function (emittedMsg) {
+					return A2(
+						elm$core$Tuple$mapSecond,
+						function (recursiveCmd) {
+							return elm$core$Platform$Cmd$batch(
+								_List_fromArray(
+									[mappedCmd, recursiveCmd]));
+						},
+						A2(parentUpdate, emittedMsg, newModel));
+				},
+				output));
+	});
+var author$project$Main$MsgQuietForOneSecond = function (a) {
+	return {$: 'MsgQuietForOneSecond', a: a};
+};
+var author$project$Main$Run = {$: 'Run'};
+var elm$json$Json$Decode$decodeString = _Json_runOnString;
+var author$project$Main$decodeString = function (x) {
+	var result = A2(
+		elm$json$Json$Decode$decodeString,
+		elm$json$Json$Decode$keyValuePairs(author$project$Main$contractDecoder),
+		x);
+	if (result.$ === 'Ok') {
+		var value = result.a;
+		return author$project$Main$displayTestResults(value);
+	} else {
+		return _List_Nil;
+	}
+};
+var elm$json$Json$Encode$string = _Json_wrap;
+var author$project$Main$toJs = _Platform_outgoingPort('toJs', elm$json$Json$Encode$string);
+var author$project$Main$updateDebouncer = {
+	getDebouncer: function ($) {
+		return $.quietForOneSecond;
+	},
+	mapMsg: author$project$Main$MsgQuietForOneSecond,
+	setDebouncer: F2(
+		function (debouncer, model) {
+			return _Utils_update(
+				model,
+				{quietForOneSecond: debouncer});
+		})
+};
+var author$project$Main$update = F2(
+	function (msg, model) {
+		update:
+		while (true) {
+			switch (msg.$) {
+				case 'MsgQuietForOneSecond':
+					var subMsg = msg.a;
+					return A4(Gizra$elm_debouncer$Debouncer$Messages$update, author$project$Main$update, author$project$Main$updateDebouncer, subMsg, model);
+				case 'DisplayTestResults':
+					var newTestResults = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{testResults: newTestResults}),
+						elm$core$Platform$Cmd$none);
+				case 'DisplayError':
+					var error = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{error: error}),
+						elm$core$Platform$Cmd$none);
+				case 'Run':
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{error: _List_Nil}),
+						author$project$Main$toJs(model.code));
+				case 'Display':
+					var newCode = msg.a;
+					var $temp$msg = author$project$Main$MsgQuietForOneSecond(
+						Gizra$elm_debouncer$Debouncer$Messages$provideInput(author$project$Main$Run)),
+						$temp$model = _Utils_update(
+						model,
+						{code: newCode});
+					msg = $temp$msg;
+					model = $temp$model;
+					continue update;
+				default:
+					var value = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								testResults: author$project$Main$decodeString(value)
+							}),
+						elm$core$Platform$Cmd$none);
+			}
+		}
+	});
+var author$project$Main$Decode = function (a) {
+	return {$: 'Decode', a: a};
 };
 var elm$json$Json$Decode$map = _Json_map1;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
@@ -5166,6 +6071,16 @@ var author$project$Main$displayContract = function (_n0) {
 						contract.functions)))
 			]));
 };
+var elm$html$Html$pre = _VirtualDom_node('pre');
+var author$project$Main$displayError = function (error) {
+	return A2(
+		elm$html$Html$pre,
+		_List_Nil,
+		_List_fromArray(
+			[
+				elm$html$Html$text(error)
+			]));
+};
 var elm$html$Html$textarea = _VirtualDom_node('textarea');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
 var elm$html$Html$Events$alwaysStop = function (x) {
@@ -5182,10 +6097,6 @@ var elm$html$Html$Events$stopPropagationOn = F2(
 			event,
 			elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
 	});
-var elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3(elm$core$List$foldr, elm$json$Json$Decode$field, decoder, fields);
-	});
 var elm$html$Html$Events$targetValue = A2(
 	elm$json$Json$Decode$at,
 	_List_fromArray(
@@ -5200,9 +6111,7 @@ var elm$html$Html$Events$onInput = function (tagger) {
 			elm$html$Html$Events$alwaysStop,
 			A2(elm$json$Json$Decode$map, tagger, elm$html$Html$Events$targetValue)));
 };
-var author$project$Main$view = function (_n0) {
-	var tests = _n0.a;
-	var code = _n0.b;
+var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_Nil,
@@ -5211,7 +6120,11 @@ var author$project$Main$view = function (_n0) {
 				A2(
 				elm$html$Html$ul,
 				_List_Nil,
-				A2(elm$core$List$map, author$project$Main$displayContract, tests)),
+				A2(elm$core$List$map, author$project$Main$displayError, model.error)),
+				A2(
+				elm$html$Html$ul,
+				_List_Nil,
+				A2(elm$core$List$map, author$project$Main$displayContract, model.testResults)),
 				A2(
 				elm$html$Html$textarea,
 				_List_fromArray(
@@ -5223,8 +6136,8 @@ var author$project$Main$view = function (_n0) {
 				elm$html$Html$textarea,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$value(code),
-						elm$html$Html$Events$onInput(author$project$Main$Run)
+						elm$html$Html$Attributes$value(model.code),
+						elm$html$Html$Events$onInput(author$project$Main$Display)
 					]),
 				_List_Nil)
 			]));
@@ -5247,85 +6160,6 @@ var elm$core$Basics$never = function (_n0) {
 		continue never;
 	}
 };
-var elm$core$Task$Perform = function (a) {
-	return {$: 'Perform', a: a};
-};
-var elm$core$Task$succeed = _Scheduler_succeed;
-var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
-var elm$core$Task$andThen = _Scheduler_andThen;
-var elm$core$Task$map = F2(
-	function (func, taskA) {
-		return A2(
-			elm$core$Task$andThen,
-			function (a) {
-				return elm$core$Task$succeed(
-					func(a));
-			},
-			taskA);
-	});
-var elm$core$Task$map2 = F3(
-	function (func, taskA, taskB) {
-		return A2(
-			elm$core$Task$andThen,
-			function (a) {
-				return A2(
-					elm$core$Task$andThen,
-					function (b) {
-						return elm$core$Task$succeed(
-							A2(func, a, b));
-					},
-					taskB);
-			},
-			taskA);
-	});
-var elm$core$Task$sequence = function (tasks) {
-	return A3(
-		elm$core$List$foldr,
-		elm$core$Task$map2(elm$core$List$cons),
-		elm$core$Task$succeed(_List_Nil),
-		tasks);
-};
-var elm$core$Platform$sendToApp = _Platform_sendToApp;
-var elm$core$Task$spawnCmd = F2(
-	function (router, _n0) {
-		var task = _n0.a;
-		return _Scheduler_spawn(
-			A2(
-				elm$core$Task$andThen,
-				elm$core$Platform$sendToApp(router),
-				task));
-	});
-var elm$core$Task$onEffects = F3(
-	function (router, commands, state) {
-		return A2(
-			elm$core$Task$map,
-			function (_n0) {
-				return _Utils_Tuple0;
-			},
-			elm$core$Task$sequence(
-				A2(
-					elm$core$List$map,
-					elm$core$Task$spawnCmd(router),
-					commands)));
-	});
-var elm$core$Task$onSelfMsg = F3(
-	function (_n0, _n1, _n2) {
-		return elm$core$Task$succeed(_Utils_Tuple0);
-	});
-var elm$core$Task$cmdMap = F2(
-	function (tagger, _n0) {
-		var task = _n0.a;
-		return elm$core$Task$Perform(
-			A2(elm$core$Task$map, tagger, task));
-	});
-_Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
-var elm$core$Task$command = _Platform_leaf('Task');
-var elm$core$Task$perform = F2(
-	function (toMessage, task) {
-		return elm$core$Task$command(
-			elm$core$Task$Perform(
-				A2(elm$core$Task$map, toMessage, task)));
-	});
 var elm$core$String$length = _String_length;
 var elm$core$String$slice = _String_slice;
 var elm$core$String$dropLeft = F2(

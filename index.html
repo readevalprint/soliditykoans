@@ -6,6 +6,10 @@
     <script src="lib/soljson.js"></script>
     <script src="elm.js"></script>
     <script src="bundle.js"></script>
+    <style>
+
+
+    </style>
   </head>
 
   <body>
@@ -17,16 +21,16 @@
       app.ports.toJs.subscribe(function (str) {
         console.log( str);
         runningTest["bar_test.sol"] = { content: str};
+        test_results = {}
         RemixTests.runTestSources(runningTest ,testCallback,resultCallback,finalCallback,importCallback)
       })
-
       input = {
         // Required: Source code language, such as "Solidity", "Vyper", "lll", "assembly", etc.
         language: "Solidity",
         // Required
         sources:
         {
-          "remix_tests.sol": {"content": RemixTests.assertLibCode},
+          "remix_tests.sol": {"content": "pragma solidity ^0.5.0;\n\n" + RemixTests.assertLibCode},
 
           // The keys here are the "global" names of the source files,
           // imports can use other files via remappings (see below).
@@ -132,6 +136,7 @@
       console.log(solc_out)
       content = input["sources"]["bar_test.sol"]["content"];
 
+      app.ports.showCode.send(content)
       test_results = {}
       testCallback=(result) => {
         console.log("test:", result);
@@ -152,8 +157,8 @@
               assertions: result.errMsg && [result.errMsg] || [],
               fail: result.type === "testFailure",
             }
-              
-          
+
+
           }
           else {
             test_results[result.context].functions[result.value].assertions.push(result.errMsg)
@@ -165,7 +170,13 @@
       resultCallback=(error, result) => {console.log("result", error, result)}
       finalCallback=(error, result) => {
         console.log("final", error, result)
-        app.ports.toElm.send(test_results)
+        if(error === null){
+          app.ports.showResults.send(test_results)
+        }
+        else 
+        {
+          app.ports.showError.send(error)
+        }
       }
       importCallback=(url, cb) => { console.log("import", url, cb); cb(null,input["sources"][url]["content"]) }
       runningTest = {}

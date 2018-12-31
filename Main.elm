@@ -1,10 +1,11 @@
 port module Main exposing (main)
 
 import Browser
+import Debouncer.Messages as Debouncer exposing (Debouncer, fromSeconds, provideInput, settleWhenQuietFor, toDebouncer)
 import Debug
 import Dict
 import Dict.Extra exposing (..)
-import Html exposing (Html, button, div, li, text, ul)
+import Html exposing (Html, button, div, li, pre, text, ul)
 import Html.Attributes exposing (classList)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode as Decode exposing (Decoder, bool, decodeString, dict, float, int, keyValuePairs, list, nullable, string)
@@ -118,24 +119,51 @@ type alias Contract =
     }
 
 
-port toElm : (Encode.Value -> msg) -> Sub msg
+type alias Model =
+    { testResults : TestResults
+    , code : Code
+    , quietForOneSecond : Debouncer Msg
+    , error : List String
+    }
+
+
+port showResults : (Encode.Value -> msg) -> Sub msg
+
+
+port showError : (Encode.Value -> msg) -> Sub msg
+
+
+port showCode : (Encode.Value -> msg) -> Sub msg
 
 
 port toJs : String -> Cmd msg
 
 
-type alias Model =
+type alias TestResults =
     List ( String, Contract )
+
+
+type alias ErrorResults =
+    String
 
 
 type alias Code =
     String
 
 
-init : () -> ( ( Model, Code ), Cmd Msg )
+init : () -> ( Model, Cmd Msg )
 init _ =
     --( ( displayTestResults (decodeString (keyValuePairs contractDecoder) test_results), "" ), Cmd.none )
-    ( ( [], "" ), Cmd.none )
+    ( { quietForOneSecond =
+            Debouncer.manual
+                |> settleWhenQuietFor (Just <| fromSeconds 1)
+                |> toDebouncer
+      , testResults = []
+      , code = ""
+      , error = []
+      }
+    , Cmd.none
+    )
 
 
 
@@ -144,22 +172,42 @@ init _ =
 
 
 type Msg
-    = Display Model
-    | Run String
+    = DisplayTestResults TestResults
+    | Run
+    | Display String
     | Decode String
+    | DisplayError (List String)
+    | MsgQuietForOneSecond (Debouncer.Msg Msg)
 
 
-update : Msg -> ( Model, Code ) -> ( ( Model, Code ), Cmd Msg )
-update msg ( test, code ) =
+updateDebouncer : Debouncer.UpdateConfig Msg Model
+updateDebouncer =
+    { mapMsg = MsgQuietForOneSecond
+    , getDebouncer = .quietForOneSecond
+    , setDebouncer = \debouncer model -> { model | quietForOneSecond = debouncer }
+    }
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
     case msg of
-        Display value ->
-            ( ( value, code ), Cmd.none )
+        MsgQuietForOneSecond subMsg ->
+            Debouncer.update update updateDebouncer subMsg model
+
+        DisplayTestResults newTestResults ->
+            ( { model | testResults = newTestResults }, Cmd.none )
+
+        DisplayError error ->
+            ( { model | error = error }, Cmd.none )
+
+        Run ->
+            ( { model | error = [] }, toJs model.code )
+
+        Display newCode ->
+            update (MsgQuietForOneSecond (provideInput Run)) { model | code = newCode }
 
         Decode value ->
-            ( ( decodeString value, code ), Cmd.none )
-
-        Run str ->
-            ( ( test, str ), toJs str )
+            ( { model | testResults = decodeString value }, Cmd.none )
 
 
 
@@ -210,21 +258,28 @@ displayTestResults contracts =
     List.sortWith (\( name_a, contract_a ) ( name_b, contract_b ) -> compare contract_a.loc contract_b.loc) contracts
 
 
-view : ( Model, Code ) -> Html Msg
-view ( tests, code ) =
+displayError error =
+    pre [] [ text error ]
+
+
+view : Model -> Html Msg
+view model =
     div []
-        [ ul []
-            (List.map displayContract tests)
+        [ ul [] (List.map displayError model.error)
+        , ul []
+            (List.map displayContract model.testResults)
         , Html.textarea
             [ onInput Decode ]
             []
         , Html.textarea
-            [ Html.Attributes.value code, onInput Run ]
+            [ Html.Attributes.value model.code
+            , onInput Display
+            ]
             []
         ]
 
 
-decodeString : String -> Model
+decodeString : String -> TestResults
 decodeString x =
     let
         result =
@@ -239,8 +294,23 @@ decodeString x =
             []
 
 
-decodeValue : Encode.Value -> Msg
-decodeValue x =
+decodeError : Encode.Value -> Msg
+decodeError x =
+    let
+        result =
+            -- Decode.decodeValue Decode.string x
+            Decode.decodeValue (Decode.list (Decode.at [ "formattedMessage" ] Decode.string)) x
+    in
+    case result of
+        Ok value ->
+            DisplayError value
+
+        Err value ->
+            DisplayError [ Decode.errorToString value ]
+
+
+decodeResults : Encode.Value -> Msg
+decodeResults x =
     let
         result =
             -- Decode.decodeValue Decode.string x
@@ -248,12 +318,30 @@ decodeValue x =
     in
     case result of
         Ok value ->
-            Display (displayTestResults value)
+            DisplayTestResults (displayTestResults value)
 
-        Err _ ->
-            Display []
+        Err value ->
+            DisplayError [ Decode.errorToString value ]
 
 
-subscriptions : ( Model, Code ) -> Sub Msg
-subscriptions ( tests, code ) =
-    toElm decodeValue
+decodeCode : Encode.Value -> Msg
+decodeCode x =
+    let
+        result =
+            Decode.decodeValue Decode.string x
+    in
+    case result of
+        Ok value ->
+            Display value
+
+        Err value ->
+            Display ("//" ++ Decode.errorToString value)
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ showResults decodeResults
+        , showError decodeError
+        , showCode decodeCode
+        ]
