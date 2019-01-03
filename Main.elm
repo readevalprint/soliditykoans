@@ -1,17 +1,21 @@
 port module Main exposing (main)
 
 import Browser
+import Browser.Events exposing (onAnimationFrame)
 import Debouncer.Messages as Debouncer exposing (Debouncer, fromSeconds, provideInput, settleWhenQuietFor, toDebouncer)
 import Debug
-import Dict
+import Dict exposing (Dict)
 import Dict.Extra exposing (..)
-import Html exposing (Html, button, div, li, pre, text, ul)
-import Html.Attributes exposing (classList)
+import Html exposing (Html, button, code, div, li, pre, text, textarea, ul)
+import Html.Attributes exposing (checked, class, classList, href, id, placeholder, selected, spellcheck, style, type_, value)
 import Html.Events exposing (onClick, onInput)
-import Json.Decode as Decode exposing (Decoder, bool, decodeString, dict, float, int, keyValuePairs, list, nullable, string)
+import Html.Lazy
+import Json.Decode as Decode exposing (Decoder, at, bool, decodeString, dict, float, int, keyValuePairs, list, nullable, string)
 import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as Encode
 import Maybe.Extra exposing (..)
+import Parser
+import SyntaxHighlight as SH exposing (monokai, toBlockHtml, useTheme)
 
 
 test_results =
@@ -121,9 +125,21 @@ type alias Contract =
 
 type alias Model =
     { testResults : TestResults
-    , code : Code
     , quietForOneSecond : Debouncer Msg
     , error : List String
+    , scroll : Scroll
+    , currentLanguage : String
+    , languagesModel : Dict String LanguageModel
+    , showLineCount : Bool
+    , lineCountStart : Int
+    , lineCount : Maybe Int
+    , theme : String
+    }
+
+
+type alias Scroll =
+    { top : Int
+    , left : Int
     }
 
 
@@ -151,17 +167,55 @@ type alias Code =
     String
 
 
+initModel : Model
+initModel =
+    { quietForOneSecond =
+        Debouncer.manual
+            |> settleWhenQuietFor (Just <| fromSeconds 1)
+            |> toDebouncer
+    , testResults = []
+    , error = []
+    , scroll = Scroll 0 0
+    , currentLanguage = "Javascript"
+    , languagesModel = initLanguagesModel
+    , showLineCount = True
+    , lineCountStart = 1
+    , lineCount = Just 1
+    , theme = "Monokai"
+    }
+
+
+type alias LanguageModel =
+    { code : String
+    , scroll : Scroll
+    }
+
+
+initLanguageModel : String -> LanguageModel
+initLanguageModel codeStr =
+    { code = codeStr
+    , scroll = Scroll 0 0
+    }
+
+
+initLanguagesModel : Dict String LanguageModel
+initLanguagesModel =
+    Dict.fromList
+        [ ( "Javascript", initLanguageModel javascriptExample )
+        ]
+
+
+javascriptExample : String
+javascriptExample =
+    """
+var a = 1;
+    """
+
+
 init : () -> ( Model, Cmd Msg )
 init _ =
     --( ( displayTestResults (decodeString (keyValuePairs contractDecoder) test_results), "" ), Cmd.none )
-    ( { quietForOneSecond =
-            Debouncer.manual
-                |> settleWhenQuietFor (Just <| fromSeconds 1)
-                |> toDebouncer
-      , testResults = []
-      , code = ""
-      , error = []
-      }
+    ( initModel
     , Cmd.none
     )
 
@@ -173,11 +227,14 @@ init _ =
 
 type Msg
     = DisplayTestResults TestResults
+    | SetText String String
+    | OnScroll Scroll
     | Run
     | Display String
     | Decode String
     | DisplayError (List String)
     | MsgQuietForOneSecond (Debouncer.Msg Msg)
+    | Frame
 
 
 updateDebouncer : Debouncer.UpdateConfig Msg Model
@@ -201,13 +258,36 @@ update msg model =
             ( { model | error = error }, Cmd.none )
 
         Run ->
-            ( { model | error = [] }, toJs model.code )
+            ( { model | error = [] }, getLangModel "Javascript" model |> .code |> toJs )
 
         Display newCode ->
-            update (MsgQuietForOneSecond (provideInput Run)) { model | code = newCode }
+            update (MsgQuietForOneSecond (provideInput Run)) model
 
         Decode value ->
             ( { model | testResults = decodeString value }, Cmd.none )
+
+        OnScroll scroll ->
+            ( { model | scroll = scroll }
+            , Cmd.none
+            )
+
+        Frame ->
+            getLangModel model.currentLanguage model
+                |> (\m -> { m | scroll = model.scroll })
+                |> updateLangModel model.currentLanguage model
+                |> (\a -> ( a, Cmd.none ))
+
+        SetText lang codeStr ->
+            getLangModel lang model
+                |> (\m -> { m | code = codeStr })
+                |> updateLangModel lang model
+                |> (\m -> update (MsgQuietForOneSecond (provideInput Run)) m)
+
+
+updateLangModel : String -> Model -> LanguageModel -> Model
+updateLangModel lang model langModel =
+    Dict.insert lang langModel model.languagesModel
+        |> (\n -> { model | languagesModel = n })
 
 
 
@@ -269,14 +349,102 @@ view model =
         , ul []
             (List.map displayContract model.testResults)
         , Html.textarea
-            [ onInput Decode ]
-            []
-        , Html.textarea
-            [ Html.Attributes.value model.code
+            [ Html.Attributes.value ""
             , onInput Display
             ]
             []
+        , div
+            []
+            []
+        , div []
+            [ useTheme monokai
+            , SH.javascript "var a = {}; a /= 5;"
+                |> Result.map (toBlockHtml (Just 1))
+                |> Result.withDefault
+                    (pre [] [ code [] [ text "var a = {}; a /= 5;" ] ])
+            ]
         ]
+
+
+getLangModel : String -> Model -> LanguageModel
+getLangModel lang model =
+    Dict.get lang model.languagesModel
+        |> Maybe.withDefault (initLanguageModel javascriptExample)
+
+
+toHtmlJavascript : Maybe Int -> String -> Html Msg
+toHtmlJavascript =
+    toHtml SH.javascript
+
+
+toHtml : (String -> Result (List Parser.DeadEnd) SH.HCode) -> Maybe Int -> String -> Html Msg
+toHtml parser maybeStart str =
+    parser str
+        |> Result.map (SH.toBlockHtml maybeStart)
+        |> Result.mapError Parser.deadEndsToString
+        |> (\result ->
+                case result of
+                    Result.Ok a ->
+                        a
+
+                    Result.Err x ->
+                        text x
+           )
+
+
+viewLanguage : String -> (Maybe Int -> String -> Html Msg) -> Model -> Html Msg
+viewLanguage thisLang parser ({ currentLanguage, lineCount } as model) =
+    if thisLang /= currentLanguage then
+        div [] []
+
+    else
+        let
+            langModel =
+                getLangModel thisLang model
+        in
+        div
+            [ classList
+                [ ( "container", True )
+                , ( "elmsh", True )
+                ]
+            ]
+            [ div
+                [ class "view-container"
+                , style "transform"
+                    ("translate("
+                        ++ String.fromInt -langModel.scroll.left
+                        ++ "px, "
+                        ++ String.fromInt -langModel.scroll.top
+                        ++ "px)"
+                    )
+                , style "will-change" "transform"
+                ]
+                [ parser
+                    lineCount
+                    langModel.code
+                ]
+            , viewTextarea thisLang langModel.code model
+            ]
+
+
+viewTextarea : String -> String -> Model -> Html Msg
+viewTextarea thisLang codeStr { showLineCount } =
+    textarea
+        [ value codeStr
+        , classList
+            [ ( "textarea", True )
+            , ( "textarea-lc", showLineCount )
+            ]
+        , onInput (SetText thisLang)
+        , spellcheck False
+        , Html.Events.on "scroll"
+            (Decode.map2 Scroll
+                (Decode.at [ "target", "scrollTop" ] Decode.int)
+                (Decode.at [ "target", "scrollLeft" ] Decode.int)
+                |> Decode.map OnScroll
+            )
+        ]
+        []
 
 
 decodeString : String -> TestResults
@@ -344,4 +512,5 @@ subscriptions model =
         [ showResults decodeResults
         , showError decodeError
         , showCode decodeCode
+        , onAnimationFrame (\_ -> Frame)
         ]

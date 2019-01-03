@@ -2314,52 +2314,6 @@ function _Platform_mergeExportsDebug(moduleName, obj, exports)
 
 
 
-function _Time_now(millisToPosix)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		callback(_Scheduler_succeed(millisToPosix(Date.now())));
-	});
-}
-
-var _Time_setInterval = F2(function(interval, task)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
-		return function() { clearInterval(id); };
-	});
-});
-
-function _Time_here()
-{
-	return _Scheduler_binding(function(callback)
-	{
-		callback(_Scheduler_succeed(
-			A2(elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
-		));
-	});
-}
-
-
-function _Time_getZoneName()
-{
-	return _Scheduler_binding(function(callback)
-	{
-		try
-		{
-			var name = elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		}
-		catch (e)
-		{
-			var name = elm$time$Time$Offset(new Date().getTimezoneOffset());
-		}
-		callback(_Scheduler_succeed(name));
-	});
-}
-
-
-
 
 // HELPERS
 
@@ -4356,6 +4310,182 @@ function _Browser_load(url)
 		}
 	}));
 }
+
+
+
+function _Time_now(millisToPosix)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(millisToPosix(Date.now())));
+	});
+}
+
+var _Time_setInterval = F2(function(interval, task)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
+		return function() { clearInterval(id); };
+	});
+});
+
+function _Time_here()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(
+			A2(elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
+		));
+	});
+}
+
+
+function _Time_getZoneName()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		try
+		{
+			var name = elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		}
+		catch (e)
+		{
+			var name = elm$time$Time$Offset(new Date().getTimezoneOffset());
+		}
+		callback(_Scheduler_succeed(name));
+	});
+}
+
+
+
+
+// STRINGS
+
+
+var _Parser_isSubString = F5(function(smallString, offset, row, col, bigString)
+{
+	var smallLength = smallString.length;
+	var isGood = offset + smallLength <= bigString.length;
+
+	for (var i = 0; isGood && i < smallLength; )
+	{
+		var code = bigString.charCodeAt(offset);
+		isGood =
+			smallString[i++] === bigString[offset++]
+			&& (
+				code === 0x000A /* \n */
+					? ( row++, col=1 )
+					: ( col++, (code & 0xF800) === 0xD800 ? smallString[i++] === bigString[offset++] : 1 )
+			)
+	}
+
+	return _Utils_Tuple3(isGood ? offset : -1, row, col);
+});
+
+
+
+// CHARS
+
+
+var _Parser_isSubChar = F3(function(predicate, offset, string)
+{
+	return (
+		string.length <= offset
+			? -1
+			:
+		(string.charCodeAt(offset) & 0xF800) === 0xD800
+			? (predicate(_Utils_chr(string.substr(offset, 2))) ? offset + 2 : -1)
+			:
+		(predicate(_Utils_chr(string[offset]))
+			? ((string[offset] === '\n') ? -2 : (offset + 1))
+			: -1
+		)
+	);
+});
+
+
+var _Parser_isAsciiCode = F3(function(code, offset, string)
+{
+	return string.charCodeAt(offset) === code;
+});
+
+
+
+// NUMBERS
+
+
+var _Parser_chompBase10 = F2(function(offset, string)
+{
+	for (; offset < string.length; offset++)
+	{
+		var code = string.charCodeAt(offset);
+		if (code < 0x30 || 0x39 < code)
+		{
+			return offset;
+		}
+	}
+	return offset;
+});
+
+
+var _Parser_consumeBase = F3(function(base, offset, string)
+{
+	for (var total = 0; offset < string.length; offset++)
+	{
+		var digit = string.charCodeAt(offset) - 0x30;
+		if (digit < 0 || base <= digit) break;
+		total = base * total + digit;
+	}
+	return _Utils_Tuple2(offset, total);
+});
+
+
+var _Parser_consumeBase16 = F2(function(offset, string)
+{
+	for (var total = 0; offset < string.length; offset++)
+	{
+		var code = string.charCodeAt(offset);
+		if (0x30 <= code && code <= 0x39)
+		{
+			total = 16 * total + code - 0x30;
+		}
+		else if (0x41 <= code && code <= 0x46)
+		{
+			total = 16 * total + code - 55;
+		}
+		else if (0x61 <= code && code <= 0x66)
+		{
+			total = 16 * total + code - 87;
+		}
+		else
+		{
+			break;
+		}
+	}
+	return _Utils_Tuple2(offset, total);
+});
+
+
+
+// FIND STRING
+
+
+var _Parser_findSubString = F5(function(smallString, offset, row, col, bigString)
+{
+	var newOffset = bigString.indexOf(smallString, offset);
+	var target = newOffset < 0 ? bigString.length : newOffset + smallString.length;
+
+	while (offset < target)
+	{
+		var code = bigString.charCodeAt(offset++);
+		code === 0x000A /* \n */
+			? ( col=1, row++ )
+			: ( col++, (code & 0xF800) === 0xD800 && offset++ )
+	}
+
+	return _Utils_Tuple3(newOffset, row, col);
+});
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -4507,6 +4637,167 @@ var Gizra$elm_debouncer$Debouncer$Internal$toDebouncer = function (config) {
 };
 var Gizra$elm_debouncer$Debouncer$Basic$toDebouncer = Gizra$elm_debouncer$Debouncer$Internal$toDebouncer;
 var Gizra$elm_debouncer$Debouncer$Messages$toDebouncer = Gizra$elm_debouncer$Debouncer$Basic$toDebouncer;
+var author$project$Main$Scroll = F2(
+	function (top, left) {
+		return {left: left, top: top};
+	});
+var author$project$Main$initLanguageModel = function (codeStr) {
+	return {
+		code: codeStr,
+		scroll: A2(author$project$Main$Scroll, 0, 0)
+	};
+};
+var author$project$Main$javascriptExample = '\nvar a = 1;\n    ';
+var elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var elm$core$Dict$empty = elm$core$Dict$RBEmpty_elm_builtin;
+var elm$core$Dict$Black = {$: 'Black'};
+var elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
+	});
+var elm$core$Basics$compare = _Utils_compare;
+var elm$core$Dict$Red = {$: 'Red'};
+var elm$core$Dict$balance = F5(
+	function (color, key, value, left, right) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
+			var _n1 = right.a;
+			var rK = right.b;
+			var rV = right.c;
+			var rLeft = right.d;
+			var rRight = right.e;
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+				var _n3 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var lLeft = left.d;
+				var lRight = left.e;
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Red,
+					key,
+					value,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					color,
+					rK,
+					rV,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, left, rLeft),
+					rRight);
+			}
+		} else {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
+				var _n5 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var _n6 = left.d;
+				var _n7 = _n6.a;
+				var llK = _n6.b;
+				var llV = _n6.c;
+				var llLeft = _n6.d;
+				var llRight = _n6.e;
+				var lRight = left.e;
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Red,
+					lK,
+					lV,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, key, value, lRight, right));
+			} else {
+				return A5(elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
+			}
+		}
+	});
+var elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, elm$core$Dict$RBEmpty_elm_builtin, elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _n1 = A2(elm$core$Basics$compare, key, nKey);
+			switch (_n1.$) {
+				case 'LT':
+					return A5(
+						elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3(elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5(elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3(elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _n0 = A3(elm$core$Dict$insertHelp, key, value, dict);
+		if ((_n0.$ === 'RBNode_elm_builtin') && (_n0.a.$ === 'Red')) {
+			var _n1 = _n0.a;
+			var k = _n0.b;
+			var v = _n0.c;
+			var l = _n0.d;
+			var r = _n0.e;
+			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _n0;
+			return x;
+		}
+	});
+var elm$core$List$foldl = F3(
+	function (func, acc, list) {
+		foldl:
+		while (true) {
+			if (!list.b) {
+				return acc;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				var $temp$func = func,
+					$temp$acc = A2(func, x, acc),
+					$temp$list = xs;
+				func = $temp$func;
+				acc = $temp$acc;
+				list = $temp$list;
+				continue foldl;
+			}
+		}
+	});
+var elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		elm$core$List$foldl,
+		F2(
+			function (_n0, dict) {
+				var key = _n0.a;
+				var value = _n0.b;
+				return A3(elm$core$Dict$insert, key, value, dict);
+			}),
+		elm$core$Dict$empty,
+		assocs);
+};
+var author$project$Main$initLanguagesModel = elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2(
+			'Javascript',
+			author$project$Main$initLanguageModel(author$project$Main$javascriptExample))
+		]));
+var elm$core$Basics$True = {$: 'True'};
 var elm$core$Basics$apL = F2(
 	function (f, x) {
 		return f(x);
@@ -4515,8 +4806,24 @@ var elm$core$Basics$apR = F2(
 	function (x, f) {
 		return f(x);
 	});
+var author$project$Main$initModel = {
+	currentLanguage: 'Javascript',
+	error: _List_Nil,
+	languagesModel: author$project$Main$initLanguagesModel,
+	lineCount: elm$core$Maybe$Just(1),
+	lineCountStart: 1,
+	quietForOneSecond: Gizra$elm_debouncer$Debouncer$Messages$toDebouncer(
+		A2(
+			Gizra$elm_debouncer$Debouncer$Messages$settleWhenQuietFor,
+			elm$core$Maybe$Just(
+				Gizra$elm_debouncer$Debouncer$Messages$fromSeconds(1)),
+			Gizra$elm_debouncer$Debouncer$Messages$manual)),
+	scroll: A2(author$project$Main$Scroll, 0, 0),
+	showLineCount: true,
+	testResults: _List_Nil,
+	theme: 'Monokai'
+};
 var elm$core$Basics$False = {$: 'False'};
-var elm$core$Basics$True = {$: 'True'};
 var elm$core$Result$isOk = function (result) {
 	if (result.$ === 'Ok') {
 		return true;
@@ -4547,25 +4854,6 @@ var elm$core$Array$SubTree = function (a) {
 	return {$: 'SubTree', a: a};
 };
 var elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
-var elm$core$List$foldl = F3(
-	function (func, acc, list) {
-		foldl:
-		while (true) {
-			if (!list.b) {
-				return acc;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				var $temp$func = func,
-					$temp$acc = A2(func, x, acc),
-					$temp$list = xs;
-				func = $temp$func;
-				acc = $temp$acc;
-				list = $temp$list;
-				continue foldl;
-			}
-		}
-	});
 var elm$core$List$reverse = function (list) {
 	return A3(elm$core$List$foldl, elm$core$List$cons, _List_Nil, list);
 };
@@ -4899,20 +5187,9 @@ var elm$json$Json$Decode$errorToStringHelp = F2(
 var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (_n0) {
-	return _Utils_Tuple2(
-		{
-			code: '',
-			error: _List_Nil,
-			quietForOneSecond: Gizra$elm_debouncer$Debouncer$Messages$toDebouncer(
-				A2(
-					Gizra$elm_debouncer$Debouncer$Messages$settleWhenQuietFor,
-					elm$core$Maybe$Just(
-						Gizra$elm_debouncer$Debouncer$Messages$fromSeconds(1)),
-					Gizra$elm_debouncer$Debouncer$Messages$manual)),
-			testResults: _List_Nil
-		},
-		elm$core$Platform$Cmd$none);
+	return _Utils_Tuple2(author$project$Main$initModel, elm$core$Platform$Cmd$none);
 };
+var author$project$Main$Frame = {$: 'Frame'};
 var author$project$Main$Display = function (a) {
 	return {$: 'Display', a: a};
 };
@@ -5069,7 +5346,6 @@ var author$project$Main$contractDecoder = A3(
 			'functions',
 			elm$json$Json$Decode$keyValuePairs(author$project$Main$functionDecoder),
 			elm$json$Json$Decode$succeed(author$project$Main$Contract))));
-var elm$core$Basics$compare = _Utils_compare;
 var elm$core$List$sortWith = _List_sortWith;
 var author$project$Main$displayTestResults = function (contracts) {
 	return A2(
@@ -5106,6 +5382,393 @@ var elm$json$Json$Decode$value = _Json_decodeValue;
 var author$project$Main$showCode = _Platform_incomingPort('showCode', elm$json$Json$Decode$value);
 var author$project$Main$showError = _Platform_incomingPort('showError', elm$json$Json$Decode$value);
 var author$project$Main$showResults = _Platform_incomingPort('showResults', elm$json$Json$Decode$value);
+var elm$browser$Browser$AnimationManager$Time = function (a) {
+	return {$: 'Time', a: a};
+};
+var elm$browser$Browser$AnimationManager$State = F3(
+	function (subs, request, oldTime) {
+		return {oldTime: oldTime, request: request, subs: subs};
+	});
+var elm$core$Task$succeed = _Scheduler_succeed;
+var elm$browser$Browser$AnimationManager$init = elm$core$Task$succeed(
+	A3(elm$browser$Browser$AnimationManager$State, _List_Nil, elm$core$Maybe$Nothing, 0));
+var elm$browser$Browser$External = function (a) {
+	return {$: 'External', a: a};
+};
+var elm$browser$Browser$Internal = function (a) {
+	return {$: 'Internal', a: a};
+};
+var elm$browser$Browser$Dom$NotFound = function (a) {
+	return {$: 'NotFound', a: a};
+};
+var elm$core$Basics$never = function (_n0) {
+	never:
+	while (true) {
+		var nvr = _n0.a;
+		var $temp$_n0 = nvr;
+		_n0 = $temp$_n0;
+		continue never;
+	}
+};
+var elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
+var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
+var elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var elm$core$Task$andThen = _Scheduler_andThen;
+var elm$core$Task$map = F2(
+	function (func, taskA) {
+		return A2(
+			elm$core$Task$andThen,
+			function (a) {
+				return elm$core$Task$succeed(
+					func(a));
+			},
+			taskA);
+	});
+var elm$core$Task$map2 = F3(
+	function (func, taskA, taskB) {
+		return A2(
+			elm$core$Task$andThen,
+			function (a) {
+				return A2(
+					elm$core$Task$andThen,
+					function (b) {
+						return elm$core$Task$succeed(
+							A2(func, a, b));
+					},
+					taskB);
+			},
+			taskA);
+	});
+var elm$core$Task$sequence = function (tasks) {
+	return A3(
+		elm$core$List$foldr,
+		elm$core$Task$map2(elm$core$List$cons),
+		elm$core$Task$succeed(_List_Nil),
+		tasks);
+};
+var elm$core$Platform$sendToApp = _Platform_sendToApp;
+var elm$core$Task$spawnCmd = F2(
+	function (router, _n0) {
+		var task = _n0.a;
+		return _Scheduler_spawn(
+			A2(
+				elm$core$Task$andThen,
+				elm$core$Platform$sendToApp(router),
+				task));
+	});
+var elm$core$Task$onEffects = F3(
+	function (router, commands, state) {
+		return A2(
+			elm$core$Task$map,
+			function (_n0) {
+				return _Utils_Tuple0;
+			},
+			elm$core$Task$sequence(
+				A2(
+					elm$core$List$map,
+					elm$core$Task$spawnCmd(router),
+					commands)));
+	});
+var elm$core$Task$onSelfMsg = F3(
+	function (_n0, _n1, _n2) {
+		return elm$core$Task$succeed(_Utils_Tuple0);
+	});
+var elm$core$Task$cmdMap = F2(
+	function (tagger, _n0) {
+		var task = _n0.a;
+		return elm$core$Task$Perform(
+			A2(elm$core$Task$map, tagger, task));
+	});
+_Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
+var elm$core$Task$command = _Platform_leaf('Task');
+var elm$core$Task$perform = F2(
+	function (toMessage, task) {
+		return elm$core$Task$command(
+			elm$core$Task$Perform(
+				A2(elm$core$Task$map, toMessage, task)));
+	});
+var elm$json$Json$Decode$map = _Json_map1;
+var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
+	switch (handler.$) {
+		case 'Normal':
+			return 0;
+		case 'MayStopPropagation':
+			return 1;
+		case 'MayPreventDefault':
+			return 2;
+		default:
+			return 3;
+	}
+};
+var elm$core$String$length = _String_length;
+var elm$core$String$slice = _String_slice;
+var elm$core$String$dropLeft = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3(
+			elm$core$String$slice,
+			n,
+			elm$core$String$length(string),
+			string);
+	});
+var elm$core$String$startsWith = _String_startsWith;
+var elm$url$Url$Http = {$: 'Http'};
+var elm$url$Url$Https = {$: 'Https'};
+var elm$core$String$indexes = _String_indexes;
+var elm$core$String$isEmpty = function (string) {
+	return string === '';
+};
+var elm$core$String$left = F2(
+	function (n, string) {
+		return (n < 1) ? '' : A3(elm$core$String$slice, 0, n, string);
+	});
+var elm$core$String$contains = _String_contains;
+var elm$core$String$toInt = _String_toInt;
+var elm$url$Url$Url = F6(
+	function (protocol, host, port_, path, query, fragment) {
+		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
+	});
+var elm$url$Url$chompBeforePath = F5(
+	function (protocol, path, params, frag, str) {
+		if (elm$core$String$isEmpty(str) || A2(elm$core$String$contains, '@', str)) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var _n0 = A2(elm$core$String$indexes, ':', str);
+			if (!_n0.b) {
+				return elm$core$Maybe$Just(
+					A6(elm$url$Url$Url, protocol, str, elm$core$Maybe$Nothing, path, params, frag));
+			} else {
+				if (!_n0.b.b) {
+					var i = _n0.a;
+					var _n1 = elm$core$String$toInt(
+						A2(elm$core$String$dropLeft, i + 1, str));
+					if (_n1.$ === 'Nothing') {
+						return elm$core$Maybe$Nothing;
+					} else {
+						var port_ = _n1;
+						return elm$core$Maybe$Just(
+							A6(
+								elm$url$Url$Url,
+								protocol,
+								A2(elm$core$String$left, i, str),
+								port_,
+								path,
+								params,
+								frag));
+					}
+				} else {
+					return elm$core$Maybe$Nothing;
+				}
+			}
+		}
+	});
+var elm$url$Url$chompBeforeQuery = F4(
+	function (protocol, params, frag, str) {
+		if (elm$core$String$isEmpty(str)) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var _n0 = A2(elm$core$String$indexes, '/', str);
+			if (!_n0.b) {
+				return A5(elm$url$Url$chompBeforePath, protocol, '/', params, frag, str);
+			} else {
+				var i = _n0.a;
+				return A5(
+					elm$url$Url$chompBeforePath,
+					protocol,
+					A2(elm$core$String$dropLeft, i, str),
+					params,
+					frag,
+					A2(elm$core$String$left, i, str));
+			}
+		}
+	});
+var elm$url$Url$chompBeforeFragment = F3(
+	function (protocol, frag, str) {
+		if (elm$core$String$isEmpty(str)) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var _n0 = A2(elm$core$String$indexes, '?', str);
+			if (!_n0.b) {
+				return A4(elm$url$Url$chompBeforeQuery, protocol, elm$core$Maybe$Nothing, frag, str);
+			} else {
+				var i = _n0.a;
+				return A4(
+					elm$url$Url$chompBeforeQuery,
+					protocol,
+					elm$core$Maybe$Just(
+						A2(elm$core$String$dropLeft, i + 1, str)),
+					frag,
+					A2(elm$core$String$left, i, str));
+			}
+		}
+	});
+var elm$url$Url$chompAfterProtocol = F2(
+	function (protocol, str) {
+		if (elm$core$String$isEmpty(str)) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var _n0 = A2(elm$core$String$indexes, '#', str);
+			if (!_n0.b) {
+				return A3(elm$url$Url$chompBeforeFragment, protocol, elm$core$Maybe$Nothing, str);
+			} else {
+				var i = _n0.a;
+				return A3(
+					elm$url$Url$chompBeforeFragment,
+					protocol,
+					elm$core$Maybe$Just(
+						A2(elm$core$String$dropLeft, i + 1, str)),
+					A2(elm$core$String$left, i, str));
+			}
+		}
+	});
+var elm$url$Url$fromString = function (str) {
+	return A2(elm$core$String$startsWith, 'http://', str) ? A2(
+		elm$url$Url$chompAfterProtocol,
+		elm$url$Url$Http,
+		A2(elm$core$String$dropLeft, 7, str)) : (A2(elm$core$String$startsWith, 'https://', str) ? A2(
+		elm$url$Url$chompAfterProtocol,
+		elm$url$Url$Https,
+		A2(elm$core$String$dropLeft, 8, str)) : elm$core$Maybe$Nothing);
+};
+var elm$browser$Browser$AnimationManager$now = _Browser_now(_Utils_Tuple0);
+var elm$browser$Browser$AnimationManager$rAF = _Browser_rAF(_Utils_Tuple0);
+var elm$core$Platform$sendToSelf = _Platform_sendToSelf;
+var elm$core$Process$kill = _Scheduler_kill;
+var elm$core$Process$spawn = _Scheduler_spawn;
+var elm$browser$Browser$AnimationManager$onEffects = F3(
+	function (router, subs, _n0) {
+		var request = _n0.request;
+		var oldTime = _n0.oldTime;
+		var _n1 = _Utils_Tuple2(request, subs);
+		if (_n1.a.$ === 'Nothing') {
+			if (!_n1.b.b) {
+				var _n2 = _n1.a;
+				return elm$browser$Browser$AnimationManager$init;
+			} else {
+				var _n4 = _n1.a;
+				return A2(
+					elm$core$Task$andThen,
+					function (pid) {
+						return A2(
+							elm$core$Task$andThen,
+							function (time) {
+								return elm$core$Task$succeed(
+									A3(
+										elm$browser$Browser$AnimationManager$State,
+										subs,
+										elm$core$Maybe$Just(pid),
+										time));
+							},
+							elm$browser$Browser$AnimationManager$now);
+					},
+					elm$core$Process$spawn(
+						A2(
+							elm$core$Task$andThen,
+							elm$core$Platform$sendToSelf(router),
+							elm$browser$Browser$AnimationManager$rAF)));
+			}
+		} else {
+			if (!_n1.b.b) {
+				var pid = _n1.a.a;
+				return A2(
+					elm$core$Task$andThen,
+					function (_n3) {
+						return elm$browser$Browser$AnimationManager$init;
+					},
+					elm$core$Process$kill(pid));
+			} else {
+				return elm$core$Task$succeed(
+					A3(elm$browser$Browser$AnimationManager$State, subs, request, oldTime));
+			}
+		}
+	});
+var elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var elm$time$Time$millisToPosix = elm$time$Time$Posix;
+var elm$browser$Browser$AnimationManager$onSelfMsg = F3(
+	function (router, newTime, _n0) {
+		var subs = _n0.subs;
+		var oldTime = _n0.oldTime;
+		var send = function (sub) {
+			if (sub.$ === 'Time') {
+				var tagger = sub.a;
+				return A2(
+					elm$core$Platform$sendToApp,
+					router,
+					tagger(
+						elm$time$Time$millisToPosix(newTime)));
+			} else {
+				var tagger = sub.a;
+				return A2(
+					elm$core$Platform$sendToApp,
+					router,
+					tagger(newTime - oldTime));
+			}
+		};
+		return A2(
+			elm$core$Task$andThen,
+			function (pid) {
+				return A2(
+					elm$core$Task$andThen,
+					function (_n1) {
+						return elm$core$Task$succeed(
+							A3(
+								elm$browser$Browser$AnimationManager$State,
+								subs,
+								elm$core$Maybe$Just(pid),
+								newTime));
+					},
+					elm$core$Task$sequence(
+						A2(elm$core$List$map, send, subs)));
+			},
+			elm$core$Process$spawn(
+				A2(
+					elm$core$Task$andThen,
+					elm$core$Platform$sendToSelf(router),
+					elm$browser$Browser$AnimationManager$rAF)));
+	});
+var elm$browser$Browser$AnimationManager$Delta = function (a) {
+	return {$: 'Delta', a: a};
+};
+var elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var elm$browser$Browser$AnimationManager$subMap = F2(
+	function (func, sub) {
+		if (sub.$ === 'Time') {
+			var tagger = sub.a;
+			return elm$browser$Browser$AnimationManager$Time(
+				A2(elm$core$Basics$composeL, func, tagger));
+		} else {
+			var tagger = sub.a;
+			return elm$browser$Browser$AnimationManager$Delta(
+				A2(elm$core$Basics$composeL, func, tagger));
+		}
+	});
+_Platform_effectManagers['Browser.AnimationManager'] = _Platform_createManager(elm$browser$Browser$AnimationManager$init, elm$browser$Browser$AnimationManager$onEffects, elm$browser$Browser$AnimationManager$onSelfMsg, 0, elm$browser$Browser$AnimationManager$subMap);
+var elm$browser$Browser$AnimationManager$subscription = _Platform_leaf('Browser.AnimationManager');
+var elm$browser$Browser$AnimationManager$onAnimationFrame = function (tagger) {
+	return elm$browser$Browser$AnimationManager$subscription(
+		elm$browser$Browser$AnimationManager$Time(tagger));
+};
+var elm$browser$Browser$Events$onAnimationFrame = elm$browser$Browser$AnimationManager$onAnimationFrame;
 var elm$core$Platform$Sub$batch = _Platform_batch;
 var author$project$Main$subscriptions = function (model) {
 	return elm$core$Platform$Sub$batch(
@@ -5113,7 +5776,11 @@ var author$project$Main$subscriptions = function (model) {
 			[
 				author$project$Main$showResults(author$project$Main$decodeResults),
 				author$project$Main$showError(author$project$Main$decodeError),
-				author$project$Main$showCode(author$project$Main$decodeCode)
+				author$project$Main$showCode(author$project$Main$decodeCode),
+				elm$browser$Browser$Events$onAnimationFrame(
+				function (_n0) {
+					return author$project$Main$Frame;
+				})
 			]));
 };
 var Gizra$elm_debouncer$Debouncer$Basic$ProvideInput = function (a) {
@@ -5142,11 +5809,6 @@ var Gizra$elm_debouncer$Debouncer$Internal$cancel = function (_n0) {
 	var state = _n0.b;
 	return A2(Gizra$elm_debouncer$Debouncer$Internal$Debouncer, config, Gizra$elm_debouncer$Debouncer$Internal$Settled);
 };
-var elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
 var elm$core$Basics$neq = _Utils_notEqual;
 var elm$core$Basics$not = _Basics_not;
 var elm$core$List$maybeCons = F3(
@@ -5219,120 +5881,10 @@ var elm$core$Tuple$mapFirst = F2(
 			func(x),
 			y);
 	});
-var elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var elm$core$Dict$empty = elm$core$Dict$RBEmpty_elm_builtin;
 var elm$core$Set$Set_elm_builtin = function (a) {
 	return {$: 'Set_elm_builtin', a: a};
 };
 var elm$core$Set$empty = elm$core$Set$Set_elm_builtin(elm$core$Dict$empty);
-var elm$core$Dict$Black = {$: 'Black'};
-var elm$core$Dict$RBNode_elm_builtin = F5(
-	function (a, b, c, d, e) {
-		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
-	});
-var elm$core$Dict$Red = {$: 'Red'};
-var elm$core$Dict$balance = F5(
-	function (color, key, value, left, right) {
-		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
-			var _n1 = right.a;
-			var rK = right.b;
-			var rV = right.c;
-			var rLeft = right.d;
-			var rRight = right.e;
-			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
-				var _n3 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var lLeft = left.d;
-				var lRight = left.e;
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					elm$core$Dict$Red,
-					key,
-					value,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, lK, lV, lLeft, lRight),
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					color,
-					rK,
-					rV,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, left, rLeft),
-					rRight);
-			}
-		} else {
-			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
-				var _n5 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var _n6 = left.d;
-				var _n7 = _n6.a;
-				var llK = _n6.b;
-				var llV = _n6.c;
-				var llLeft = _n6.d;
-				var llRight = _n6.e;
-				var lRight = left.e;
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					elm$core$Dict$Red,
-					lK,
-					lV,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, llK, llV, llLeft, llRight),
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, key, value, lRight, right));
-			} else {
-				return A5(elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
-			}
-		}
-	});
-var elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, elm$core$Dict$RBEmpty_elm_builtin, elm$core$Dict$RBEmpty_elm_builtin);
-		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _n1 = A2(elm$core$Basics$compare, key, nKey);
-			switch (_n1.$) {
-				case 'LT':
-					return A5(
-						elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3(elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 'EQ':
-					return A5(elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
-				default:
-					return A5(
-						elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3(elm$core$Dict$insertHelp, key, value, nRight));
-			}
-		}
-	});
-var elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _n0 = A3(elm$core$Dict$insertHelp, key, value, dict);
-		if ((_n0.$ === 'RBNode_elm_builtin') && (_n0.a.$ === 'Red')) {
-			var _n1 = _n0.a;
-			var k = _n0.b;
-			var v = _n0.c;
-			var l = _n0.d;
-			var r = _n0.e;
-			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, k, v, l, r);
-		} else {
-			var x = _n0;
-			return x;
-		}
-	});
 var elm$core$Set$insert = F2(
 	function (key, _n0) {
 		var dict = _n0.a;
@@ -5618,100 +6170,7 @@ var elm$core$Basics$always = F2(
 	function (a, _n0) {
 		return a;
 	});
-var elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
 var elm$core$Process$sleep = _Process_sleep;
-var elm$core$Task$andThen = _Scheduler_andThen;
-var elm$core$Task$Perform = function (a) {
-	return {$: 'Perform', a: a};
-};
-var elm$core$Task$succeed = _Scheduler_succeed;
-var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
-var elm$core$Task$map = F2(
-	function (func, taskA) {
-		return A2(
-			elm$core$Task$andThen,
-			function (a) {
-				return elm$core$Task$succeed(
-					func(a));
-			},
-			taskA);
-	});
-var elm$core$Task$map2 = F3(
-	function (func, taskA, taskB) {
-		return A2(
-			elm$core$Task$andThen,
-			function (a) {
-				return A2(
-					elm$core$Task$andThen,
-					function (b) {
-						return elm$core$Task$succeed(
-							A2(func, a, b));
-					},
-					taskB);
-			},
-			taskA);
-	});
-var elm$core$Task$sequence = function (tasks) {
-	return A3(
-		elm$core$List$foldr,
-		elm$core$Task$map2(elm$core$List$cons),
-		elm$core$Task$succeed(_List_Nil),
-		tasks);
-};
-var elm$core$Platform$sendToApp = _Platform_sendToApp;
-var elm$core$Task$spawnCmd = F2(
-	function (router, _n0) {
-		var task = _n0.a;
-		return _Scheduler_spawn(
-			A2(
-				elm$core$Task$andThen,
-				elm$core$Platform$sendToApp(router),
-				task));
-	});
-var elm$core$Task$onEffects = F3(
-	function (router, commands, state) {
-		return A2(
-			elm$core$Task$map,
-			function (_n0) {
-				return _Utils_Tuple0;
-			},
-			elm$core$Task$sequence(
-				A2(
-					elm$core$List$map,
-					elm$core$Task$spawnCmd(router),
-					commands)));
-	});
-var elm$core$Task$onSelfMsg = F3(
-	function (_n0, _n1, _n2) {
-		return elm$core$Task$succeed(_Utils_Tuple0);
-	});
-var elm$core$Task$cmdMap = F2(
-	function (tagger, _n0) {
-		var task = _n0.a;
-		return elm$core$Task$Perform(
-			A2(elm$core$Task$map, tagger, task));
-	});
-_Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
-var elm$core$Task$command = _Platform_leaf('Task');
-var elm$core$Task$perform = F2(
-	function (toMessage, task) {
-		return elm$core$Task$command(
-			elm$core$Task$Perform(
-				A2(elm$core$Task$map, toMessage, task)));
-	});
 var elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
 };
@@ -5723,10 +6182,6 @@ var elm$time$Time$Zone = F2(
 		return {$: 'Zone', a: a, b: b};
 	});
 var elm$time$Time$customZone = elm$time$Time$Zone;
-var elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var elm$time$Time$millisToPosix = elm$time$Time$Posix;
 var elm$time$Time$now = _Time_now(elm$time$Time$millisToPosix);
 var elm$time$Time$posixToMillis = function (_n0) {
 	var millis = _n0.a;
@@ -5840,6 +6295,13 @@ var author$project$Main$decodeString = function (x) {
 		return _List_Nil;
 	}
 };
+var author$project$Main$getLangModel = F2(
+	function (lang, model) {
+		return A2(
+			elm$core$Maybe$withDefault,
+			author$project$Main$initLanguageModel(author$project$Main$javascriptExample),
+			A2(elm$core$Dict$get, lang, model.languagesModel));
+	});
 var elm$json$Json$Encode$string = _Json_wrap;
 var author$project$Main$toJs = _Platform_outgoingPort('toJs', elm$json$Json$Encode$string);
 var author$project$Main$updateDebouncer = {
@@ -5854,6 +6316,15 @@ var author$project$Main$updateDebouncer = {
 				{quietForOneSecond: debouncer});
 		})
 };
+var author$project$Main$updateLangModel = F3(
+	function (lang, model, langModel) {
+		return function (n) {
+			return _Utils_update(
+				model,
+				{languagesModel: n});
+		}(
+			A3(elm$core$Dict$insert, lang, langModel, model.languagesModel));
+	});
 var author$project$Main$update = F2(
 	function (msg, model) {
 		update:
@@ -5881,18 +6352,17 @@ var author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{error: _List_Nil}),
-						author$project$Main$toJs(model.code));
+						author$project$Main$toJs(
+							A2(author$project$Main$getLangModel, 'Javascript', model).code));
 				case 'Display':
 					var newCode = msg.a;
 					var $temp$msg = author$project$Main$MsgQuietForOneSecond(
 						Gizra$elm_debouncer$Debouncer$Messages$provideInput(author$project$Main$Run)),
-						$temp$model = _Utils_update(
-						model,
-						{code: newCode});
+						$temp$model = model;
 					msg = $temp$msg;
 					model = $temp$model;
 					continue update;
-				default:
+				case 'Decode':
 					var value = msg.a;
 					return _Utils_Tuple2(
 						_Utils_update(
@@ -5901,25 +6371,50 @@ var author$project$Main$update = F2(
 								testResults: author$project$Main$decodeString(value)
 							}),
 						elm$core$Platform$Cmd$none);
+				case 'OnScroll':
+					var scroll = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{scroll: scroll}),
+						elm$core$Platform$Cmd$none);
+				case 'Frame':
+					return function (a) {
+						return _Utils_Tuple2(a, elm$core$Platform$Cmd$none);
+					}(
+						A3(
+							author$project$Main$updateLangModel,
+							model.currentLanguage,
+							model,
+							function (m) {
+								return _Utils_update(
+									m,
+									{scroll: model.scroll});
+							}(
+								A2(author$project$Main$getLangModel, model.currentLanguage, model))));
+				default:
+					var lang = msg.a;
+					var codeStr = msg.b;
+					return function (m) {
+						return A2(
+							author$project$Main$update,
+							author$project$Main$MsgQuietForOneSecond(
+								Gizra$elm_debouncer$Debouncer$Messages$provideInput(author$project$Main$Run)),
+							m);
+					}(
+						A3(
+							author$project$Main$updateLangModel,
+							lang,
+							model,
+							function (m) {
+								return _Utils_update(
+									m,
+									{code: codeStr});
+							}(
+								A2(author$project$Main$getLangModel, lang, model))));
 			}
 		}
 	});
-var author$project$Main$Decode = function (a) {
-	return {$: 'Decode', a: a};
-};
-var elm$json$Json$Decode$map = _Json_map1;
-var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
-	switch (handler.$) {
-		case 'Normal':
-			return 0;
-		case 'MayStopPropagation':
-			return 1;
-		case 'MayPreventDefault':
-			return 2;
-		default:
-			return 3;
-	}
-};
 var elm$html$Html$div = _VirtualDom_node('div');
 var elm$html$Html$li = _VirtualDom_node('li');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
@@ -6081,6 +6576,27 @@ var author$project$Main$displayError = function (error) {
 				elm$html$Html$text(error)
 			]));
 };
+var elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return elm$core$Result$Err(e);
+		}
+	});
+var elm$core$Result$withDefault = F2(
+	function (def, result) {
+		if (result.$ === 'Ok') {
+			var a = result.a;
+			return a;
+		} else {
+			return def;
+		}
+	});
+var elm$html$Html$code = _VirtualDom_node('code');
 var elm$html$Html$textarea = _VirtualDom_node('textarea');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
 var elm$html$Html$Events$alwaysStop = function (x) {
@@ -6111,6 +6627,2046 @@ var elm$html$Html$Events$onInput = function (tagger) {
 			elm$html$Html$Events$alwaysStop,
 			A2(elm$json$Json$Decode$map, tagger, elm$html$Html$Events$targetValue)));
 };
+var elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$HCode = function (a) {
+	return {$: 'HCode', a: a};
+};
+var elm$parser$Parser$DeadEnd = F3(
+	function (row, col, problem) {
+		return {col: col, problem: problem, row: row};
+	});
+var elm$parser$Parser$problemToDeadEnd = function (p) {
+	return A3(elm$parser$Parser$DeadEnd, p.row, p.col, p.problem);
+};
+var elm$parser$Parser$Advanced$bagToList = F2(
+	function (bag, list) {
+		bagToList:
+		while (true) {
+			switch (bag.$) {
+				case 'Empty':
+					return list;
+				case 'AddRight':
+					var bag1 = bag.a;
+					var x = bag.b;
+					var $temp$bag = bag1,
+						$temp$list = A2(elm$core$List$cons, x, list);
+					bag = $temp$bag;
+					list = $temp$list;
+					continue bagToList;
+				default:
+					var bag1 = bag.a;
+					var bag2 = bag.b;
+					var $temp$bag = bag1,
+						$temp$list = A2(elm$parser$Parser$Advanced$bagToList, bag2, list);
+					bag = $temp$bag;
+					list = $temp$list;
+					continue bagToList;
+			}
+		}
+	});
+var elm$parser$Parser$Advanced$run = F2(
+	function (_n0, src) {
+		var parse = _n0.a;
+		var _n1 = parse(
+			{col: 1, context: _List_Nil, indent: 1, offset: 0, row: 1, src: src});
+		if (_n1.$ === 'Good') {
+			var value = _n1.b;
+			return elm$core$Result$Ok(value);
+		} else {
+			var bag = _n1.b;
+			return elm$core$Result$Err(
+				A2(elm$parser$Parser$Advanced$bagToList, bag, _List_Nil));
+		}
+	});
+var elm$parser$Parser$run = F2(
+	function (parser, source) {
+		var _n0 = A2(elm$parser$Parser$Advanced$run, parser, source);
+		if (_n0.$ === 'Ok') {
+			var a = _n0.a;
+			return elm$core$Result$Ok(a);
+		} else {
+			var problems = _n0.a;
+			return elm$core$Result$Err(
+				A2(elm$core$List$map, elm$parser$Parser$problemToDeadEnd, problems));
+		}
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style1 = {$: 'Style1'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style2 = {$: 'Style2'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3 = {$: 'Style3'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style4 = {$: 'Style4'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style5 = {$: 'Style5'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style6 = {$: 'Style6'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style7 = {$: 'Style7'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$syntaxToStyle = function (syntax) {
+	switch (syntax.$) {
+		case 'Number':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style1, 'js-n');
+		case 'String':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style2, 'js-s');
+		case 'Keyword':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3, 'js-k');
+		case 'DeclarationKeyword':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style4, 'js-dk');
+		case 'FunctionEval':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style4, 'js-fe');
+		case 'Function':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style5, 'js-f');
+		case 'LiteralKeyword':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style6, 'js-lk');
+		case 'Param':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style7, 'js-p');
+		default:
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style5, 'js-ce');
+	}
+};
+var elm$parser$Parser$Advanced$Bad = F2(
+	function (a, b) {
+		return {$: 'Bad', a: a, b: b};
+	});
+var elm$parser$Parser$Advanced$Good = F3(
+	function (a, b, c) {
+		return {$: 'Good', a: a, b: b, c: c};
+	});
+var elm$parser$Parser$Advanced$Parser = function (a) {
+	return {$: 'Parser', a: a};
+};
+var elm$parser$Parser$Advanced$map = F2(
+	function (func, _n0) {
+		var parse = _n0.a;
+		return elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _n1 = parse(s0);
+				if (_n1.$ === 'Good') {
+					var p = _n1.a;
+					var a = _n1.b;
+					var s1 = _n1.c;
+					return A3(
+						elm$parser$Parser$Advanced$Good,
+						p,
+						func(a),
+						s1);
+				} else {
+					var p = _n1.a;
+					var x = _n1.b;
+					return A2(elm$parser$Parser$Advanced$Bad, p, x);
+				}
+			});
+	});
+var elm$parser$Parser$map = elm$parser$Parser$Advanced$map;
+var elm$parser$Parser$Advanced$Done = function (a) {
+	return {$: 'Done', a: a};
+};
+var elm$parser$Parser$Advanced$Loop = function (a) {
+	return {$: 'Loop', a: a};
+};
+var elm$parser$Parser$toAdvancedStep = function (step) {
+	if (step.$ === 'Loop') {
+		var s = step.a;
+		return elm$parser$Parser$Advanced$Loop(s);
+	} else {
+		var a = step.a;
+		return elm$parser$Parser$Advanced$Done(a);
+	}
+};
+var elm$parser$Parser$Advanced$loopHelp = F4(
+	function (p, state, callback, s0) {
+		loopHelp:
+		while (true) {
+			var _n0 = callback(state);
+			var parse = _n0.a;
+			var _n1 = parse(s0);
+			if (_n1.$ === 'Good') {
+				var p1 = _n1.a;
+				var step = _n1.b;
+				var s1 = _n1.c;
+				if (step.$ === 'Loop') {
+					var newState = step.a;
+					var $temp$p = p || p1,
+						$temp$state = newState,
+						$temp$callback = callback,
+						$temp$s0 = s1;
+					p = $temp$p;
+					state = $temp$state;
+					callback = $temp$callback;
+					s0 = $temp$s0;
+					continue loopHelp;
+				} else {
+					var result = step.a;
+					return A3(elm$parser$Parser$Advanced$Good, p || p1, result, s1);
+				}
+			} else {
+				var p1 = _n1.a;
+				var x = _n1.b;
+				return A2(elm$parser$Parser$Advanced$Bad, p || p1, x);
+			}
+		}
+	});
+var elm$parser$Parser$Advanced$loop = F2(
+	function (state, callback) {
+		return elm$parser$Parser$Advanced$Parser(
+			function (s) {
+				return A4(elm$parser$Parser$Advanced$loopHelp, false, state, callback, s);
+			});
+	});
+var elm$parser$Parser$loop = F2(
+	function (state, callback) {
+		return A2(
+			elm$parser$Parser$Advanced$loop,
+			state,
+			function (s) {
+				return A2(
+					elm$parser$Parser$map,
+					elm$parser$Parser$toAdvancedStep,
+					callback(s));
+			});
+	});
+var elm$parser$Parser$Done = function (a) {
+	return {$: 'Done', a: a};
+};
+var elm$parser$Parser$Loop = function (a) {
+	return {$: 'Loop', a: a};
+};
+var elm$parser$Parser$Advanced$andThen = F2(
+	function (callback, _n0) {
+		var parseA = _n0.a;
+		return elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _n1 = parseA(s0);
+				if (_n1.$ === 'Bad') {
+					var p = _n1.a;
+					var x = _n1.b;
+					return A2(elm$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p1 = _n1.a;
+					var a = _n1.b;
+					var s1 = _n1.c;
+					var _n2 = callback(a);
+					var parseB = _n2.a;
+					var _n3 = parseB(s1);
+					if (_n3.$ === 'Bad') {
+						var p2 = _n3.a;
+						var x = _n3.b;
+						return A2(elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _n3.a;
+						var b = _n3.b;
+						var s2 = _n3.c;
+						return A3(elm$parser$Parser$Advanced$Good, p1 || p2, b, s2);
+					}
+				}
+			});
+	});
+var elm$parser$Parser$andThen = elm$parser$Parser$Advanced$andThen;
+var elm$parser$Parser$Advanced$mapChompedString = F2(
+	function (func, _n0) {
+		var parse = _n0.a;
+		return elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _n1 = parse(s0);
+				if (_n1.$ === 'Bad') {
+					var p = _n1.a;
+					var x = _n1.b;
+					return A2(elm$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p = _n1.a;
+					var a = _n1.b;
+					var s1 = _n1.c;
+					return A3(
+						elm$parser$Parser$Advanced$Good,
+						p,
+						A2(
+							func,
+							A3(elm$core$String$slice, s0.offset, s1.offset, s0.src),
+							a),
+						s1);
+				}
+			});
+	});
+var elm$parser$Parser$Advanced$getChompedString = function (parser) {
+	return A2(elm$parser$Parser$Advanced$mapChompedString, elm$core$Basics$always, parser);
+};
+var elm$parser$Parser$getChompedString = elm$parser$Parser$Advanced$getChompedString;
+var elm$parser$Parser$Advanced$Empty = {$: 'Empty'};
+var elm$parser$Parser$Advanced$Append = F2(
+	function (a, b) {
+		return {$: 'Append', a: a, b: b};
+	});
+var elm$parser$Parser$Advanced$oneOfHelp = F3(
+	function (s0, bag, parsers) {
+		oneOfHelp:
+		while (true) {
+			if (!parsers.b) {
+				return A2(elm$parser$Parser$Advanced$Bad, false, bag);
+			} else {
+				var parse = parsers.a.a;
+				var remainingParsers = parsers.b;
+				var _n1 = parse(s0);
+				if (_n1.$ === 'Good') {
+					var step = _n1;
+					return step;
+				} else {
+					var step = _n1;
+					var p = step.a;
+					var x = step.b;
+					if (p) {
+						return step;
+					} else {
+						var $temp$s0 = s0,
+							$temp$bag = A2(elm$parser$Parser$Advanced$Append, bag, x),
+							$temp$parsers = remainingParsers;
+						s0 = $temp$s0;
+						bag = $temp$bag;
+						parsers = $temp$parsers;
+						continue oneOfHelp;
+					}
+				}
+			}
+		}
+	});
+var elm$parser$Parser$Advanced$oneOf = function (parsers) {
+	return elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3(elm$parser$Parser$Advanced$oneOfHelp, s, elm$parser$Parser$Advanced$Empty, parsers);
+		});
+};
+var elm$parser$Parser$oneOf = elm$parser$Parser$Advanced$oneOf;
+var elm$parser$Parser$Advanced$succeed = function (a) {
+	return elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3(elm$parser$Parser$Advanced$Good, false, a, s);
+		});
+};
+var elm$parser$Parser$succeed = elm$parser$Parser$Advanced$succeed;
+var elm$parser$Parser$UnexpectedChar = {$: 'UnexpectedChar'};
+var elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var elm$parser$Parser$Advanced$AddRight = F2(
+	function (a, b) {
+		return {$: 'AddRight', a: a, b: b};
+	});
+var elm$parser$Parser$Advanced$DeadEnd = F4(
+	function (row, col, problem, contextStack) {
+		return {col: col, contextStack: contextStack, problem: problem, row: row};
+	});
+var elm$parser$Parser$Advanced$fromState = F2(
+	function (s, x) {
+		return A2(
+			elm$parser$Parser$Advanced$AddRight,
+			elm$parser$Parser$Advanced$Empty,
+			A4(elm$parser$Parser$Advanced$DeadEnd, s.row, s.col, x, s.context));
+	});
+var elm$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
+var elm$parser$Parser$Advanced$chompIf = F2(
+	function (isGood, expecting) {
+		return elm$parser$Parser$Advanced$Parser(
+			function (s) {
+				var newOffset = A3(elm$parser$Parser$Advanced$isSubChar, isGood, s.offset, s.src);
+				return _Utils_eq(newOffset, -1) ? A2(
+					elm$parser$Parser$Advanced$Bad,
+					false,
+					A2(elm$parser$Parser$Advanced$fromState, s, expecting)) : (_Utils_eq(newOffset, -2) ? A3(
+					elm$parser$Parser$Advanced$Good,
+					true,
+					_Utils_Tuple0,
+					{col: 1, context: s.context, indent: s.indent, offset: s.offset + 1, row: s.row + 1, src: s.src}) : A3(
+					elm$parser$Parser$Advanced$Good,
+					true,
+					_Utils_Tuple0,
+					{col: s.col + 1, context: s.context, indent: s.indent, offset: newOffset, row: s.row, src: s.src}));
+			});
+	});
+var elm$parser$Parser$chompIf = function (isGood) {
+	return A2(elm$parser$Parser$Advanced$chompIf, isGood, elm$parser$Parser$UnexpectedChar);
+};
+var elm$parser$Parser$Advanced$chompWhileHelp = F5(
+	function (isGood, offset, row, col, s0) {
+		chompWhileHelp:
+		while (true) {
+			var newOffset = A3(elm$parser$Parser$Advanced$isSubChar, isGood, offset, s0.src);
+			if (_Utils_eq(newOffset, -1)) {
+				return A3(
+					elm$parser$Parser$Advanced$Good,
+					_Utils_cmp(s0.offset, offset) < 0,
+					_Utils_Tuple0,
+					{col: col, context: s0.context, indent: s0.indent, offset: offset, row: row, src: s0.src});
+			} else {
+				if (_Utils_eq(newOffset, -2)) {
+					var $temp$isGood = isGood,
+						$temp$offset = offset + 1,
+						$temp$row = row + 1,
+						$temp$col = 1,
+						$temp$s0 = s0;
+					isGood = $temp$isGood;
+					offset = $temp$offset;
+					row = $temp$row;
+					col = $temp$col;
+					s0 = $temp$s0;
+					continue chompWhileHelp;
+				} else {
+					var $temp$isGood = isGood,
+						$temp$offset = newOffset,
+						$temp$row = row,
+						$temp$col = col + 1,
+						$temp$s0 = s0;
+					isGood = $temp$isGood;
+					offset = $temp$offset;
+					row = $temp$row;
+					col = $temp$col;
+					s0 = $temp$s0;
+					continue chompWhileHelp;
+				}
+			}
+		}
+	});
+var elm$parser$Parser$Advanced$chompWhile = function (isGood) {
+	return elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A5(elm$parser$Parser$Advanced$chompWhileHelp, isGood, s.offset, s.row, s.col, s);
+		});
+};
+var elm$parser$Parser$chompWhile = elm$parser$Parser$Advanced$chompWhile;
+var elm$parser$Parser$Advanced$map2 = F3(
+	function (func, _n0, _n1) {
+		var parseA = _n0.a;
+		var parseB = _n1.a;
+		return elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _n2 = parseA(s0);
+				if (_n2.$ === 'Bad') {
+					var p = _n2.a;
+					var x = _n2.b;
+					return A2(elm$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p1 = _n2.a;
+					var a = _n2.b;
+					var s1 = _n2.c;
+					var _n3 = parseB(s1);
+					if (_n3.$ === 'Bad') {
+						var p2 = _n3.a;
+						var x = _n3.b;
+						return A2(elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _n3.a;
+						var b = _n3.b;
+						var s2 = _n3.c;
+						return A3(
+							elm$parser$Parser$Advanced$Good,
+							p1 || p2,
+							A2(func, a, b),
+							s2);
+					}
+				}
+			});
+	});
+var elm$parser$Parser$Advanced$ignorer = F2(
+	function (keepParser, ignoreParser) {
+		return A3(elm$parser$Parser$Advanced$map2, elm$core$Basics$always, keepParser, ignoreParser);
+	});
+var elm$parser$Parser$ignorer = elm$parser$Parser$Advanced$ignorer;
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$chompIfThenWhile = function (isNotRelevant) {
+	return A2(
+		elm$parser$Parser$ignorer,
+		A2(
+			elm$parser$Parser$ignorer,
+			elm$parser$Parser$succeed(_Utils_Tuple0),
+			elm$parser$Parser$chompIf(isNotRelevant)),
+		elm$parser$Parser$chompWhile(isNotRelevant));
+};
+var elm$core$Set$fromList = function (list) {
+	return A3(elm$core$List$foldl, elm$core$Set$insert, elm$core$Set$empty, list);
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$groupSet = elm$core$Set$fromList(
+	_List_fromArray(
+		[
+			_Utils_chr('{'),
+			_Utils_chr('}'),
+			_Utils_chr('('),
+			_Utils_chr(')'),
+			_Utils_chr('['),
+			_Utils_chr(']'),
+			_Utils_chr(','),
+			_Utils_chr(';')
+		]));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isGroupChar = function (c) {
+	return A2(elm$core$Set$member, c, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$groupSet);
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$Normal = {$: 'Normal'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$groupChar = A2(
+	elm$parser$Parser$map,
+	function (b) {
+		return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$Normal, b);
+	},
+	elm$parser$Parser$getChompedString(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$chompIfThenWhile(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isGroupChar)));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isLineBreak = function (c) {
+	return _Utils_eq(
+		c,
+		_Utils_chr('\n'));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isSpace = function (c) {
+	return _Utils_eq(
+		c,
+		_Utils_chr(' ')) || _Utils_eq(
+		c,
+		_Utils_chr('\t'));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isWhitespace = function (c) {
+	return pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isSpace(c) || pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isLineBreak(c);
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isCommentChar = function (c) {
+	return _Utils_eq(
+		c,
+		_Utils_chr('/'));
+};
+var elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return acc;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3(elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
+			}
+		}
+	});
+var elm$core$Dict$union = F2(
+	function (t1, t2) {
+		return A3(elm$core$Dict$foldl, elm$core$Dict$insert, t2, t1);
+	});
+var elm$core$Set$union = F2(
+	function (_n0, _n1) {
+		var dict1 = _n0.a;
+		var dict2 = _n1.a;
+		return elm$core$Set$Set_elm_builtin(
+			A2(elm$core$Dict$union, dict1, dict2));
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$operatorSet = elm$core$Set$fromList(
+	_List_fromArray(
+		[
+			_Utils_chr('+'),
+			_Utils_chr('-'),
+			_Utils_chr('*'),
+			_Utils_chr('/'),
+			_Utils_chr('='),
+			_Utils_chr('!'),
+			_Utils_chr('<'),
+			_Utils_chr('>'),
+			_Utils_chr('&'),
+			_Utils_chr('|'),
+			_Utils_chr('?'),
+			_Utils_chr('^'),
+			_Utils_chr(':'),
+			_Utils_chr('~'),
+			_Utils_chr('%'),
+			_Utils_chr('.')
+		]));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$punctuactorSet = A2(elm$core$Set$union, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$operatorSet, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$groupSet);
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isPunctuaction = function (c) {
+	return A2(elm$core$Set$member, c, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$punctuactorSet);
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isStringLiteralChar = function (c) {
+	return _Utils_eq(
+		c,
+		_Utils_chr('\"')) || (_Utils_eq(
+		c,
+		_Utils_chr('\'')) || _Utils_eq(
+		c,
+		_Utils_chr('`')));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isIdentifierNameChar = function (c) {
+	return !(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isPunctuaction(c) || (pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isStringLiteralChar(c) || (pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isCommentChar(c) || pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isWhitespace(c))));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$DeclarationKeyword = {$: 'DeclarationKeyword'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Function = {$: 'Function'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Keyword = {$: 'Keyword'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$LiteralKeyword = {$: 'LiteralKeyword'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Param = {$: 'Param'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$ClassExtends = {$: 'ClassExtends'};
+var elm$parser$Parser$ExpectingSymbol = function (a) {
+	return {$: 'ExpectingSymbol', a: a};
+};
+var elm$parser$Parser$Advanced$Token = F2(
+	function (a, b) {
+		return {$: 'Token', a: a, b: b};
+	});
+var elm$parser$Parser$Advanced$isSubString = _Parser_isSubString;
+var elm$parser$Parser$Advanced$token = function (_n0) {
+	var str = _n0.a;
+	var expecting = _n0.b;
+	var progress = !elm$core$String$isEmpty(str);
+	return elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _n1 = A5(elm$parser$Parser$Advanced$isSubString, str, s.offset, s.row, s.col, s.src);
+			var newOffset = _n1.a;
+			var newRow = _n1.b;
+			var newCol = _n1.c;
+			return _Utils_eq(newOffset, -1) ? A2(
+				elm$parser$Parser$Advanced$Bad,
+				false,
+				A2(elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
+				elm$parser$Parser$Advanced$Good,
+				progress,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+		});
+};
+var elm$parser$Parser$Advanced$symbol = elm$parser$Parser$Advanced$token;
+var elm$parser$Parser$symbol = function (str) {
+	return elm$parser$Parser$Advanced$symbol(
+		A2(
+			elm$parser$Parser$Advanced$Token,
+			str,
+			elm$parser$Parser$ExpectingSymbol(str)));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$thenChompWhile = F2(
+	function (isNotRelevant, previousParser) {
+		return A2(
+			elm$parser$Parser$ignorer,
+			previousParser,
+			elm$parser$Parser$chompWhile(isNotRelevant));
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$Comment = {$: 'Comment'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$inlineComment = A2(
+	elm$parser$Parser$map,
+	function (b) {
+		return _List_fromArray(
+			[
+				_Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$Comment, b)
+			]);
+	},
+	elm$parser$Parser$getChompedString(
+		A2(
+			pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$thenChompWhile,
+			A2(elm$core$Basics$composeL, elm$core$Basics$not, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isLineBreak),
+			elm$parser$Parser$symbol('//'))));
+var elm$parser$Parser$Problem = function (a) {
+	return {$: 'Problem', a: a};
+};
+var elm$parser$Parser$Advanced$problem = function (x) {
+	return elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A2(
+				elm$parser$Parser$Advanced$Bad,
+				false,
+				A2(elm$parser$Parser$Advanced$fromState, s, x));
+		});
+};
+var elm$parser$Parser$problem = function (msg) {
+	return elm$parser$Parser$Advanced$problem(
+		elm$parser$Parser$Problem(msg));
+};
+var elm$parser$Parser$ExpectingEnd = {$: 'ExpectingEnd'};
+var elm$parser$Parser$Advanced$end = function (x) {
+	return elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return _Utils_eq(
+				elm$core$String$length(s.src),
+				s.offset) ? A3(elm$parser$Parser$Advanced$Good, false, _Utils_Tuple0, s) : A2(
+				elm$parser$Parser$Advanced$Bad,
+				false,
+				A2(elm$parser$Parser$Advanced$fromState, s, x));
+		});
+};
+var elm$parser$Parser$end = elm$parser$Parser$Advanced$end(elm$parser$Parser$ExpectingEnd);
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$addThen = F3(
+	function (f, list, plist) {
+		return A2(
+			elm$parser$Parser$andThen,
+			function (n) {
+				return f(
+					_Utils_ap(n, list));
+			},
+			plist);
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$consThen = F3(
+	function (f, list, pn) {
+		return A2(
+			elm$parser$Parser$andThen,
+			function (n) {
+				return f(
+					A2(elm$core$List$cons, n, list));
+			},
+			pn);
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimitedUnnestable = F2(
+	function (options, revAList) {
+		var defaultMap = options.defaultMap;
+		var isNotRelevant = options.isNotRelevant;
+		var end = options.end;
+		var innerParsers = options.innerParsers;
+		return elm$parser$Parser$oneOf(
+			_List_fromArray(
+				[
+					A2(
+					elm$parser$Parser$map,
+					elm$core$Basics$always(
+						A2(
+							elm$core$List$cons,
+							defaultMap(end),
+							revAList)),
+					elm$parser$Parser$symbol(end)),
+					A2(
+					elm$parser$Parser$map,
+					elm$core$Basics$always(revAList),
+					elm$parser$Parser$end),
+					A3(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$addThen,
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimitedUnnestable(options),
+					revAList,
+					elm$parser$Parser$oneOf(innerParsers)),
+					A3(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$consThen,
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimitedUnnestable(options),
+					revAList,
+					A2(
+						elm$parser$Parser$map,
+						defaultMap,
+						elm$parser$Parser$getChompedString(
+							A2(
+								pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$thenChompWhile,
+								isNotRelevant,
+								elm$parser$Parser$chompIf(
+									elm$core$Basics$always(true))))))
+				]));
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimitedNestable = F3(
+	function (nestLevel, options, revAList) {
+		var defaultMap = options.defaultMap;
+		var isNotRelevant = options.isNotRelevant;
+		var start = options.start;
+		var end = options.end;
+		var innerParsers = options.innerParsers;
+		return elm$parser$Parser$oneOf(
+			_List_fromArray(
+				[
+					A2(
+					elm$parser$Parser$andThen,
+					function (n) {
+						return (nestLevel === 1) ? elm$parser$Parser$succeed(n) : A3(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimitedNestable, nestLevel - 1, options, n);
+					},
+					A2(
+						elm$parser$Parser$map,
+						elm$core$Basics$always(
+							A2(
+								elm$core$List$cons,
+								defaultMap(end),
+								revAList)),
+						elm$parser$Parser$symbol(end))),
+					A3(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$consThen,
+					A2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimitedNestable, nestLevel + 1, options),
+					revAList,
+					A2(
+						elm$parser$Parser$map,
+						defaultMap,
+						elm$parser$Parser$getChompedString(
+							A2(
+								pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$thenChompWhile,
+								isNotRelevant,
+								elm$parser$Parser$symbol(start))))),
+					A3(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$addThen,
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimitedUnnestable(options),
+					revAList,
+					elm$parser$Parser$oneOf(innerParsers)),
+					A2(
+					elm$parser$Parser$map,
+					elm$core$Basics$always(revAList),
+					elm$parser$Parser$end),
+					A3(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$consThen,
+					A2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimitedNestable, nestLevel, options),
+					revAList,
+					A2(
+						elm$parser$Parser$map,
+						defaultMap,
+						elm$parser$Parser$getChompedString(
+							A2(
+								pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$thenChompWhile,
+								isNotRelevant,
+								elm$parser$Parser$chompIf(
+									elm$core$Basics$always(true))))))
+				]));
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimitedHelp = F2(
+	function (options, revAList) {
+		var start = options.start;
+		var end = options.end;
+		var isNotRelevant = options.isNotRelevant;
+		var _n0 = _Utils_Tuple2(
+			elm$core$String$uncons(options.start),
+			elm$core$String$uncons(options.end));
+		if (_n0.a.$ === 'Nothing') {
+			var _n1 = _n0.a;
+			return elm$parser$Parser$problem('Trying to parse a delimited helper, but the start token cannot be an empty string!');
+		} else {
+			if (_n0.b.$ === 'Nothing') {
+				var _n2 = _n0.b;
+				return elm$parser$Parser$problem('Trying to parse a delimited helper, but the end token cannot be an empty string!');
+			} else {
+				var _n3 = _n0.a.a;
+				var startChar = _n3.a;
+				var _n4 = _n0.b.a;
+				var endChar = _n4.a;
+				return options.isNestable ? A3(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimitedNestable,
+					1,
+					_Utils_update(
+						options,
+						{
+							isNotRelevant: function (c) {
+								return isNotRelevant(c) && ((!_Utils_eq(c, startChar)) && (!_Utils_eq(c, endChar)));
+							}
+						}),
+					revAList) : A2(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimitedUnnestable,
+					_Utils_update(
+						options,
+						{
+							isNotRelevant: function (c) {
+								return isNotRelevant(c) && (!_Utils_eq(c, endChar));
+							}
+						}),
+					revAList);
+			}
+		}
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimited = function (options) {
+	var start = options.start;
+	var isNotRelevant = options.isNotRelevant;
+	var defaultMap = options.defaultMap;
+	return A2(
+		elm$parser$Parser$andThen,
+		function (n) {
+			return A2(
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimitedHelp,
+				options,
+				_List_fromArray(
+					[n]));
+		},
+		A2(
+			elm$parser$Parser$map,
+			elm$core$Basics$always(
+				defaultMap(start)),
+			elm$parser$Parser$symbol(start)));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$LineBreak = {$: 'LineBreak'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$lineBreakList = A2(
+	elm$parser$Parser$map,
+	function (_n0) {
+		return _List_fromArray(
+			[
+				_Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$LineBreak, '\n')
+			]);
+	},
+	elm$parser$Parser$symbol('\n'));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$multilineComment = pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimited(
+	{
+		defaultMap: function (b) {
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$Comment, b);
+		},
+		end: '*/',
+		innerParsers: _List_fromArray(
+			[pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$lineBreakList]),
+		isNestable: false,
+		isNotRelevant: function (c) {
+			return !pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isLineBreak(c);
+		},
+		start: '/*'
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$comment = elm$parser$Parser$oneOf(
+	_List_fromArray(
+		[pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$inlineComment, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$multilineComment]));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$whitespaceOrCommentStep = function (revTokens) {
+	return elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
+				A2(
+				elm$parser$Parser$map,
+				function (b) {
+					return elm$parser$Parser$Loop(
+						A2(
+							elm$core$List$cons,
+							_Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$Normal, b),
+							revTokens));
+				},
+				elm$parser$Parser$getChompedString(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$chompIfThenWhile(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isSpace))),
+				A2(
+				elm$parser$Parser$map,
+				function (ns) {
+					return elm$parser$Parser$Loop(
+						_Utils_ap(ns, revTokens));
+				},
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$lineBreakList),
+				A2(
+				elm$parser$Parser$map,
+				function (ns) {
+					return elm$parser$Parser$Loop(
+						_Utils_ap(ns, revTokens));
+				},
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$comment)
+			]));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C = function (a) {
+	return {$: 'C', a: a};
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$classExtendsLoop = function (revTokens) {
+	return elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$whitespaceOrCommentStep(revTokens),
+				A2(
+				elm$parser$Parser$map,
+				function (b) {
+					return elm$parser$Parser$Loop(
+						A2(
+							elm$core$List$cons,
+							_Utils_Tuple2(
+								pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$ClassExtends),
+								b),
+							revTokens));
+				},
+				elm$parser$Parser$getChompedString(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$chompIfThenWhile(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isIdentifierNameChar))),
+				elm$parser$Parser$succeed(
+				elm$parser$Parser$Done(revTokens))
+			]));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$classDeclarationLoop = function (revTokens) {
+	return elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$whitespaceOrCommentStep(revTokens),
+				A2(
+				elm$parser$Parser$andThen,
+				function (n) {
+					return (n === 'extends') ? A2(
+						elm$parser$Parser$map,
+						elm$parser$Parser$Loop,
+						A2(
+							elm$parser$Parser$loop,
+							A2(
+								elm$core$List$cons,
+								_Utils_Tuple2(
+									pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Keyword),
+									n),
+								revTokens),
+							pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$classExtendsLoop)) : elm$parser$Parser$succeed(
+						elm$parser$Parser$Loop(
+							A2(
+								elm$core$List$cons,
+								_Utils_Tuple2(
+									pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Function),
+									n),
+								revTokens)));
+				},
+				elm$parser$Parser$getChompedString(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$chompIfThenWhile(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isIdentifierNameChar))),
+				elm$parser$Parser$succeed(
+				elm$parser$Parser$Done(revTokens))
+			]));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$argLoop = function (revTokens) {
+	return elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$whitespaceOrCommentStep(revTokens),
+				A2(
+				elm$parser$Parser$map,
+				function (b) {
+					return elm$parser$Parser$Loop(
+						A2(
+							elm$core$List$cons,
+							_Utils_Tuple2(
+								pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Param),
+								b),
+							revTokens));
+				},
+				elm$parser$Parser$getChompedString(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$chompIfThenWhile(
+						function (c) {
+							return !(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isCommentChar(c) || (pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isWhitespace(c) || (_Utils_eq(
+								c,
+								_Utils_chr(',')) || _Utils_eq(
+								c,
+								_Utils_chr(')')))));
+						}))),
+				A2(
+				elm$parser$Parser$map,
+				function (b) {
+					return elm$parser$Parser$Loop(
+						A2(
+							elm$core$List$cons,
+							_Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$Normal, b),
+							revTokens));
+				},
+				elm$parser$Parser$getChompedString(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$chompIfThenWhile(
+						function (c) {
+							return _Utils_eq(
+								c,
+								_Utils_chr('/')) || _Utils_eq(
+								c,
+								_Utils_chr(','));
+						}))),
+				elm$parser$Parser$succeed(
+				elm$parser$Parser$Done(revTokens))
+			]));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$functionDeclarationLoop = function (revTokens) {
+	return elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$whitespaceOrCommentStep(revTokens),
+				A2(
+				elm$parser$Parser$map,
+				function (b) {
+					return elm$parser$Parser$Loop(
+						A2(
+							elm$core$List$cons,
+							_Utils_Tuple2(
+								pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Function),
+								b),
+							revTokens));
+				},
+				elm$parser$Parser$getChompedString(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$chompIfThenWhile(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isIdentifierNameChar))),
+				A2(
+				elm$parser$Parser$map,
+				function (_n0) {
+					return elm$parser$Parser$Loop(
+						A2(
+							elm$core$List$cons,
+							_Utils_Tuple2(
+								pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Keyword),
+								'*'),
+							revTokens));
+				},
+				elm$parser$Parser$symbol('*')),
+				A2(
+				elm$parser$Parser$map,
+				elm$parser$Parser$Loop,
+				A2(
+					elm$parser$Parser$andThen,
+					function (_n1) {
+						return A2(
+							elm$parser$Parser$loop,
+							A2(
+								elm$core$List$cons,
+								_Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$Normal, '('),
+								revTokens),
+							pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$argLoop);
+					},
+					elm$parser$Parser$symbol('('))),
+				elm$parser$Parser$succeed(
+				elm$parser$Parser$Done(revTokens))
+			]));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$FunctionEval = {$: 'FunctionEval'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$functionEvalLoop = F3(
+	function (identifier, revTokens, thisRevToken) {
+		return elm$parser$Parser$oneOf(
+			_List_fromArray(
+				[
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$whitespaceOrCommentStep(thisRevToken),
+					A2(
+					elm$parser$Parser$map,
+					function (_n0) {
+						return elm$parser$Parser$Done(
+							_Utils_ap(
+								A2(
+									elm$core$List$cons,
+									_Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$Normal, '('),
+									thisRevToken),
+								A2(
+									elm$core$List$cons,
+									_Utils_Tuple2(
+										pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$FunctionEval),
+										identifier),
+									revTokens)));
+					},
+					elm$parser$Parser$symbol('(')),
+					elm$parser$Parser$succeed(
+					elm$parser$Parser$Done(
+						_Utils_ap(
+							thisRevToken,
+							A2(
+								elm$core$List$cons,
+								_Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$Normal, identifier),
+								revTokens))))
+				]));
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$declarationKeywordSet = elm$core$Set$fromList(
+	_List_fromArray(
+		['var', 'const', 'let']));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isDeclarationKeyword = function (str) {
+	return A2(elm$core$Set$member, str, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$declarationKeywordSet);
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$keywordSet = elm$core$Set$fromList(
+	_List_fromArray(
+		['break', 'do', 'instanceof', 'typeof', 'case', 'else', 'new', 'catch', 'finally', 'return', 'void', 'continue', 'for', 'switch', 'while', 'debugger', 'this', 'with', 'default', 'if', 'throw', 'delete', 'in', 'try', 'enum', 'extends', 'export', 'import', 'implements', 'private', 'public', 'yield', 'interface', 'package', 'protected']));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isKeyword = function (str) {
+	return A2(elm$core$Set$member, str, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$keywordSet);
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$literalKeywordSet = elm$core$Set$fromList(
+	_List_fromArray(
+		['true', 'false', 'null', 'undefined', 'NaN', 'Infinity']));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isLiteralKeyword = function (str) {
+	return A2(elm$core$Set$member, str, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$literalKeywordSet);
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$keywordParser = F2(
+	function (revTokens, n) {
+		return ((n === 'function') || (n === 'static')) ? A2(
+			elm$parser$Parser$loop,
+			A2(
+				elm$core$List$cons,
+				_Utils_Tuple2(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$DeclarationKeyword),
+					n),
+				revTokens),
+			pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$functionDeclarationLoop) : ((n === 'class') ? A2(
+			elm$parser$Parser$loop,
+			A2(
+				elm$core$List$cons,
+				_Utils_Tuple2(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$DeclarationKeyword),
+					n),
+				revTokens),
+			pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$classDeclarationLoop) : (((n === 'this') || (n === 'super')) ? elm$parser$Parser$succeed(
+			A2(
+				elm$core$List$cons,
+				_Utils_Tuple2(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Param),
+					n),
+				revTokens)) : ((n === 'constructor') ? A2(
+			elm$parser$Parser$loop,
+			A2(
+				elm$core$List$cons,
+				_Utils_Tuple2(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Function),
+					n),
+				revTokens),
+			pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$functionDeclarationLoop) : (pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isKeyword(n) ? elm$parser$Parser$succeed(
+			A2(
+				elm$core$List$cons,
+				_Utils_Tuple2(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Keyword),
+					n),
+				revTokens)) : (pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isDeclarationKeyword(n) ? elm$parser$Parser$succeed(
+			A2(
+				elm$core$List$cons,
+				_Utils_Tuple2(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$DeclarationKeyword),
+					n),
+				revTokens)) : (pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isLiteralKeyword(n) ? elm$parser$Parser$succeed(
+			A2(
+				elm$core$List$cons,
+				_Utils_Tuple2(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$LiteralKeyword),
+					n),
+				revTokens)) : A2(
+			elm$parser$Parser$loop,
+			_List_Nil,
+			A2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$functionEvalLoop, n, revTokens))))))));
+	});
+var elm$parser$Parser$Advanced$backtrackable = function (_n0) {
+	var parse = _n0.a;
+	return elm$parser$Parser$Advanced$Parser(
+		function (s0) {
+			var _n1 = parse(s0);
+			if (_n1.$ === 'Bad') {
+				var x = _n1.b;
+				return A2(elm$parser$Parser$Advanced$Bad, false, x);
+			} else {
+				var a = _n1.b;
+				var s1 = _n1.c;
+				return A3(elm$parser$Parser$Advanced$Good, false, a, s1);
+			}
+		});
+};
+var elm$parser$Parser$backtrackable = elm$parser$Parser$Advanced$backtrackable;
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isNumber = function (c) {
+	return elm$core$Char$isDigit(c) || _Utils_eq(
+		c,
+		_Utils_chr('.'));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$positiveNumber = A2(
+	elm$parser$Parser$ignorer,
+	A2(
+		elm$parser$Parser$ignorer,
+		elm$parser$Parser$succeed(_Utils_Tuple0),
+		elm$parser$Parser$chompIf(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isNumber)),
+	elm$parser$Parser$chompWhile(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isNumber));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$negativeNumber = A2(
+	elm$parser$Parser$ignorer,
+	A2(
+		elm$parser$Parser$ignorer,
+		elm$parser$Parser$succeed(_Utils_Tuple0),
+		elm$parser$Parser$backtrackable(
+			elm$parser$Parser$symbol('-'))),
+	pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$positiveNumber);
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$number = elm$parser$Parser$oneOf(
+	_List_fromArray(
+		[pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$positiveNumber, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$negativeNumber]));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Number = {$: 'Number'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$number = A2(
+	elm$parser$Parser$map,
+	function (b) {
+		return _Utils_Tuple2(
+			pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Number),
+			b);
+	},
+	elm$parser$Parser$getChompedString(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$number));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isOperatorChar = function (c) {
+	return A2(elm$core$Set$member, c, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$operatorSet);
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$operatorChar = A2(
+	elm$parser$Parser$map,
+	function (b) {
+		return _Utils_Tuple2(
+			pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$Keyword),
+			b);
+	},
+	elm$parser$Parser$getChompedString(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$chompIfThenWhile(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isOperatorChar)));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isEscapable = function (c) {
+	return _Utils_eq(
+		c,
+		_Utils_chr('\\'));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$String = {$: 'String'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$escapableSet = elm$core$Set$fromList(
+	_List_fromArray(
+		[
+			_Utils_chr('\''),
+			_Utils_chr('\"'),
+			_Utils_chr('\\'),
+			_Utils_chr('n'),
+			_Utils_chr('r'),
+			_Utils_chr('t'),
+			_Utils_chr('b'),
+			_Utils_chr('f'),
+			_Utils_chr('v')
+		]));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isEscapableChar = function (c) {
+	return A2(elm$core$Set$member, c, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$escapableSet);
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$escapable = A2(
+	elm$parser$Parser$ignorer,
+	A2(
+		elm$parser$Parser$ignorer,
+		elm$parser$Parser$succeed(_Utils_Tuple0),
+		elm$parser$Parser$backtrackable(
+			elm$parser$Parser$symbol('\\'))),
+	elm$parser$Parser$chompIf(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isEscapableChar));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$jsEscapable = A2(
+	elm$parser$Parser$map,
+	function (b) {
+		return _List_fromArray(
+			[
+				_Utils_Tuple2(
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$LiteralKeyword),
+				b)
+			]);
+	},
+	elm$parser$Parser$getChompedString(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$escapable));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$quoteDelimiter = {
+	defaultMap: function (b) {
+		return _Utils_Tuple2(
+			pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$C(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$String),
+			b);
+	},
+	end: '\'',
+	innerParsers: _List_fromArray(
+		[pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$lineBreakList, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$jsEscapable]),
+	isNestable: false,
+	isNotRelevant: function (c) {
+		return !(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isLineBreak(c) || pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isEscapable(c));
+	},
+	start: '\''
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$doubleQuote = pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimited(
+	_Utils_update(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$quoteDelimiter,
+		{end: '\"', start: '\"'}));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$quote = pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimited(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$quoteDelimiter);
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$templateString = pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$delimited(
+	_Utils_update(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$quoteDelimiter,
+		{
+			end: '`',
+			innerParsers: _List_fromArray(
+				[pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$lineBreakList, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$jsEscapable]),
+			isNotRelevant: function (c) {
+				return !(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isLineBreak(c) || pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$isEscapable(c));
+			},
+			start: '`'
+		}));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$stringLiteral = elm$parser$Parser$oneOf(
+	_List_fromArray(
+		[pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$quote, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$doubleQuote, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$templateString]));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$mainLoop = function (revTokens) {
+	return elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$whitespaceOrCommentStep(revTokens),
+				A2(
+				elm$parser$Parser$map,
+				function (s) {
+					return elm$parser$Parser$Loop(
+						_Utils_ap(s, revTokens));
+				},
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$stringLiteral),
+				A2(
+				elm$parser$Parser$map,
+				function (s) {
+					return elm$parser$Parser$Loop(
+						A2(elm$core$List$cons, s, revTokens));
+				},
+				elm$parser$Parser$oneOf(
+					_List_fromArray(
+						[pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$operatorChar, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$groupChar, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$number]))),
+				A2(
+				elm$parser$Parser$map,
+				elm$parser$Parser$Loop,
+				A2(
+					elm$parser$Parser$andThen,
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$keywordParser(revTokens),
+					elm$parser$Parser$getChompedString(
+						pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Helpers$chompIfThenWhile(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$isIdentifierNameChar)))),
+				elm$parser$Parser$succeed(
+				elm$parser$Parser$Done(revTokens))
+			]));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$toRevTokens = A2(elm$parser$Parser$loop, _List_Nil, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$mainLoop);
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Helpers$newLine = function (fragments) {
+	return {fragments: fragments, highlight: elm$core$Maybe$Nothing};
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Comment = {$: 'Comment'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Default = {$: 'Default'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Helpers$toFragment = F2(
+	function (toStyle, _n0) {
+		var syntax = _n0.a;
+		var text = _n0.b;
+		switch (syntax.$) {
+			case 'Normal':
+				return {additionalClass: '', requiredStyle: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Default, text: text};
+			case 'Comment':
+				return {additionalClass: '', requiredStyle: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Comment, text: text};
+			case 'LineBreak':
+				return {additionalClass: '', requiredStyle: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Default, text: text};
+			default:
+				var c = syntax.a;
+				var _n2 = toStyle(c);
+				var requiredStyle = _n2.a;
+				var additionalClass = _n2.b;
+				return {additionalClass: additionalClass, requiredStyle: requiredStyle, text: text};
+		}
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Helpers$toLinesHelp = F3(
+	function (toStyle, _n0, _n1) {
+		var syntax = _n0.a;
+		var text = _n0.b;
+		var lines = _n1.a;
+		var fragments = _n1.b;
+		var maybeLastSyntax = _n1.c;
+		if (_Utils_eq(syntax, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Type$LineBreak)) {
+			return _Utils_Tuple3(
+				A2(
+					elm$core$List$cons,
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Helpers$newLine(fragments),
+					lines),
+				_List_fromArray(
+					[
+						A2(
+						pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Helpers$toFragment,
+						toStyle,
+						_Utils_Tuple2(syntax, text))
+					]),
+				elm$core$Maybe$Nothing);
+		} else {
+			if (_Utils_eq(
+				elm$core$Maybe$Just(syntax),
+				maybeLastSyntax)) {
+				if (fragments.b) {
+					var headFrag = fragments.a;
+					var tailFrags = fragments.b;
+					return _Utils_Tuple3(
+						lines,
+						A2(
+							elm$core$List$cons,
+							_Utils_update(
+								headFrag,
+								{
+									text: _Utils_ap(text, headFrag.text)
+								}),
+							tailFrags),
+						maybeLastSyntax);
+				} else {
+					return _Utils_Tuple3(
+						lines,
+						A2(
+							elm$core$List$cons,
+							A2(
+								pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Helpers$toFragment,
+								toStyle,
+								_Utils_Tuple2(syntax, text)),
+							fragments),
+						maybeLastSyntax);
+				}
+			} else {
+				return _Utils_Tuple3(
+					lines,
+					A2(
+						elm$core$List$cons,
+						A2(
+							pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Helpers$toFragment,
+							toStyle,
+							_Utils_Tuple2(syntax, text)),
+						fragments),
+					elm$core$Maybe$Just(syntax));
+			}
+		}
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Helpers$toLines = F2(
+	function (toStyle, revTokens) {
+		return function (_n0) {
+			var lines = _n0.a;
+			var frags = _n0.b;
+			return A2(
+				elm$core$List$cons,
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Helpers$newLine(frags),
+				lines);
+		}(
+			A3(
+				elm$core$List$foldl,
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Helpers$toLinesHelp(toStyle),
+				_Utils_Tuple3(_List_Nil, _List_Nil, elm$core$Maybe$Nothing),
+				revTokens));
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$toLines = A2(
+	elm$core$Basics$composeR,
+	elm$parser$Parser$run(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$toRevTokens),
+	elm$core$Result$map(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Helpers$toLines(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$syntaxToStyle)));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$javascript = A2(
+	elm$core$Basics$composeR,
+	pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$toLines,
+	elm$core$Result$map(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$HCode));
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme = function (a) {
+	return {$: 'Theme', a: a};
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$AtRule = function (a) {
+	return {$: 'AtRule', a: a};
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$Identifier = {$: 'Identifier'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$Property = {$: 'Property'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Elm$TypeSignature = {$: 'TypeSignature'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex = function (a) {
+	return {$: 'Hex', a: a};
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$bold = function (style) {
+	return _Utils_update(
+		style,
+		{isBold: true});
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$italic = function (style) {
+	return _Utils_update(
+		style,
+		{isItalic: true});
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$DefaultColor = {$: 'DefaultColor'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$textColor = function (text) {
+	return {background: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$DefaultColor, isBold: false, isItalic: false, isUnderline: false, text: text};
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$backgroundColor = function (background) {
+	return {background: background, isBold: false, isItalic: false, isUnderline: false, text: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$DefaultColor};
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$noEmphasis = F2(
+	function (text, background) {
+		return {background: background, isBold: false, isItalic: false, isUnderline: false, text: text};
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Monokai$requiredStyles = {
+	addition: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$backgroundColor(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#003800')),
+	comment: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$textColor(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#75715e')),
+	_default: A2(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$noEmphasis,
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#f8f8f2'),
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#23241f')),
+	deletion: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$backgroundColor(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#380000')),
+	highlight: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$backgroundColor(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#343434')),
+	style1: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$textColor(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#ae81ff')),
+	style2: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$textColor(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#e6db74')),
+	style3: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$textColor(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#f92672')),
+	style4: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$textColor(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#66d9ef')),
+	style5: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$textColor(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#a6e22e')),
+	style6: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$textColor(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#ae81ff')),
+	style7: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$textColor(
+		pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#fd971f'))
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$Css = function (a) {
+	return {$: 'Css', a: a};
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$Elm = function (a) {
+	return {$: 'Elm', a: a};
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$Javascript = function (a) {
+	return {$: 'Javascript', a: a};
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Monokai$theme = {
+	customStyles: _List_fromArray(
+		[
+			_Utils_Tuple2(
+			_List_fromArray(
+				[
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$Elm(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Elm$TypeSignature),
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$Javascript(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$DeclarationKeyword),
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$Css(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$Property)
+				]),
+			pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$italic(
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$textColor(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#66d9ef')))),
+			_Utils_Tuple2(
+			_List_fromArray(
+				[
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$Javascript(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$ClassExtends)
+				]),
+			pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$italic(
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$textColor(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#a6e22e')))),
+			_Utils_Tuple2(
+			_List_fromArray(
+				[
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$Css(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$AtRule(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$Identifier))
+				]),
+			pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$bold(
+				pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$textColor(
+					pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#f92672'))))
+		]),
+	requiredStyles: pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Monokai$requiredStyles
+};
+var elm$core$String$concat = function (strings) {
+	return A2(elm$core$String$join, '', strings);
+};
+var elm$core$String$fromFloat = _String_fromNumber;
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$colorToCss = F2(
+	function (property, color) {
+		switch (color.$) {
+			case 'DefaultColor':
+				return '';
+			case 'Hex':
+				var hex = color.a;
+				return property + (hex + ';');
+			case 'Rgb':
+				var r = color.a;
+				var g = color.b;
+				var b = color.c;
+				return elm$core$String$concat(
+					_List_fromArray(
+						[
+							property,
+							'rgb(',
+							elm$core$String$fromInt(r),
+							', ',
+							elm$core$String$fromInt(g),
+							',',
+							elm$core$String$fromInt(b),
+							');'
+						]));
+			default:
+				var r = color.a;
+				var g = color.b;
+				var b = color.c;
+				var a = color.d;
+				return elm$core$String$concat(
+					_List_fromArray(
+						[
+							property,
+							'rgba(',
+							elm$core$String$fromInt(r),
+							', ',
+							elm$core$String$fromInt(g),
+							',',
+							elm$core$String$fromInt(b),
+							', ',
+							elm$core$String$fromFloat(a),
+							');'
+						]));
+		}
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$emptyIfFalse = F2(
+	function (bool, str) {
+		return bool ? str : '';
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$styleToCss = function (_n0) {
+	var isBold = _n0.isBold;
+	var isItalic = _n0.isItalic;
+	var isUnderline = _n0.isUnderline;
+	var text = _n0.text;
+	var background = _n0.background;
+	return elm$core$String$concat(
+		_List_fromArray(
+			[
+				A2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$emptyIfFalse, isBold, 'font-weight: bold;'),
+				A2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$emptyIfFalse, isItalic, 'font-style: italic;'),
+				A2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$emptyIfFalse, isUnderline, 'text-decoration: underline;'),
+				A2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$colorToCss, 'color: ', text),
+				A2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$colorToCss, 'background: ', background)
+			]));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$toCssClass = function (_n0) {
+	var selectors = _n0.a;
+	var style = _n0.b;
+	return elm$core$String$isEmpty(selectors) ? '' : (selectors + (' {' + (pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$styleToCss(style) + '}')));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$toCss = function (classes) {
+	return elm$core$String$concat(
+		A2(elm$core$List$map, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$toCssClass, classes));
+};
+var elm$core$List$intersperse = F2(
+	function (sep, xs) {
+		if (!xs.b) {
+			return _List_Nil;
+		} else {
+			var hd = xs.a;
+			var tl = xs.b;
+			var step = F2(
+				function (x, rest) {
+					return A2(
+						elm$core$List$cons,
+						sep,
+						A2(elm$core$List$cons, x, rest));
+				});
+			var spersed = A3(elm$core$List$foldr, step, _List_Nil, tl);
+			return A2(elm$core$List$cons, hd, spersed);
+		}
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$atRuleToFragment = function (a) {
+	switch (a.$) {
+		case 'Identifier':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3, 'css-ar-i');
+		case 'Prefix':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style5, 'css-ar-p');
+		case 'Keyword':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3, 'css-ar-k');
+		default:
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style4, 'css-ar-v');
+	}
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$attributeSelectorToFragment = function (att) {
+	switch (att.$) {
+		case 'AttributeName':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style5, 'css-s-a-an');
+		case 'AttributeValue':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style2, 'css-s-a-av');
+		default:
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3, 'css-s-a-o');
+	}
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$selectorToFragment = function (s) {
+	switch (s.$) {
+		case 'Element':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3, 'css-s-e');
+		case 'Id':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style5, 'css-s-i');
+		case 'Class':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style5, 'css-s-cl');
+		case 'Combinator':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style7, 'css-s-c');
+		case 'Universal':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3, 'css-s-u');
+		case 'AttributeSelector':
+			var att = s.a;
+			return pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$attributeSelectorToFragment(att);
+		case 'PseudoElement':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Default, 'css-s-pe');
+		default:
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Default, 'css-s-pc');
+	}
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$syntaxToStyle = function (syntax) {
+	switch (syntax.$) {
+		case 'String':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style2, 'css-s');
+		case 'AtRule':
+			var a = syntax.a;
+			return pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$atRuleToFragment(a);
+		case 'Selector':
+			var s = syntax.a;
+			return pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$selectorToFragment(s);
+		case 'Property':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style4, 'css-p');
+		case 'PropertyValue':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style4, 'css-pv');
+		case 'Number':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style1, 'css-n');
+		default:
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3, 'css-u');
+	}
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Elm$syntaxToStyle = function (syntax) {
+	switch (syntax.$) {
+		case 'String':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style2, 'elm-s');
+		case 'BasicSymbol':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3, 'elm-bs');
+		case 'GroupSymbol':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style4, 'elm-gs');
+		case 'Capitalized':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style6, 'elm-c');
+		case 'Keyword':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3, 'elm-k');
+		case 'Function':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style5, 'elm-f');
+		case 'TypeSignature':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style4, 'elm-ts');
+		default:
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style1, 'elm-n');
+	}
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Python$syntaxToStyle = function (syntax) {
+	switch (syntax.$) {
+		case 'Number':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style1, 'py-n');
+		case 'String':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style2, 'py-s');
+		case 'Keyword':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3, 'py-k');
+		case 'DeclarationKeyword':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style4, 'py-dk');
+		case 'Function':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style5, 'py-f');
+		case 'LiteralKeyword':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style6, 'py-lk');
+		case 'Param':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style7, 'py-p');
+		default:
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Default, 'py-fe');
+	}
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Sql$syntaxToStyle = function (syntax) {
+	switch (syntax.$) {
+		case 'Number':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style1, 'sql-n');
+		case 'String':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style2, 'sql-s');
+		case 'Keyword':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3, 'sql-k');
+		case 'Operator':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style4, 'sql-o');
+		case 'Function':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style5, 'sql-f');
+		case 'Punctuation':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style6, 'sql-p');
+		default:
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style7, 'sql-l');
+	}
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Xml$syntaxToStyle = function (syntax) {
+	switch (syntax.$) {
+		case 'Tag':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style3, 'xml-t');
+		case 'Attribute':
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style5, 'xml-a');
+		default:
+			return _Utils_Tuple2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Style2, 'xlm-av');
+	}
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$syntaxToSelector = function (syntax) {
+	switch (syntax.$) {
+		case 'Elm':
+			var elmSyntax = syntax.a;
+			return pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Elm$syntaxToStyle(elmSyntax).b;
+		case 'Xml':
+			var xmlSyntax = syntax.a;
+			return pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Xml$syntaxToStyle(xmlSyntax).b;
+		case 'Javascript':
+			var jsSyntax = syntax.a;
+			return pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Javascript$syntaxToStyle(jsSyntax).b;
+		case 'Css':
+			var cssSyntax = syntax.a;
+			return pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$syntaxToStyle(cssSyntax).b;
+		case 'Python':
+			var pythonSyntax = syntax.a;
+			return pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Python$syntaxToStyle(pythonSyntax).b;
+		default:
+			var sqlSyntax = syntax.a;
+			return pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Sql$syntaxToStyle(sqlSyntax).b;
+	}
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$syntaxesToSelectors = function (syntaxes) {
+	return elm$core$String$concat(
+		A2(
+			elm$core$List$intersperse,
+			', ',
+			A2(
+				elm$core$List$map,
+				elm$core$Basics$append('.elmsh-'),
+				A2(elm$core$List$map, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$syntaxToSelector, syntaxes))));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$toCss = function (_n0) {
+	var requiredStyles = _n0.requiredStyles;
+	var customStyles = _n0.customStyles;
+	return pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$toCss(
+		_Utils_ap(
+			_List_fromArray(
+				[
+					_Utils_Tuple2('.elmsh', requiredStyles._default),
+					_Utils_Tuple2('.elmsh-hl', requiredStyles.highlight),
+					_Utils_Tuple2('.elmsh-add', requiredStyles.addition),
+					_Utils_Tuple2('.elmsh-del', requiredStyles.deletion),
+					_Utils_Tuple2('.elmsh-comm', requiredStyles.comment),
+					_Utils_Tuple2('.elmsh1', requiredStyles.style1),
+					_Utils_Tuple2('.elmsh2', requiredStyles.style2),
+					_Utils_Tuple2('.elmsh3', requiredStyles.style3),
+					_Utils_Tuple2('.elmsh4', requiredStyles.style4),
+					_Utils_Tuple2('.elmsh5', requiredStyles.style5),
+					_Utils_Tuple2('.elmsh6', requiredStyles.style6),
+					_Utils_Tuple2('.elmsh7', requiredStyles.style7)
+				]),
+			A2(
+				elm$core$List$map,
+				elm$core$Tuple$mapFirst(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$syntaxesToSelectors),
+				customStyles)));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Monokai$css = pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$toCss(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Monokai$theme);
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$monokai = pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Monokai$css;
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$monokai = pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$monokai);
+var elm$core$List$singleton = function (value) {
+	return _List_fromArray(
+		[value]);
+};
+var elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var elm$html$Html$Attributes$attribute = elm$virtual_dom$VirtualDom$attribute;
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Add = {$: 'Add'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Del = {$: 'Del'};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Normal = {$: 'Normal'};
+var elm$html$Html$span = _VirtualDom_node('span');
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$View$requiredStyleToString = function (required) {
+	return 'elmsh' + function () {
+		switch (required.$) {
+			case 'Default':
+				return '0';
+			case 'Comment':
+				return '-comm';
+			case 'Style1':
+				return '1';
+			case 'Style2':
+				return '2';
+			case 'Style3':
+				return '3';
+			case 'Style4':
+				return '4';
+			case 'Style5':
+				return '5';
+			case 'Style6':
+				return '6';
+			default:
+				return '7';
+		}
+	}();
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$View$fragmentView = function (_n0) {
+	var text = _n0.text;
+	var requiredStyle = _n0.requiredStyle;
+	var additionalClass = _n0.additionalClass;
+	return (_Utils_eq(requiredStyle, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Default) && elm$core$String$isEmpty(additionalClass)) ? elm$html$Html$text(text) : A2(
+		elm$html$Html$span,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$classList(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						pablohirafuji$elm_syntax_highlight$SyntaxHighlight$View$requiredStyleToString(requiredStyle),
+						!_Utils_eq(requiredStyle, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Default)),
+						_Utils_Tuple2('elmsh-' + additionalClass, additionalClass !== '')
+					]))
+			]),
+		_List_fromArray(
+			[
+				elm$html$Html$text(text)
+			]));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$View$lineView = F3(
+	function (start, index, _n0) {
+		var fragments = _n0.fragments;
+		var highlight = _n0.highlight;
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$classList(
+					_List_fromArray(
+						[
+							_Utils_Tuple2('elmsh-line', true),
+							_Utils_Tuple2(
+							'elmsh-hl',
+							_Utils_eq(
+								highlight,
+								elm$core$Maybe$Just(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Normal))),
+							_Utils_Tuple2(
+							'elmsh-add',
+							_Utils_eq(
+								highlight,
+								elm$core$Maybe$Just(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Add))),
+							_Utils_Tuple2(
+							'elmsh-del',
+							_Utils_eq(
+								highlight,
+								elm$core$Maybe$Just(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Del)))
+						])),
+					A2(
+					elm$html$Html$Attributes$attribute,
+					'data-elmsh-lc',
+					elm$core$String$fromInt(start + index))
+				]),
+			A2(elm$core$List$map, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$View$fragmentView, fragments));
+	});
+var elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
+		}
+	});
+var elm$core$List$concat = function (lists) {
+	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$View$toInlineHtml = function (lines) {
+	return A2(
+		elm$html$Html$code,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$class('elmsh')
+			]),
+		elm$core$List$concat(
+			A2(
+				elm$core$List$map,
+				function (_n0) {
+					var highlight = _n0.highlight;
+					var fragments = _n0.fragments;
+					return _Utils_eq(highlight, elm$core$Maybe$Nothing) ? A2(elm$core$List$map, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$View$fragmentView, fragments) : _List_fromArray(
+						[
+							A2(
+							elm$html$Html$span,
+							_List_fromArray(
+								[
+									elm$html$Html$Attributes$classList(
+									_List_fromArray(
+										[
+											_Utils_Tuple2(
+											'elmsh-hl',
+											_Utils_eq(
+												highlight,
+												elm$core$Maybe$Just(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Normal))),
+											_Utils_Tuple2(
+											'elmsh-add',
+											_Utils_eq(
+												highlight,
+												elm$core$Maybe$Just(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Add))),
+											_Utils_Tuple2(
+											'elmsh-del',
+											_Utils_eq(
+												highlight,
+												elm$core$Maybe$Just(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Del)))
+										]))
+								]),
+							A2(elm$core$List$map, pablohirafuji$elm_syntax_highlight$SyntaxHighlight$View$fragmentView, fragments))
+						]);
+				},
+				lines)));
+};
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$View$toBlockHtml = F2(
+	function (maybeStart, lines) {
+		if (maybeStart.$ === 'Nothing') {
+			return A2(
+				elm$html$Html$pre,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('elmsh')
+					]),
+				_List_fromArray(
+					[
+						pablohirafuji$elm_syntax_highlight$SyntaxHighlight$View$toInlineHtml(lines)
+					]));
+		} else {
+			var start = maybeStart.a;
+			return A2(
+				elm$html$Html$pre,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('elmsh')
+					]),
+				elm$core$List$singleton(
+					A2(
+						elm$html$Html$code,
+						_List_Nil,
+						A2(
+							elm$core$List$indexedMap,
+							pablohirafuji$elm_syntax_highlight$SyntaxHighlight$View$lineView(start),
+							lines))));
+		}
+	});
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$toBlockHtml = F2(
+	function (maybeStart, _n0) {
+		var lines = _n0.a;
+		return A2(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$View$toBlockHtml, maybeStart, lines);
+	});
+var elm$virtual_dom$VirtualDom$node = function (tag) {
+	return _VirtualDom_node(
+		_VirtualDom_noScript(tag));
+};
+var elm$html$Html$node = elm$virtual_dom$VirtualDom$node;
+var pablohirafuji$elm_syntax_highlight$SyntaxHighlight$useTheme = function (_n0) {
+	var theme = _n0.a;
+	return A3(
+		elm$html$Html$node,
+		'style',
+		_List_Nil,
+		_List_fromArray(
+			[
+				elm$html$Html$text(theme)
+			]));
+};
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -6129,165 +8685,39 @@ var author$project$Main$view = function (model) {
 				elm$html$Html$textarea,
 				_List_fromArray(
 					[
-						elm$html$Html$Events$onInput(author$project$Main$Decode)
-					]),
-				_List_Nil),
-				A2(
-				elm$html$Html$textarea,
-				_List_fromArray(
-					[
-						elm$html$Html$Attributes$value(model.code),
+						elm$html$Html$Attributes$value(''),
 						elm$html$Html$Events$onInput(author$project$Main$Display)
 					]),
-				_List_Nil)
+				_List_Nil),
+				A2(elm$html$Html$div, _List_Nil, _List_Nil),
+				A2(
+				elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						pablohirafuji$elm_syntax_highlight$SyntaxHighlight$useTheme(pablohirafuji$elm_syntax_highlight$SyntaxHighlight$monokai),
+						A2(
+						elm$core$Result$withDefault,
+						A2(
+							elm$html$Html$pre,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									elm$html$Html$code,
+									_List_Nil,
+									_List_fromArray(
+										[
+											elm$html$Html$text('var a = {}; a /= 5;')
+										]))
+								])),
+						A2(
+							elm$core$Result$map,
+							pablohirafuji$elm_syntax_highlight$SyntaxHighlight$toBlockHtml(
+								elm$core$Maybe$Just(1)),
+							pablohirafuji$elm_syntax_highlight$SyntaxHighlight$javascript('var a = {}; a /= 5;')))
+					]))
 			]));
-};
-var elm$browser$Browser$External = function (a) {
-	return {$: 'External', a: a};
-};
-var elm$browser$Browser$Internal = function (a) {
-	return {$: 'Internal', a: a};
-};
-var elm$browser$Browser$Dom$NotFound = function (a) {
-	return {$: 'NotFound', a: a};
-};
-var elm$core$Basics$never = function (_n0) {
-	never:
-	while (true) {
-		var nvr = _n0.a;
-		var $temp$_n0 = nvr;
-		_n0 = $temp$_n0;
-		continue never;
-	}
-};
-var elm$core$String$length = _String_length;
-var elm$core$String$slice = _String_slice;
-var elm$core$String$dropLeft = F2(
-	function (n, string) {
-		return (n < 1) ? string : A3(
-			elm$core$String$slice,
-			n,
-			elm$core$String$length(string),
-			string);
-	});
-var elm$core$String$startsWith = _String_startsWith;
-var elm$url$Url$Http = {$: 'Http'};
-var elm$url$Url$Https = {$: 'Https'};
-var elm$core$String$indexes = _String_indexes;
-var elm$core$String$isEmpty = function (string) {
-	return string === '';
-};
-var elm$core$String$left = F2(
-	function (n, string) {
-		return (n < 1) ? '' : A3(elm$core$String$slice, 0, n, string);
-	});
-var elm$core$String$contains = _String_contains;
-var elm$core$String$toInt = _String_toInt;
-var elm$url$Url$Url = F6(
-	function (protocol, host, port_, path, query, fragment) {
-		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
-	});
-var elm$url$Url$chompBeforePath = F5(
-	function (protocol, path, params, frag, str) {
-		if (elm$core$String$isEmpty(str) || A2(elm$core$String$contains, '@', str)) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var _n0 = A2(elm$core$String$indexes, ':', str);
-			if (!_n0.b) {
-				return elm$core$Maybe$Just(
-					A6(elm$url$Url$Url, protocol, str, elm$core$Maybe$Nothing, path, params, frag));
-			} else {
-				if (!_n0.b.b) {
-					var i = _n0.a;
-					var _n1 = elm$core$String$toInt(
-						A2(elm$core$String$dropLeft, i + 1, str));
-					if (_n1.$ === 'Nothing') {
-						return elm$core$Maybe$Nothing;
-					} else {
-						var port_ = _n1;
-						return elm$core$Maybe$Just(
-							A6(
-								elm$url$Url$Url,
-								protocol,
-								A2(elm$core$String$left, i, str),
-								port_,
-								path,
-								params,
-								frag));
-					}
-				} else {
-					return elm$core$Maybe$Nothing;
-				}
-			}
-		}
-	});
-var elm$url$Url$chompBeforeQuery = F4(
-	function (protocol, params, frag, str) {
-		if (elm$core$String$isEmpty(str)) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var _n0 = A2(elm$core$String$indexes, '/', str);
-			if (!_n0.b) {
-				return A5(elm$url$Url$chompBeforePath, protocol, '/', params, frag, str);
-			} else {
-				var i = _n0.a;
-				return A5(
-					elm$url$Url$chompBeforePath,
-					protocol,
-					A2(elm$core$String$dropLeft, i, str),
-					params,
-					frag,
-					A2(elm$core$String$left, i, str));
-			}
-		}
-	});
-var elm$url$Url$chompBeforeFragment = F3(
-	function (protocol, frag, str) {
-		if (elm$core$String$isEmpty(str)) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var _n0 = A2(elm$core$String$indexes, '?', str);
-			if (!_n0.b) {
-				return A4(elm$url$Url$chompBeforeQuery, protocol, elm$core$Maybe$Nothing, frag, str);
-			} else {
-				var i = _n0.a;
-				return A4(
-					elm$url$Url$chompBeforeQuery,
-					protocol,
-					elm$core$Maybe$Just(
-						A2(elm$core$String$dropLeft, i + 1, str)),
-					frag,
-					A2(elm$core$String$left, i, str));
-			}
-		}
-	});
-var elm$url$Url$chompAfterProtocol = F2(
-	function (protocol, str) {
-		if (elm$core$String$isEmpty(str)) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var _n0 = A2(elm$core$String$indexes, '#', str);
-			if (!_n0.b) {
-				return A3(elm$url$Url$chompBeforeFragment, protocol, elm$core$Maybe$Nothing, str);
-			} else {
-				var i = _n0.a;
-				return A3(
-					elm$url$Url$chompBeforeFragment,
-					protocol,
-					elm$core$Maybe$Just(
-						A2(elm$core$String$dropLeft, i + 1, str)),
-					A2(elm$core$String$left, i, str));
-			}
-		}
-	});
-var elm$url$Url$fromString = function (str) {
-	return A2(elm$core$String$startsWith, 'http://', str) ? A2(
-		elm$url$Url$chompAfterProtocol,
-		elm$url$Url$Http,
-		A2(elm$core$String$dropLeft, 7, str)) : (A2(elm$core$String$startsWith, 'https://', str) ? A2(
-		elm$url$Url$chompAfterProtocol,
-		elm$url$Url$Https,
-		A2(elm$core$String$dropLeft, 8, str)) : elm$core$Maybe$Nothing);
 };
 var elm$browser$Browser$element = _Browser_element;
 var author$project$Main$main = elm$browser$Browser$element(
