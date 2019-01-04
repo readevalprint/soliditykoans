@@ -3,7 +3,6 @@ port module Main exposing (main)
 import Browser
 import Browser.Events exposing (onAnimationFrame)
 import Debouncer.Messages as Debouncer exposing (Debouncer, fromSeconds, provideInput, settleWhenQuietFor, toDebouncer)
-import Debug
 import Dict exposing (Dict)
 import Dict.Extra exposing (..)
 import Html exposing (Html, button, code, div, li, pre, text, textarea, ul)
@@ -15,71 +14,6 @@ import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as Encode
 import Maybe.Extra exposing (..)
 import SyntaxHighlight as SH exposing (monokai, toBlockHtml, useTheme)
-
-
-test_results =
-    """
-  {
-    "ReflectionsOnArrays": {
-      "notice": "",
-      "loc": 2290,
-      "functions": {
-        "arraysHaveLength": {
-          "notice": "",
-          "loc": 2479,
-          "assertions": [
-            "list should have 10 items"
-            ],
-            "fail": true
-      }
-    }
-  },
-  "ReflectionsOnNumbers": {
-    "notice": "",
-    "loc": 1181,
-    "functions": {
-      "numbersCanBeMultiplied": {
-        "notice": "",
-        "loc": 1757,
-        "assertions": [],
-        "fail": false
-      },
-      "numbersCanBeDivided": {
-        "notice": "",
-        "loc": 1227,
-        "assertions": [
-          "a should be greater than 1",
-          "b should be greater than 1",
-          "a should be twice as great as b"
-          ],
-          "fail": true
-      }
-    }
-  },
-  "ReflectionsOnTruth": {
-    "notice": "You can use this contract for only the most basic simulation",
-    "loc": 411,
-    "functions": {
-      "huh": {
-        "notice": "To be quite honest.",
-        "loc": 502,
-        "assertions": [
-          "value should now be false"
-          ],
-          "fail": true
-      },
-      "trueOrFalse": {
-        "notice": "Consider that boolean values are either true/false.",
-        "loc": 535,
-        "assertions": [
-          "value should now be false"
-          ],
-          "fail": true
-      }
-    }
-  }
-}
-"""
 
 
 functionDecoder : Decoder Function
@@ -133,7 +67,6 @@ type alias Model =
     , lineCountStart : Int
     , lineCount : Maybe Int
     , theme : String
-    , customTheme : String
     }
 
 
@@ -182,7 +115,6 @@ initModel =
     , lineCountStart = 1
     , lineCount = Just 1
     , theme = "Monokai"
-    , customTheme = rawMonokai
     }
 
 
@@ -213,14 +145,8 @@ var a = 1;
     """
 
 
-rawMonokai : String
-rawMonokai =
-    ".elmsh {color: #f8f8f2;background: #23241f;}.elmsh-hl {background: #343434;}.elmsh-add {background: #003800;}.elmsh-del {background: #380000;}.elmsh-comm {color: #75715e;}.elmsh1 {color: #ae81ff;}.elmsh2 {color: #e6db74;}.elmsh3 {color: #f92672;}.elmsh4 {color: #66d9ef;}.elmsh5 {color: #a6e22e;}.elmsh6 {color: #ae81ff;}.elmsh7 {color: #fd971f;}.elmsh-elm-ts, .elmsh-js-dk, .elmsh-css-p {font-style: italic;color: #66d9ef;}.elmsh-js-ce {font-style: italic;color: #a6e22e;}.elmsh-css-ar-i {font-weight: bold;color: #f92672;}"
-
-
 init : () -> ( Model, Cmd Msg )
 init _ =
-    --( ( displayTestResults (decodeString (keyValuePairs contractDecoder) test_results), "" ), Cmd.none )
     ( initModel
     , Cmd.none
     )
