@@ -14,7 +14,6 @@ import Json.Decode as Decode exposing (Decoder, at, bool, decodeString, dict, fl
 import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as Encode
 import Maybe.Extra exposing (..)
-import Parser
 import SyntaxHighlight as SH exposing (monokai, toBlockHtml, useTheme)
 
 
@@ -134,6 +133,7 @@ type alias Model =
     , lineCountStart : Int
     , lineCount : Maybe Int
     , theme : String
+    , customTheme : String
     }
 
 
@@ -182,6 +182,7 @@ initModel =
     , lineCountStart = 1
     , lineCount = Just 1
     , theme = "Monokai"
+    , customTheme = rawMonokai
     }
 
 
@@ -210,6 +211,11 @@ javascriptExample =
     """
 var a = 1;
     """
+
+
+rawMonokai : String
+rawMonokai =
+    ".elmsh {color: #f8f8f2;background: #23241f;}.elmsh-hl {background: #343434;}.elmsh-add {background: #003800;}.elmsh-del {background: #380000;}.elmsh-comm {color: #75715e;}.elmsh1 {color: #ae81ff;}.elmsh2 {color: #e6db74;}.elmsh3 {color: #f92672;}.elmsh4 {color: #66d9ef;}.elmsh5 {color: #a6e22e;}.elmsh6 {color: #ae81ff;}.elmsh7 {color: #fd971f;}.elmsh-elm-ts, .elmsh-js-dk, .elmsh-css-p {font-style: italic;color: #66d9ef;}.elmsh-js-ce {font-style: italic;color: #a6e22e;}.elmsh-css-ar-i {font-weight: bold;color: #f92672;}"
 
 
 init : () -> ( Model, Cmd Msg )
@@ -353,15 +359,10 @@ view model =
             , onInput Display
             ]
             []
+        , div [] [ useTheme monokai ]
         , div
             []
-            []
-        , div []
-            [ useTheme monokai
-            , SH.javascript "var a = {}; a /= 5;"
-                |> Result.map (toBlockHtml (Just 1))
-                |> Result.withDefault
-                    (pre [] [ code [] [ text "var a = {}; a /= 5;" ] ])
+            [ viewLanguage "Javascript" toHtml model
             ]
         ]
 
@@ -372,24 +373,12 @@ getLangModel lang model =
         |> Maybe.withDefault (initLanguageModel javascriptExample)
 
 
-toHtmlJavascript : Maybe Int -> String -> Html Msg
-toHtmlJavascript =
-    toHtml SH.javascript
-
-
-toHtml : (String -> Result (List Parser.DeadEnd) SH.HCode) -> Maybe Int -> String -> Html Msg
-toHtml parser maybeStart str =
-    parser str
+toHtml : Maybe Int -> String -> Html Msg
+toHtml maybeStart str =
+    SH.javascript str
         |> Result.map (SH.toBlockHtml maybeStart)
-        |> Result.mapError Parser.deadEndsToString
-        |> (\result ->
-                case result of
-                    Result.Ok a ->
-                        a
-
-                    Result.Err x ->
-                        text x
-           )
+        |> Result.withDefault
+            (pre [] [ code [] [ text str ] ])
 
 
 viewLanguage : String -> (Maybe Int -> String -> Html Msg) -> Model -> Html Msg
