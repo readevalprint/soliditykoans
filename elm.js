@@ -8147,6 +8147,12 @@ var author$project$Main$toHtml = F2(
 var author$project$Main$OnScroll = function (a) {
 	return {$: 1, a: a};
 };
+var elm$core$String$fromFloat = _String_fromNumber;
+var elm$virtual_dom$VirtualDom$node = function (tag) {
+	return _VirtualDom_node(
+		_VirtualDom_noScript(tag));
+};
+var elm$html$Html$node = elm$virtual_dom$VirtualDom$node;
 var elm$html$Html$textarea = _VirtualDom_node('textarea');
 var elm$json$Json$Encode$bool = _Json_wrap;
 var elm$html$Html$Attributes$boolProperty = F2(
@@ -8157,8 +8163,6 @@ var elm$html$Html$Attributes$boolProperty = F2(
 			elm$json$Json$Encode$bool(bool));
 	});
 var elm$html$Html$Attributes$spellcheck = elm$html$Html$Attributes$boolProperty('spellcheck');
-var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 0, a: a};
@@ -8202,46 +8206,59 @@ var author$project$Main$viewTextarea = F3(
 	function (thisLang, codeStr, _n0) {
 		var showLineCount = _n0.ar;
 		return A2(
-			elm$html$Html$textarea,
+			elm$html$Html$div,
+			_List_Nil,
 			_List_fromArray(
 				[
-					elm$html$Html$Attributes$value(codeStr),
-					elm$html$Html$Attributes$classList(
+					A3(
+					elm$html$Html$node,
+					'style',
+					_List_Nil,
 					_List_fromArray(
 						[
-							_Utils_Tuple2('textarea', true),
-							_Utils_Tuple2('textarea-lc', showLineCount)
+							elm$html$Html$text(
+							'.textarea, .view-container {height: ' + (elm$core$String$fromFloat(
+								elm$core$List$length(
+									A2(elm$core$String$indexes, '\n', codeStr)) * 1.3) + 'rem !important;}'))
 						])),
 					A2(
-					elm$html$Html$Attributes$style,
-					'height',
-					elm$core$String$fromInt(
-						elm$core$List$length(
-							A2(elm$core$String$indexes, '\n', codeStr))) + 'em'),
-					elm$html$Html$Events$onInput(author$project$Main$Display),
-					elm$html$Html$Attributes$spellcheck(false),
-					A2(
-					elm$html$Html$Events$on,
-					'scroll',
-					A2(
-						elm$json$Json$Decode$map,
-						author$project$Main$OnScroll,
-						A3(
-							elm$json$Json$Decode$map2,
-							author$project$Main$Scroll,
+					elm$html$Html$textarea,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$value(codeStr),
+							elm$html$Html$Attributes$classList(
+							_List_fromArray(
+								[
+									_Utils_Tuple2('textarea', true),
+									_Utils_Tuple2('textarea-lc', showLineCount)
+								])),
+							elm$html$Html$Events$onInput(author$project$Main$Display),
+							elm$html$Html$Attributes$spellcheck(false),
 							A2(
-								elm$json$Json$Decode$at,
-								_List_fromArray(
-									['target', 'scrollTop']),
-								elm$json$Json$Decode$int),
+							elm$html$Html$Events$on,
+							'scroll',
 							A2(
-								elm$json$Json$Decode$at,
-								_List_fromArray(
-									['target', 'scrollLeft']),
-								elm$json$Json$Decode$int))))
-				]),
-			_List_Nil);
+								elm$json$Json$Decode$map,
+								author$project$Main$OnScroll,
+								A3(
+									elm$json$Json$Decode$map2,
+									author$project$Main$Scroll,
+									A2(
+										elm$json$Json$Decode$at,
+										_List_fromArray(
+											['target', 'scrollTop']),
+										elm$json$Json$Decode$int),
+									A2(
+										elm$json$Json$Decode$at,
+										_List_fromArray(
+											['target', 'scrollLeft']),
+										elm$json$Json$Decode$int))))
+						]),
+					_List_Nil)
+				]));
 	});
+var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var author$project$Main$viewLanguage = F3(
 	function (thisLang, parser, model) {
 		var currentLanguage = model.V;
@@ -8329,7 +8346,6 @@ var author$project$SyntaxHighlight$Theme$GitHub$theme = {bt: _List_Nil, bO: auth
 var elm$core$String$concat = function (strings) {
 	return A2(elm$core$String$join, '', strings);
 };
-var elm$core$String$fromFloat = _String_fromNumber;
 var author$project$SyntaxHighlight$Style$colorToCss = F2(
 	function (property, color) {
 		switch (color.$) {
@@ -8613,11 +8629,6 @@ var author$project$SyntaxHighlight$Theme$Type$toCss = function (_n0) {
 var author$project$SyntaxHighlight$Theme$GitHub$css = author$project$SyntaxHighlight$Theme$Type$toCss(author$project$SyntaxHighlight$Theme$GitHub$theme);
 var author$project$SyntaxHighlight$Theme$gitHub = author$project$SyntaxHighlight$Theme$GitHub$css;
 var author$project$SyntaxHighlight$gitHub = author$project$SyntaxHighlight$Theme$gitHub;
-var elm$virtual_dom$VirtualDom$node = function (tag) {
-	return _VirtualDom_node(
-		_VirtualDom_noScript(tag));
-};
-var elm$html$Html$node = elm$virtual_dom$VirtualDom$node;
 var author$project$SyntaxHighlight$useTheme = function (_n0) {
 	var theme = _n0;
 	return A3(
@@ -8645,11 +8656,25 @@ var author$project$Main$view = function (model) {
 					])),
 				A2(
 				elm$html$Html$ul,
-				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$classList(
+						_List_fromArray(
+							[
+								_Utils_Tuple2('refectionsOnErrors', true)
+							]))
+					]),
 				A2(elm$core$List$map, author$project$Main$displayError, model.W)),
 				A2(
 				elm$html$Html$ul,
-				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$classList(
+						_List_fromArray(
+							[
+								_Utils_Tuple2('refectionsOnTests', true)
+							]))
+					]),
 				A2(elm$core$List$map, author$project$Main$displayContract, model.ab))
 			]));
 };

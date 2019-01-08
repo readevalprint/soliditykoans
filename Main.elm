@@ -5,7 +5,7 @@ import Browser.Events exposing (onAnimationFrame)
 import Debouncer.Messages as Debouncer exposing (Debouncer, fromSeconds, provideInput, settleWhenQuietFor, toDebouncer)
 import Dict exposing (Dict)
 import Dict.Extra exposing (..)
-import Html exposing (Html, button, code, div, li, pre, text, textarea, ul)
+import Html exposing (Html, button, code, div, li, node, pre, text, textarea, ul)
 import Html.Attributes exposing (checked, class, classList, href, id, placeholder, selected, spellcheck, style, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Html.Lazy
@@ -271,8 +271,17 @@ view model =
             [ useTheme SH.gitHub
             , viewLanguage "Javascript" toHtml model
             ]
-        , ul [] (List.map displayError model.error)
-        , ul []
+        , ul
+            [ classList
+                [ ( "refectionsOnErrors", True )
+                ]
+            ]
+            (List.map displayError model.error)
+        , ul
+            [ classList
+                [ ( "refectionsOnTests", True )
+                ]
+            ]
             (List.map displayContract model.testResults)
         ]
 
@@ -328,23 +337,25 @@ viewLanguage thisLang parser ({ currentLanguage, lineCount } as model) =
 
 viewTextarea : String -> String -> Model -> Html Msg
 viewTextarea thisLang codeStr { showLineCount } =
-    textarea
-        [ value codeStr
-        , classList
-            [ ( "textarea", True )
-            , ( "textarea-lc", showLineCount )
+    div []
+        [ node "style" [] [ text (".textarea, .view-container {height: " ++ ((toFloat (codeStr |> String.indexes "\n" |> List.length) * 1.3) |> String.fromFloat) ++ "rem !important;}") ]
+        , textarea
+            [ value codeStr
+            , classList
+                [ ( "textarea", True )
+                , ( "textarea-lc", showLineCount )
+                ]
+            , onInput Display
+            , spellcheck False
+            , Html.Events.on "scroll"
+                (Decode.map2 Scroll
+                    (Decode.at [ "target", "scrollTop" ] Decode.int)
+                    (Decode.at [ "target", "scrollLeft" ] Decode.int)
+                    |> Decode.map OnScroll
+                )
             ]
-        , style "height" ((codeStr |> String.indexes "\n" |> List.length |> String.fromInt) ++ "em")
-        , onInput Display
-        , spellcheck False
-        , Html.Events.on "scroll"
-            (Decode.map2 Scroll
-                (Decode.at [ "target", "scrollTop" ] Decode.int)
-                (Decode.at [ "target", "scrollLeft" ] Decode.int)
-                |> Decode.map OnScroll
-            )
+            []
         ]
-        []
 
 
 decodeString : String -> TestResults

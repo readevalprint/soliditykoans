@@ -6,6 +6,12 @@
     <script src="elm.js"></script>
     <!--script src="bundle.js"></script-->
     <style>
+      ul.refectionsOnTests {
+    position: fixed;
+    right: 0;
+    top: 0;
+}
+      ul.refectionsOnErrors {}
       body {
         margin: 0 auto 20px auto;
         /* max-width: 650px; */
@@ -46,27 +52,11 @@
       .textarea {caret-color: #080802;}
 
 
-      .textarea, .view-container {
-
-        box-sizing: border-box;
-        font-size: 1rem;
-        line-height: 1.2;
-        width: 100%;
-        height: 100%;
-        height: 250px;
-        font-family: monospace;
-        letter-spacing: normal;
-        word-spacing: normal;
-        padding: 0;
-        margin: 0;
-        border: 0;
-        background: transparent;
-        white-space: pre;
-      }
+      .textarea, .view-container {box-sizing: border-box;font-size: 1rem;line-height: 1.2;width: 100%;height: 100%;height: (2*95)rem;font-family: monospace;letter-spacing: normal;word-spacing: normal;padding: 0;margin: 0;border: 0;background: transparent;white-space: pre;}
       .textarea {
         color: rgba(0,0,0,0);
         resize: none;
-        z-index: 2;
+        /* z-index: 2; */
         position: relative;
         padding: 10px;
       }
@@ -81,9 +71,7 @@
         top: 0;
         left: 0;
         pointer-events: none;
-        z-index:1;
       }
-      /* Elm Syntax Highlight CSS */
       pre.elmsh {
         padding: 10px;
         margin: 0;
@@ -101,7 +89,6 @@
         padding: 0 20px 0 0;
         opacity: 0.3;
       }
-      /* Demo specifics */
       pre.elmsh {
         overflow: visible;
       }
@@ -125,7 +112,7 @@
     });
     app.ports.toJs.subscribe(function (str) {
       console.log( str);
-      runningTest["bar_test.sol"] = { content: str};
+      runningTest["enlightenment_test.sol"] = { content: str};
       test_results = {}
       RemixTests.runTestSources(runningTest ,testCallback,resultCallback,finalCallback,importCallback)
     })
@@ -139,8 +126,9 @@
 
         // The keys here are the "global" names of the source files,
         // imports can use other files via remappings (see below).
-        "bar_test.sol": {
-          "content":`pragma solidity ^0.5.0;
+        "enlightenment_test.sol": {
+          "content":`
+          pragma solidity ^0.5.0;
 
           //import "browser/Assertions.sol";
           import "remix_tests.sol";
@@ -239,7 +227,7 @@
     out = sol_compiler.compile(JSON.stringify(input), console.log)
     solc_out = JSON.parse(out)
     console.log(solc_out)
-    content = input["sources"]["bar_test.sol"]["content"];
+    content = input["sources"]["enlightenment_test.sol"]["content"];
 
     app.ports.showCode.send(content)
     test_results = {}
@@ -286,7 +274,7 @@
     importCallback=(url, cb) => { console.log("import", url, cb); cb(null,input["sources"][url]["content"]) }
     runningTest = {}
     //runningTest["bar_test.sol"] = { content: "pragma solidity ^0.5.0; import \"remix_tests.sol\"; contract Foo {function lesson_01_bb() public view returns (bool) {return true;} function lesson_02_cc() public { Assert.equal(int(2), int(2), \"it should be 2\");}}" };
-    runningTest["bar_test.sol"] = { content: content};
+    runningTest["enlightenment_test.sol"] = { content: content};
     //runningTest["remix_tests.sol"] = { content: "" };
     //RemixTests.runTestSources(runningTest ,testCallback,resultCallback,finalCallback,importCallback)
 
