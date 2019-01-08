@@ -134,15 +134,8 @@ initLanguageModel codeStr =
 initLanguagesModel : Dict String LanguageModel
 initLanguagesModel =
     Dict.fromList
-        [ ( "Javascript", initLanguageModel javascriptExample )
+        [ ( "Javascript", initLanguageModel "" )
         ]
-
-
-javascriptExample : String
-javascriptExample =
-    """
-var a = 1;
-    """
 
 
 init : () -> ( Model, Cmd Msg )
@@ -159,7 +152,6 @@ init _ =
 
 type Msg
     = DisplayTestResults TestResults
-    | SetText String String
     | OnScroll Scroll
     | Run
     | Display String
@@ -192,9 +184,6 @@ update msg model =
         Run ->
             ( { model | error = [] }, getLangModel "Javascript" model |> .code |> toJs )
 
-        Display newCode ->
-            update (MsgQuietForOneSecond (provideInput Run)) model
-
         Decode value ->
             ( { model | testResults = decodeString value }, Cmd.none )
 
@@ -209,10 +198,10 @@ update msg model =
                 |> updateLangModel model.currentLanguage model
                 |> (\a -> ( a, Cmd.none ))
 
-        SetText lang codeStr ->
-            getLangModel lang model
+        Display codeStr ->
+            getLangModel "Javascript" model
                 |> (\m -> { m | code = codeStr })
-                |> updateLangModel lang model
+                |> updateLangModel "Javascript" model
                 |> (\m -> update (MsgQuietForOneSecond (provideInput Run)) m)
 
 
@@ -277,26 +266,21 @@ displayError error =
 view : Model -> Html Msg
 view model =
     div []
-        [ ul [] (List.map displayError model.error)
+        [ div
+            []
+            [ useTheme SH.gitHub
+            , viewLanguage "Javascript" toHtml model
+            ]
+        , ul [] (List.map displayError model.error)
         , ul []
             (List.map displayContract model.testResults)
-        , Html.textarea
-            [ Html.Attributes.value ""
-            , onInput Display
-            ]
-            []
-        , div [] [ useTheme monokai ]
-        , div
-            []
-            [ viewLanguage "Javascript" toHtml model
-            ]
         ]
 
 
 getLangModel : String -> Model -> LanguageModel
 getLangModel lang model =
     Dict.get lang model.languagesModel
-        |> Maybe.withDefault (initLanguageModel javascriptExample)
+        |> Maybe.withDefault (initLanguageModel "")
 
 
 toHtml : Maybe Int -> String -> Html Msg
@@ -350,7 +334,8 @@ viewTextarea thisLang codeStr { showLineCount } =
             [ ( "textarea", True )
             , ( "textarea-lc", showLineCount )
             ]
-        , onInput (SetText thisLang)
+        , style "height" ((codeStr |> String.indexes "\n" |> List.length |> String.fromInt) ++ "em")
+        , onInput Display
         , spellcheck False
         , Html.Events.on "scroll"
             (Decode.map2 Scroll

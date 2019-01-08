@@ -4642,7 +4642,6 @@ var author$project$Main$initLanguageModel = function (codeStr) {
 		v: A2(author$project$Main$Scroll, 0, 0)
 	};
 };
-var author$project$Main$javascriptExample = '\nvar a = 1;\n    ';
 var elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
 var elm$core$Dict$empty = elm$core$Dict$RBEmpty_elm_builtin;
 var elm$core$Dict$Black = 1;
@@ -4790,7 +4789,7 @@ var author$project$Main$initLanguagesModel = elm$core$Dict$fromList(
 		[
 			_Utils_Tuple2(
 			'Javascript',
-			author$project$Main$initLanguageModel(author$project$Main$javascriptExample))
+			author$project$Main$initLanguageModel(''))
 		]));
 var elm$core$Basics$True = 0;
 var elm$core$Basics$apL = F2(
@@ -5184,9 +5183,9 @@ var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(author$project$Main$initModel, elm$core$Platform$Cmd$none);
 };
-var author$project$Main$Frame = {$: 8};
+var author$project$Main$Frame = {$: 7};
 var author$project$Main$Display = function (a) {
-	return {$: 4, a: a};
+	return {$: 3, a: a};
 };
 var elm$json$Json$Decode$decodeValue = _Json_run;
 var elm$json$Json$Decode$string = _Json_decodeString;
@@ -5202,7 +5201,7 @@ var author$project$Main$decodeCode = function (x) {
 	}
 };
 var author$project$Main$DisplayError = function (a) {
-	return {$: 6, a: a};
+	return {$: 5, a: a};
 };
 var elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
@@ -6263,9 +6262,9 @@ var author$project$Debouncer$Messages$update = F4(
 				output));
 	});
 var author$project$Main$MsgQuietForOneSecond = function (a) {
-	return {$: 7, a: a};
+	return {$: 6, a: a};
 };
-var author$project$Main$Run = {$: 3};
+var author$project$Main$Run = {$: 2};
 var elm$json$Json$Decode$decodeString = _Json_runOnString;
 var author$project$Main$decodeString = function (x) {
 	var result = A2(
@@ -6283,7 +6282,7 @@ var author$project$Main$getLangModel = F2(
 	function (lang, model) {
 		return A2(
 			elm$core$Maybe$withDefault,
-			author$project$Main$initLanguageModel(author$project$Main$javascriptExample),
+			author$project$Main$initLanguageModel(''),
 			A2(elm$core$Dict$get, lang, model.Y));
 	});
 var elm$json$Json$Encode$string = _Json_wrap;
@@ -6311,92 +6310,80 @@ var author$project$Main$updateLangModel = F3(
 	});
 var author$project$Main$update = F2(
 	function (msg, model) {
-		update:
-		while (true) {
-			switch (msg.$) {
-				case 7:
-					var subMsg = msg.a;
-					return A4(author$project$Debouncer$Messages$update, author$project$Main$update, author$project$Main$updateDebouncer, subMsg, model);
-				case 0:
-					var newTestResults = msg.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{ab: newTestResults}),
-						elm$core$Platform$Cmd$none);
-				case 6:
-					var error = msg.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{W: error}),
-						elm$core$Platform$Cmd$none);
-				case 3:
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{W: _List_Nil}),
-						author$project$Main$toJs(
-							A2(author$project$Main$getLangModel, 'Javascript', model).H));
-				case 4:
-					var newCode = msg.a;
-					var $temp$msg = author$project$Main$MsgQuietForOneSecond(
-						author$project$Debouncer$Messages$provideInput(author$project$Main$Run)),
-						$temp$model = model;
-					msg = $temp$msg;
-					model = $temp$model;
-					continue update;
-				case 5:
-					var value = msg.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								ab: author$project$Main$decodeString(value)
-							}),
-						elm$core$Platform$Cmd$none);
-				case 2:
-					var scroll = msg.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{v: scroll}),
-						elm$core$Platform$Cmd$none);
-				case 8:
-					return function (a) {
-						return _Utils_Tuple2(a, elm$core$Platform$Cmd$none);
-					}(
-						A3(
-							author$project$Main$updateLangModel,
-							model.V,
-							model,
-							function (m) {
-								return _Utils_update(
-									m,
-									{v: model.v});
-							}(
-								A2(author$project$Main$getLangModel, model.V, model))));
-				default:
-					var lang = msg.a;
-					var codeStr = msg.b;
-					return function (m) {
-						return A2(
-							author$project$Main$update,
-							author$project$Main$MsgQuietForOneSecond(
-								author$project$Debouncer$Messages$provideInput(author$project$Main$Run)),
-							m);
-					}(
-						A3(
-							author$project$Main$updateLangModel,
-							lang,
-							model,
-							function (m) {
-								return _Utils_update(
-									m,
-									{H: codeStr});
-							}(
-								A2(author$project$Main$getLangModel, lang, model))));
-			}
+		switch (msg.$) {
+			case 6:
+				var subMsg = msg.a;
+				return A4(author$project$Debouncer$Messages$update, author$project$Main$update, author$project$Main$updateDebouncer, subMsg, model);
+			case 0:
+				var newTestResults = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{ab: newTestResults}),
+					elm$core$Platform$Cmd$none);
+			case 5:
+				var error = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{W: error}),
+					elm$core$Platform$Cmd$none);
+			case 2:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{W: _List_Nil}),
+					author$project$Main$toJs(
+						A2(author$project$Main$getLangModel, 'Javascript', model).H));
+			case 4:
+				var value = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							ab: author$project$Main$decodeString(value)
+						}),
+					elm$core$Platform$Cmd$none);
+			case 1:
+				var scroll = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{v: scroll}),
+					elm$core$Platform$Cmd$none);
+			case 7:
+				return function (a) {
+					return _Utils_Tuple2(a, elm$core$Platform$Cmd$none);
+				}(
+					A3(
+						author$project$Main$updateLangModel,
+						model.V,
+						model,
+						function (m) {
+							return _Utils_update(
+								m,
+								{v: model.v});
+						}(
+							A2(author$project$Main$getLangModel, model.V, model))));
+			default:
+				var codeStr = msg.a;
+				return function (m) {
+					return A2(
+						author$project$Main$update,
+						author$project$Main$MsgQuietForOneSecond(
+							author$project$Debouncer$Messages$provideInput(author$project$Main$Run)),
+						m);
+				}(
+					A3(
+						author$project$Main$updateLangModel,
+						'Javascript',
+						model,
+						function (m) {
+							return _Utils_update(
+								m,
+								{H: codeStr});
+						}(
+							A2(author$project$Main$getLangModel, 'Javascript', model))));
 		}
 	});
 var elm$html$Html$div = _VirtualDom_node('div');
@@ -8158,12 +8145,8 @@ var author$project$Main$toHtml = F2(
 				author$project$SyntaxHighlight$javascript(str)));
 	});
 var author$project$Main$OnScroll = function (a) {
-	return {$: 2, a: a};
+	return {$: 1, a: a};
 };
-var author$project$Main$SetText = F2(
-	function (a, b) {
-		return {$: 1, a: a, b: b};
-	});
 var elm$html$Html$textarea = _VirtualDom_node('textarea');
 var elm$json$Json$Encode$bool = _Json_wrap;
 var elm$html$Html$Attributes$boolProperty = F2(
@@ -8174,6 +8157,8 @@ var elm$html$Html$Attributes$boolProperty = F2(
 			elm$json$Json$Encode$bool(bool));
 	});
 var elm$html$Html$Attributes$spellcheck = elm$html$Html$Attributes$boolProperty('spellcheck');
+var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 0, a: a};
@@ -8227,8 +8212,13 @@ var author$project$Main$viewTextarea = F3(
 							_Utils_Tuple2('textarea', true),
 							_Utils_Tuple2('textarea-lc', showLineCount)
 						])),
-					elm$html$Html$Events$onInput(
-					author$project$Main$SetText(thisLang)),
+					A2(
+					elm$html$Html$Attributes$style,
+					'height',
+					elm$core$String$fromInt(
+						elm$core$List$length(
+							A2(elm$core$String$indexes, '\n', codeStr))) + 'em'),
+					elm$html$Html$Events$onInput(author$project$Main$Display),
 					elm$html$Html$Attributes$spellcheck(false),
 					A2(
 					elm$html$Html$Events$on,
@@ -8252,8 +8242,6 @@ var author$project$Main$viewTextarea = F3(
 				]),
 			_List_Nil);
 	});
-var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var author$project$Main$viewLanguage = F3(
 	function (thisLang, parser, model) {
 		var currentLanguage = model.V;
@@ -8295,29 +8283,10 @@ var author$project$Main$viewLanguage = F3(
 		}
 	});
 var author$project$SyntaxHighlight$Theme = elm$core$Basics$identity;
-var author$project$SyntaxHighlight$Language$Css$AtRule = function (a) {
-	return {$: 1, a: a};
-};
-var author$project$SyntaxHighlight$Language$Css$Identifier = 0;
-var author$project$SyntaxHighlight$Language$Css$Property = {$: 3};
-var author$project$SyntaxHighlight$Language$Elm$TypeSignature = 6;
 var author$project$SyntaxHighlight$Style$Hex = function (a) {
 	return {$: 1, a: a};
 };
-var author$project$SyntaxHighlight$Style$bold = function (style) {
-	return _Utils_update(
-		style,
-		{K: true});
-};
-var author$project$SyntaxHighlight$Style$italic = function (style) {
-	return _Utils_update(
-		style,
-		{L: true});
-};
 var author$project$SyntaxHighlight$Style$DefaultColor = {$: 0};
-var author$project$SyntaxHighlight$Style$textColor = function (text) {
-	return {U: author$project$SyntaxHighlight$Style$DefaultColor, K: false, L: false, X: false, b$: text};
-};
 var author$project$SyntaxHighlight$Style$backgroundColor = function (background) {
 	return {U: background, K: false, L: false, X: false, b$: author$project$SyntaxHighlight$Style$DefaultColor};
 };
@@ -8325,76 +8294,38 @@ var author$project$SyntaxHighlight$Style$noEmphasis = F2(
 	function (text, background) {
 		return {U: background, K: false, L: false, X: false, b$: text};
 	});
-var author$project$SyntaxHighlight$Theme$Monokai$requiredStyles = {
+var author$project$SyntaxHighlight$Style$textColor = function (text) {
+	return {U: author$project$SyntaxHighlight$Style$DefaultColor, K: false, L: false, X: false, b$: text};
+};
+var author$project$SyntaxHighlight$Theme$GitHub$requiredStyles = {
 	bm: author$project$SyntaxHighlight$Style$backgroundColor(
-		author$project$SyntaxHighlight$Style$Hex('#003800')),
+		author$project$SyntaxHighlight$Style$Hex('#eaffea')),
 	br: author$project$SyntaxHighlight$Style$textColor(
-		author$project$SyntaxHighlight$Style$Hex('#75715e')),
+		author$project$SyntaxHighlight$Style$Hex('#969896')),
 	bu: A2(
 		author$project$SyntaxHighlight$Style$noEmphasis,
-		author$project$SyntaxHighlight$Style$Hex('#f8f8f2'),
-		author$project$SyntaxHighlight$Style$Hex('#23241f')),
+		author$project$SyntaxHighlight$Style$Hex('#24292e'),
+		author$project$SyntaxHighlight$Style$Hex('#ffffff')),
 	bv: author$project$SyntaxHighlight$Style$backgroundColor(
-		author$project$SyntaxHighlight$Style$Hex('#380000')),
+		author$project$SyntaxHighlight$Style$Hex('#ffecec')),
 	bB: author$project$SyntaxHighlight$Style$backgroundColor(
-		author$project$SyntaxHighlight$Style$Hex('#343434')),
+		author$project$SyntaxHighlight$Style$Hex('#fffbdd')),
 	bS: author$project$SyntaxHighlight$Style$textColor(
-		author$project$SyntaxHighlight$Style$Hex('#ae81ff')),
+		author$project$SyntaxHighlight$Style$Hex('#005cc5')),
 	bT: author$project$SyntaxHighlight$Style$textColor(
-		author$project$SyntaxHighlight$Style$Hex('#e6db74')),
+		author$project$SyntaxHighlight$Style$Hex('#df5000')),
 	bU: author$project$SyntaxHighlight$Style$textColor(
-		author$project$SyntaxHighlight$Style$Hex('#f92672')),
+		author$project$SyntaxHighlight$Style$Hex('#d73a49')),
 	bV: author$project$SyntaxHighlight$Style$textColor(
-		author$project$SyntaxHighlight$Style$Hex('#66d9ef')),
+		author$project$SyntaxHighlight$Style$Hex('#0086b3')),
 	bW: author$project$SyntaxHighlight$Style$textColor(
-		author$project$SyntaxHighlight$Style$Hex('#a6e22e')),
+		author$project$SyntaxHighlight$Style$Hex('#63a35c')),
 	bX: author$project$SyntaxHighlight$Style$textColor(
-		author$project$SyntaxHighlight$Style$Hex('#ae81ff')),
+		author$project$SyntaxHighlight$Style$Hex('#005cc5')),
 	bY: author$project$SyntaxHighlight$Style$textColor(
-		author$project$SyntaxHighlight$Style$Hex('#fd971f'))
+		author$project$SyntaxHighlight$Style$Hex('#795da3'))
 };
-var author$project$SyntaxHighlight$Theme$Type$Css = function (a) {
-	return {$: 3, a: a};
-};
-var author$project$SyntaxHighlight$Theme$Type$Elm = function (a) {
-	return {$: 0, a: a};
-};
-var author$project$SyntaxHighlight$Theme$Type$Javascript = function (a) {
-	return {$: 2, a: a};
-};
-var author$project$SyntaxHighlight$Theme$Monokai$theme = {
-	bt: _List_fromArray(
-		[
-			_Utils_Tuple2(
-			_List_fromArray(
-				[
-					author$project$SyntaxHighlight$Theme$Type$Elm(6),
-					author$project$SyntaxHighlight$Theme$Type$Javascript(3),
-					author$project$SyntaxHighlight$Theme$Type$Css(author$project$SyntaxHighlight$Language$Css$Property)
-				]),
-			author$project$SyntaxHighlight$Style$italic(
-				author$project$SyntaxHighlight$Style$textColor(
-					author$project$SyntaxHighlight$Style$Hex('#66d9ef')))),
-			_Utils_Tuple2(
-			_List_fromArray(
-				[
-					author$project$SyntaxHighlight$Theme$Type$Javascript(8)
-				]),
-			author$project$SyntaxHighlight$Style$italic(
-				author$project$SyntaxHighlight$Style$textColor(
-					author$project$SyntaxHighlight$Style$Hex('#a6e22e')))),
-			_Utils_Tuple2(
-			_List_fromArray(
-				[
-					author$project$SyntaxHighlight$Theme$Type$Css(
-					author$project$SyntaxHighlight$Language$Css$AtRule(0))
-				]),
-			author$project$SyntaxHighlight$Style$bold(
-				author$project$SyntaxHighlight$Style$textColor(
-					author$project$SyntaxHighlight$Style$Hex('#f92672'))))
-		]),
-	bO: author$project$SyntaxHighlight$Theme$Monokai$requiredStyles
-};
+var author$project$SyntaxHighlight$Theme$GitHub$theme = {bt: _List_Nil, bO: author$project$SyntaxHighlight$Theme$GitHub$requiredStyles};
 var elm$core$String$concat = function (strings) {
 	return A2(elm$core$String$join, '', strings);
 };
@@ -8679,9 +8610,9 @@ var author$project$SyntaxHighlight$Theme$Type$toCss = function (_n0) {
 				elm$core$Tuple$mapFirst(author$project$SyntaxHighlight$Theme$Type$syntaxesToSelectors),
 				customStyles)));
 };
-var author$project$SyntaxHighlight$Theme$Monokai$css = author$project$SyntaxHighlight$Theme$Type$toCss(author$project$SyntaxHighlight$Theme$Monokai$theme);
-var author$project$SyntaxHighlight$Theme$monokai = author$project$SyntaxHighlight$Theme$Monokai$css;
-var author$project$SyntaxHighlight$monokai = author$project$SyntaxHighlight$Theme$monokai;
+var author$project$SyntaxHighlight$Theme$GitHub$css = author$project$SyntaxHighlight$Theme$Type$toCss(author$project$SyntaxHighlight$Theme$GitHub$theme);
+var author$project$SyntaxHighlight$Theme$gitHub = author$project$SyntaxHighlight$Theme$GitHub$css;
+var author$project$SyntaxHighlight$gitHub = author$project$SyntaxHighlight$Theme$gitHub;
 var elm$virtual_dom$VirtualDom$node = function (tag) {
 	return _VirtualDom_node(
 		_VirtualDom_noScript(tag));
@@ -8705,35 +8636,21 @@ var author$project$Main$view = function (model) {
 		_List_fromArray(
 			[
 				A2(
+				elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						author$project$SyntaxHighlight$useTheme(author$project$SyntaxHighlight$gitHub),
+						A3(author$project$Main$viewLanguage, 'Javascript', author$project$Main$toHtml, model)
+					])),
+				A2(
 				elm$html$Html$ul,
 				_List_Nil,
 				A2(elm$core$List$map, author$project$Main$displayError, model.W)),
 				A2(
 				elm$html$Html$ul,
 				_List_Nil,
-				A2(elm$core$List$map, author$project$Main$displayContract, model.ab)),
-				A2(
-				elm$html$Html$textarea,
-				_List_fromArray(
-					[
-						elm$html$Html$Attributes$value(''),
-						elm$html$Html$Events$onInput(author$project$Main$Display)
-					]),
-				_List_Nil),
-				A2(
-				elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						author$project$SyntaxHighlight$useTheme(author$project$SyntaxHighlight$monokai)
-					])),
-				A2(
-				elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A3(author$project$Main$viewLanguage, 'Javascript', author$project$Main$toHtml, model)
-					]))
+				A2(elm$core$List$map, author$project$Main$displayContract, model.ab))
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;

@@ -12,13 +12,15 @@
 //var abi = require('ethereumjs-abi')
 //rlp = require('rlp')
 
-
-require('babel-polyfill')
-const solcWrapper = require('solc/wrapper')
+//require('babel-polyfill')
+var solcWrapper = require('solc/wrapper')
 //const sim = require('remix-simulator')
 //const Web3 = require('web3');
-RemixTests = require('remix-tests');
+//var RemixTests = require('remix-tests')
 
-solc = solcWrapper(window.Module)
+
+window.sol_compiler = solcWrapper(window.Module)
 
 //web3 = new Web3(new sim.Provider())
+//
+
