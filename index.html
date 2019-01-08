@@ -10,7 +10,11 @@
     position: fixed;
     right: 0;
     top: 0;
-}
+
+  }
+    li.failed {
+      color: red;
+    }
       ul.refectionsOnErrors {}
       body {
         margin: 0 auto 20px auto;
@@ -127,8 +131,7 @@
         // The keys here are the "global" names of the source files,
         // imports can use other files via remappings (see below).
         "enlightenment_test.sol": {
-"content":`
-pragma solidity ^0.5.0;
+"content":`pragma solidity ^0.5.0;
 
 //import "browser/Assertions.sol";
 import "remix_tests.sol";
@@ -139,10 +142,6 @@ import "remix_tests.sol";
 /// @dev All function calls are currently implement without side effects
 contract ReflectionsOnTruth {
 
-  /// @notice To be quite honest.
-  function huh() public {  
-    trueOrFalse();
-  }              
 
   /// @notice Consider that boolean values are either true/false.
   function trueOrFalse() public {
@@ -181,8 +180,8 @@ contract ReflectionsOnNumbers {
   }             
   function numbersCanBeMultiplied() public {
     // ======= Fix the following lines so that a is twice as large as b and b is greater
-    int a = 10;
-    int b = 10;
+    int a = -10;
+    int b = -1;
     // =======
 
     Assert.greaterThan(a, int(0), "a should be greater than 1");
