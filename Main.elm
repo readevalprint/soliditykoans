@@ -57,16 +57,16 @@ type alias Contract =
 
 
 type alias Model =
-    { testResults : TestResults
+    { testResults : String
     , quietForOneSecond : Debouncer Msg
-    , error : List String
+    , error : String
     , scroll : Scroll
-    , currentLanguage : String
     , languagesModel : Dict String LanguageModel
     , showLineCount : Bool
     , lineCountStart : Int
     , lineCount : Maybe Int
     , theme : String
+    , highlight : HighlightModel
     }
 
 
@@ -100,21 +100,55 @@ type alias Code =
     String
 
 
+type alias HighlightModel =
+    { mode : Maybe SH.Highlight
+    , start : Int
+    , end : Int
+    }
+
+
+initHighlightModel : HighlightModel
+initHighlightModel =
+    { mode = Just SH.Highlight
+    , start = 0
+    , end = 0
+    }
+
+
+lineNumberFromError : List String -> String -> Int
+lineNumberFromError path code =
+    List.map (\s -> String.indexes s code) path
+        |> List.foldl
+            (\state i ->
+                List.filter (\i2 -> i2 > i) state
+                    |> List.head
+                    |> Maybe.withDefault 0
+            )
+            -- default value
+            0
+        -- Find the actual line number (number of newline before the string index)
+        |> (\index ->
+                String.indexes "\n" code
+                    |> List.filter (\n -> n < index)
+                    |> List.length
+           )
+
+
 initModel : Model
 initModel =
     { quietForOneSecond =
         Debouncer.manual
             |> settleWhenQuietFor (Just <| fromSeconds 1)
             |> toDebouncer
-    , testResults = []
-    , error = []
+    , testResults = ""
+    , error = ""
     , scroll = Scroll 0 0
-    , currentLanguage = "Javascript"
     , languagesModel = initLanguagesModel
     , showLineCount = True
     , lineCountStart = 1
     , lineCount = Just 1
     , theme = "Monokai"
+    , highlight = initHighlightModel
     }
 
 
@@ -151,12 +185,12 @@ init _ =
 
 
 type Msg
-    = DisplayTestResults TestResults
+    = DisplayTestResults String
     | OnScroll Scroll
     | Run
     | Display String
     | Decode String
-    | DisplayError (List String)
+    | DisplayError String
     | MsgQuietForOneSecond (Debouncer.Msg Msg)
     | Frame
 
@@ -170,7 +204,7 @@ updateDebouncer =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update msg ({ highlight } as model) =
     case msg of
         MsgQuietForOneSecond subMsg ->
             Debouncer.update update updateDebouncer subMsg model
@@ -182,10 +216,10 @@ update msg model =
             ( { model | error = error }, Cmd.none )
 
         Run ->
-            ( { model | error = [] }, getLangModel "Javascript" model |> .code |> toJs )
+            ( { model | error = "" }, getLangModel "Javascript" model |> .code |> toJs )
 
         Decode value ->
-            ( { model | testResults = decodeString value }, Cmd.none )
+            ( { model | testResults = value }, Cmd.none )
 
         OnScroll scroll ->
             ( { model | scroll = scroll }
@@ -193,9 +227,9 @@ update msg model =
             )
 
         Frame ->
-            getLangModel model.currentLanguage model
+            getLangModel "Javascript" model
                 |> (\m -> { m | scroll = model.scroll })
-                |> updateLangModel model.currentLanguage model
+                |> updateLangModel "Javascript" model
                 |> (\a -> ( a, Cmd.none ))
 
         Display codeStr ->
@@ -211,78 +245,33 @@ updateLangModel lang model langModel =
         |> (\n -> { model | languagesModel = n })
 
 
-
--- VIEW
-
-
-displayAssertions : List String -> Html Msg
-displayAssertions assertions =
-    if List.length assertions > 0 then
-        ul []
-            (List.map
-                (\a ->
-                    li
-                        []
-                        [ text a
-                        ]
-                )
-                assertions
-            )
-
-    else
-        div [] []
-
-
-displayFunction ( name, function ) =
-    li
-        [ classList
-            [ ( "failed", function.fail )
-            ]
-        ]
-        [ div [] [ text name ]
-        , displayAssertions function.assertions
-        ]
-
-
-displayContract ( name, contract ) =
-    li
-        [ classList
-            [ ( "failed", List.any (\( n, c ) -> c.fail) contract.functions )
-            ]
-        ]
-        [ div [] [ text name ]
-        , ul [] (List.map displayFunction (List.sortWith (\( name_a, function_a ) ( name_b, function_b ) -> compare function_a.loc function_b.loc) contract.functions))
-        ]
-
-
-displayTestResults contracts =
-    List.sortWith (\( name_a, contract_a ) ( name_b, contract_b ) -> compare contract_a.loc contract_b.loc) contracts
-
-
 displayError error =
     pre [] [ text error ]
 
 
 view : Model -> Html Msg
 view model =
-    div []
+    div
+        [ classList
+            [ ( "container", True )
+            ]
+        ]
         [ div
-            []
+            [ classList
+                [ ( "row", True )
+                ]
+            ]
             [ useTheme SH.gitHub
             , viewLanguage "Javascript" toHtml model
             ]
-        , ul
-            [ classList
-                [ ( "refectionsOnErrors", True )
+        , div [ id "results" ] [ text model.testResults ]
+        , div
+            [ id "errors" ]
+            [ pre
+                []
+                [ text model.error
                 ]
             ]
-            (List.map displayError model.error)
-        , ul
-            [ classList
-                [ ( "refectionsOnTests", True )
-                ]
-            ]
-            (List.map displayContract model.testResults)
         ]
 
 
@@ -292,53 +281,51 @@ getLangModel lang model =
         |> Maybe.withDefault (initLanguageModel "")
 
 
-toHtml : Maybe Int -> String -> Html Msg
-toHtml maybeStart str =
+toHtml : Maybe Int -> String -> HighlightModel -> Html Msg
+toHtml maybeStart str hlModel =
     SH.javascript str
+        |> Result.map (SH.highlightLines hlModel.mode hlModel.start hlModel.end)
         |> Result.map (SH.toBlockHtml maybeStart)
         |> Result.withDefault
-            (pre [] [ code [] [ text str ] ])
+            (div [] [ text str ])
 
 
-viewLanguage : String -> (Maybe Int -> String -> Html Msg) -> Model -> Html Msg
-viewLanguage thisLang parser ({ currentLanguage, lineCount } as model) =
-    if thisLang /= currentLanguage then
-        div [] []
-
-    else
-        let
-            langModel =
-                getLangModel thisLang model
-        in
-        div
-            [ classList
-                [ ( "container", True )
-                , ( "elmsh", True )
-                ]
+viewLanguage : String -> (Maybe Int -> String -> HighlightModel -> Html Msg) -> Model -> Html Msg
+viewLanguage thisLang parser ({ lineCount, highlight } as model) =
+    let
+        langModel =
+            getLangModel thisLang model
+    in
+    div
+        [ classList
+            [ ( "container", True )
+            , ( "elmsh", True )
             ]
-            [ div
-                [ class "view-container"
-                , style "transform"
-                    ("translate("
-                        ++ String.fromInt -langModel.scroll.left
-                        ++ "px, "
-                        ++ String.fromInt -langModel.scroll.top
-                        ++ "px)"
-                    )
-                , style "will-change" "transform"
-                ]
-                [ parser
-                    lineCount
-                    langModel.code
-                ]
-            , viewTextarea thisLang langModel.code model
+        ]
+        [ div
+            [ class "view-container"
+            , style "transform"
+                ("translate("
+                    ++ String.fromInt -langModel.scroll.left
+                    ++ "px, "
+                    ++ String.fromInt -langModel.scroll.top
+                    ++ "px)"
+                )
+            , style "will-change" "transform"
             ]
+            [ parser
+                lineCount
+                langModel.code
+                highlight
+            ]
+        , viewTextarea thisLang langModel.code model
+        ]
 
 
 viewTextarea : String -> String -> Model -> Html Msg
 viewTextarea thisLang codeStr { showLineCount } =
     div []
-        [ node "style" [] [ text (".textarea, .view-container {height: " ++ ((toFloat (codeStr |> String.indexes "\n" |> List.length) * 1.3) |> String.fromFloat) ++ "rem !important;}") ]
+        [ node "style" [] [ text (".textarea, .view-container {height: " ++ ((toFloat (codeStr |> String.indexes "\n" |> List.length) * 1.7) |> String.fromFloat) ++ "rem !important;}") ]
         , textarea
             [ value codeStr
             , classList
@@ -358,21 +345,6 @@ viewTextarea thisLang codeStr { showLineCount } =
         ]
 
 
-decodeString : String -> TestResults
-decodeString x =
-    let
-        result =
-            -- Decode.decodeValue Decode.string x
-            Decode.decodeString (keyValuePairs contractDecoder) x
-    in
-    case result of
-        Ok value ->
-            displayTestResults value
-
-        Err _ ->
-            []
-
-
 decodeError : Encode.Value -> Msg
 decodeError x =
     let
@@ -382,10 +354,10 @@ decodeError x =
     in
     case result of
         Ok value ->
-            DisplayError value
+            DisplayError (value |> List.head |> Maybe.withDefault "")
 
         Err value ->
-            DisplayError [ Decode.errorToString value ]
+            DisplayError (Decode.errorToString value)
 
 
 decodeResults : Encode.Value -> Msg
@@ -393,14 +365,14 @@ decodeResults x =
     let
         result =
             -- Decode.decodeValue Decode.string x
-            Decode.decodeValue (keyValuePairs contractDecoder) x
+            Decode.decodeValue (Decode.list (Decode.at [ "message" ] Decode.string)) x
     in
     case result of
         Ok value ->
-            DisplayTestResults (displayTestResults value)
+            DisplayTestResults (value |> List.head |> Maybe.withDefault "")
 
         Err value ->
-            DisplayError [ Decode.errorToString value ]
+            DisplayTestResults (Decode.errorToString value)
 
 
 decodeCode : Encode.Value -> Msg

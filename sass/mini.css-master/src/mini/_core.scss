@@ -226,20 +226,11 @@ blockquote {  // Doesn't have a back color by default, can be added manually.
   }
 }
 
-code, kbd, pre, samp {
+kbd, samp {
   font-family: #{$code-font-family};     // Display fix should be applied manually!
   font-size: $code-font-size;
 }
 
-code { // No border color by default and fore color is the default for text, can be altered manually.
-  background: var(#{$secondary-back-color-var});
-  border-radius: var(#{$universal-border-radius-var});
-  // This could be a bit counterintuitive and burden the codebase a bit, look into it again?
-  padding: calc(var(#{$universal-padding-var}) / 4) calc(var(#{$universal-padding-var}) / 2);
-  @if $universal-box-shadow != none {
-    box-shadow: var(#{$universal-box-shadow-var});
-  }
-}
 
 kbd { // No border color by default, can be altered manually.
   background: var(#{$fore-color-var});
@@ -252,7 +243,7 @@ kbd { // No border color by default, can be altered manually.
   }
 }
 
-pre { // Fore color is the default, can be altered manually.
+pre:not(.elmsh) { // Fore color is the default, can be altered manually.
   overflow: auto; // Responsiveness
   background: var(#{$secondary-back-color-var});
   padding: calc(1.5 * var(#{$universal-padding-var}));
@@ -266,7 +257,7 @@ pre { // Fore color is the default, can be altered manually.
 }
 
 // Prevent elements from affecting the line height in all browsers.
-sup, sub, code, kbd {
+sup, sub, kbd {
   line-height: 0;
   position: relative;
   vertical-align: baseline;
