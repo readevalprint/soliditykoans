@@ -5,8 +5,8 @@ import Browser.Events exposing (onAnimationFrame)
 import Debouncer.Messages as Debouncer exposing (Debouncer, fromSeconds, provideInput, settleWhenQuietFor, toDebouncer)
 import Dict exposing (Dict)
 import Dict.Extra exposing (..)
-import Html exposing (Html, button, code, div, li, node, pre, text, textarea, ul)
-import Html.Attributes exposing (checked, class, classList, href, id, placeholder, selected, spellcheck, style, type_, value)
+import Html exposing (Html, a, button, code, div, header, img, li, node, pre, text, textarea, ul)
+import Html.Attributes exposing (checked, class, classList, href, id, placeholder, selected, spellcheck, src, style, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Html.Lazy
 import Json.Decode as Decode exposing (Decoder, at, bool, decodeString, dict, float, int, keyValuePairs, list, nullable, string)
@@ -259,17 +259,26 @@ view model =
         [ div
             [ classList
                 [ ( "row", True )
+                , ( "cols-sm-6", True )
                 ]
             ]
-            [ useTheme SH.gitHub
-            , viewLanguage "Javascript" toHtml model
-            ]
-        , div [ id "results" ] [ text model.testResults ]
-        , div
-            [ id "errors" ]
-            [ pre
-                []
-                [ text model.error
+            [ viewLanguage "Javascript" toHtml model
+            , Html.section []
+                [ header []
+                    [ a [ class "logo" ] [ text "Solidity Koans" ]
+                    ]
+                , div [ class "card fluid" ]
+                    [ div [ class "section" ]
+                        [ Html.h1 [] [ text model.testResults ]
+                        ]
+                    ]
+                , div
+                    [ class "card  fluid" ]
+                    [ pre
+                        []
+                        [ text model.error
+                        ]
+                    ]
                 ]
             ]
         ]
@@ -298,12 +307,12 @@ viewLanguage thisLang parser ({ lineCount, highlight } as model) =
     in
     div
         [ classList
-            [ ( "container", True )
-            , ( "elmsh", True )
+            [ ( "elmsh", True )
+            , ( "elmsh-container", True )
             ]
         ]
         [ div
-            [ class "view-container"
+            [ class "view-container "
             , style "transform"
                 ("translate("
                     ++ String.fromInt -langModel.scroll.left
@@ -325,7 +334,7 @@ viewLanguage thisLang parser ({ lineCount, highlight } as model) =
 viewTextarea : String -> String -> Model -> Html Msg
 viewTextarea thisLang codeStr { showLineCount } =
     div []
-        [ node "style" [] [ text (".textarea, .view-container {height: " ++ ((toFloat (codeStr |> String.indexes "\n" |> List.length) * 1.7) |> String.fromFloat) ++ "rem !important;}") ]
+        [ node "style" [] [ text (".textarea, .view-container {height: " ++ ((toFloat (codeStr |> String.indexes "\n" |> List.length) * 1.6) |> String.fromFloat) ++ "rem !important;}") ]
         , textarea
             [ value codeStr
             , classList
@@ -395,5 +404,7 @@ subscriptions model =
         [ showResults decodeResults
         , showError decodeError
         , showCode decodeCode
-        , onAnimationFrame (\_ -> Frame)
+
+        -- disable animation frames becase we keep the text area expanded to match text height
+        --, onAnimationFrame (\_ -> Frame)
         ]
