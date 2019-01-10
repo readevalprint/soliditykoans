@@ -7887,6 +7887,12 @@ var elm$html$Html$a = _VirtualDom_node('a');
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$header = _VirtualDom_node('header');
 var elm$html$Html$section = _VirtualDom_node('section');
+var elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -7933,6 +7939,17 @@ var author$project$Main$view = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$text('Solidity Koans')
+											])),
+										A2(
+										elm$html$Html$a,
+										_List_fromArray(
+											[
+												elm$html$Html$Attributes$class('button'),
+												elm$html$Html$Attributes$href('https://twitter.com/soliditykoans')
+											]),
+										_List_fromArray(
+											[
+												elm$html$Html$text('@soliditykoans')
 											]))
 									])),
 								A2(
@@ -7964,7 +7981,7 @@ var author$project$Main$view = function (model) {
 								elm$html$Html$div,
 								_List_fromArray(
 									[
-										elm$html$Html$Attributes$class('card error fluid')
+										elm$html$Html$Attributes$class('card  fluid')
 									]),
 								_List_fromArray(
 									[

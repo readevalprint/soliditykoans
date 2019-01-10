@@ -266,6 +266,7 @@ view model =
             , Html.section []
                 [ header []
                     [ a [ class "logo" ] [ text "Solidity Koans" ]
+                    , a [ class "button", href "https://twitter.com/soliditykoans" ] [ text "@soliditykoans" ]
                     ]
                 , div [ class "card fluid" ]
                     [ div [ class "section" ]
