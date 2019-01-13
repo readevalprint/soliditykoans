@@ -4820,7 +4820,7 @@ var author$project$Main$initModel = {
 			author$project$Debouncer$Messages$manual)),
 	v: A2(author$project$Main$Scroll, 0, 0),
 	ap: true,
-	_: '',
+	_: elm$core$Maybe$Nothing,
 	bf: 'Monokai'
 };
 var elm$core$Basics$False = 1;
@@ -5327,14 +5327,12 @@ var author$project$Main$decodeResults = function (x) {
 	if (!result.$) {
 		var value = result.a;
 		return author$project$Main$DisplayTestResults(
-			A2(
-				elm$core$Maybe$withDefault,
-				'',
-				elm$core$List$head(value)));
+			elm$core$List$head(value));
 	} else {
 		var value = result.a;
 		return author$project$Main$DisplayTestResults(
-			elm$json$Json$Decode$errorToString(value));
+			elm$core$Maybe$Just(
+				elm$json$Json$Decode$errorToString(value)));
 	}
 };
 var elm$json$Json$Decode$value = _Json_decodeValue;
@@ -6286,7 +6284,9 @@ var author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{_: value}),
+						{
+							_: elm$core$Maybe$Just(value)
+						}),
 					elm$core$Platform$Cmd$none);
 			case 1:
 				var scroll = msg.a;
@@ -8221,31 +8221,39 @@ var author$project$Main$view = function (model) {
 												elm$html$Html$text('@soliditykoans')
 											]))
 									])),
-								A2(
-								elm$html$Html$div,
-								_List_fromArray(
-									[
-										elm$html$Html$Attributes$class('card fluid')
-									]),
-								_List_fromArray(
-									[
-										A2(
+								function () {
+								var _n0 = model._;
+								if (_n0.$ === 1) {
+									return A2(elm$html$Html$div, _List_Nil, _List_Nil);
+								} else {
+									var tr = _n0.a;
+									return A2(
 										elm$html$Html$div,
 										_List_fromArray(
 											[
-												elm$html$Html$Attributes$class('section')
+												elm$html$Html$Attributes$class('card fluid')
 											]),
 										_List_fromArray(
 											[
 												A2(
-												elm$html$Html$h1,
-												_List_Nil,
+												elm$html$Html$div,
 												_List_fromArray(
 													[
-														elm$html$Html$text(model._)
+														elm$html$Html$Attributes$class('section')
+													]),
+												_List_fromArray(
+													[
+														A2(
+														elm$html$Html$h1,
+														_List_Nil,
+														_List_fromArray(
+															[
+																elm$html$Html$text(tr)
+															]))
 													]))
-											]))
-									])),
+											]));
+								}
+							}(),
 								A2(
 								elm$html$Html$div,
 								_List_fromArray(

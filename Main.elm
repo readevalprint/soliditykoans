@@ -57,7 +57,7 @@ type alias Contract =
 
 
 type alias Model =
-    { testResults : String
+    { testResults : Maybe String
     , quietForOneSecond : Debouncer Msg
     , error : String
     , scroll : Scroll
@@ -140,7 +140,7 @@ initModel =
         Debouncer.manual
             |> settleWhenQuietFor (Just <| fromSeconds 1)
             |> toDebouncer
-    , testResults = ""
+    , testResults = Nothing
     , error = ""
     , scroll = Scroll 0 0
     , languagesModel = initLanguagesModel
@@ -185,7 +185,7 @@ init _ =
 
 
 type Msg
-    = DisplayTestResults String
+    = DisplayTestResults (Maybe String)
     | OnScroll Scroll
     | Run
     | Display String
@@ -219,7 +219,7 @@ update msg ({ highlight } as model) =
             ( { model | error = "" }, getLangModel "Javascript" model |> .code |> toJs )
 
         Decode value ->
-            ( { model | testResults = value }, Cmd.none )
+            ( { model | testResults = Just value }, Cmd.none )
 
         OnScroll scroll ->
             ( { model | scroll = scroll }
@@ -268,11 +268,16 @@ view model =
                     [ a [ class "logo" ] [ text "Solidity Koans" ]
                     , a [ class "button", href "https://twitter.com/soliditykoans" ] [ text "@soliditykoans" ]
                     ]
-                , div [ class "card fluid" ]
-                    [ div [ class "section" ]
-                        [ Html.h1 [] [ text model.testResults ]
-                        ]
-                    ]
+                , case model.testResults of
+                    Nothing ->
+                        div [] []
+
+                    Just tr ->
+                        div [ class "card fluid" ]
+                            [ div [ class "section" ]
+                                [ Html.h1 [] [ text tr ]
+                                ]
+                            ]
                 , div
                     [ class "card  fluid" ]
                     [ pre
@@ -379,10 +384,10 @@ decodeResults x =
     in
     case result of
         Ok value ->
-            DisplayTestResults (value |> List.head |> Maybe.withDefault "")
+            DisplayTestResults (value |> List.head)
 
         Err value ->
-            DisplayTestResults (Decode.errorToString value)
+            DisplayTestResults (Just (Decode.errorToString value))
 
 
 decodeCode : Encode.Value -> Msg
