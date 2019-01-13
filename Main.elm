@@ -405,7 +405,5 @@ subscriptions model =
         [ showResults decodeResults
         , showError decodeError
         , showCode decodeCode
-
-        -- disable animation frames becase we keep the text area expanded to match text height
-        --, onAnimationFrame (\_ -> Frame)
+        , onAnimationFrame (\_ -> Frame)
         ]
