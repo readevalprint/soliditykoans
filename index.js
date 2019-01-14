@@ -13,13 +13,13 @@
 //rlp = require('rlp')
 
 //require('babel-polyfill')
-var solcWrapper = require('solc/wrapper')
+//var solcWrapper = require('solc/wrapper')
 //const sim = require('remix-simulator')
 //const Web3 = require('web3');
 //var RemixTests = require('remix-tests')
 
 
-window.sol_compiler = solcWrapper(window.Module)
+//window.sol_compiler = solcWrapper(window.Module)
 
 //web3 = new Web3(new sim.Provider())
 //

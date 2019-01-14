@@ -59,7 +59,7 @@ type alias Contract =
 type alias Model =
     { testResults : Maybe String
     , quietForOneSecond : Debouncer Msg
-    , error : String
+    , error : List String
     , scroll : Scroll
     , languagesModel : Dict String LanguageModel
     , showLineCount : Bool
@@ -67,6 +67,8 @@ type alias Model =
     , lineCount : Maybe Int
     , theme : String
     , highlight : HighlightModel
+    , isTyping : Bool
+    , isWaiting : Bool
     }
 
 
@@ -141,7 +143,7 @@ initModel =
             |> settleWhenQuietFor (Just <| fromSeconds 1)
             |> toDebouncer
     , testResults = Nothing
-    , error = ""
+    , error = []
     , scroll = Scroll 0 0
     , languagesModel = initLanguagesModel
     , showLineCount = True
@@ -149,6 +151,8 @@ initModel =
     , lineCount = Just 1
     , theme = "Monokai"
     , highlight = initHighlightModel
+    , isTyping = False
+    , isWaiting = True
     }
 
 
@@ -190,7 +194,7 @@ type Msg
     | Run
     | Display String
     | Decode String
-    | DisplayError String
+    | DisplayError (List String)
     | MsgQuietForOneSecond (Debouncer.Msg Msg)
     | Frame
 
@@ -210,13 +214,13 @@ update msg ({ highlight } as model) =
             Debouncer.update update updateDebouncer subMsg model
 
         DisplayTestResults newTestResults ->
-            ( { model | testResults = newTestResults }, Cmd.none )
+            ( { model | testResults = newTestResults, isWaiting = False }, Cmd.none )
 
         DisplayError error ->
-            ( { model | error = error }, Cmd.none )
+            ( { model | error = error, isWaiting = False }, Cmd.none )
 
         Run ->
-            ( { model | error = "" }, getLangModel "Javascript" model |> .code |> toJs )
+            ( { model | error = [], isTyping = False, isWaiting = True }, getLangModel "Javascript" model |> .code |> toJs )
 
         Decode value ->
             ( { model | testResults = Just value }, Cmd.none )
@@ -235,7 +239,7 @@ update msg ({ highlight } as model) =
         Display codeStr ->
             getLangModel "Javascript" model
                 |> (\m -> { m | code = codeStr })
-                |> updateLangModel "Javascript" model
+                |> updateLangModel "Javascript" { model | isTyping = True }
                 |> (\m -> update (MsgQuietForOneSecond (provideInput Run)) m)
 
 
@@ -268,23 +272,42 @@ view model =
                     [ a [ class "logo" ] [ text "Solidity Koans" ]
                     , a [ class "button", href "https://twitter.com/soliditykoans" ] [ text "@soliditykoans" ]
                     ]
-                , case model.testResults of
-                    Nothing ->
-                        div [] []
+                , case model.isWaiting of
+                    True ->
+                        Html.div [ class "spinner" ] []
 
-                    Just tr ->
-                        div [ class "card fluid" ]
-                            [ div [ class "section" ]
-                                [ Html.h1 [] [ text tr ]
-                                ]
-                            ]
-                , div
-                    [ class "card  fluid" ]
-                    [ pre
-                        []
-                        [ text model.error
-                        ]
-                    ]
+                    False ->
+                        case model.testResults of
+                            Nothing ->
+                                text ""
+
+                            Just tr ->
+                                div
+                                    [ class "card fluid"
+                                    , case model.isTyping of
+                                        True ->
+                                            style "opacity" "0.5"
+
+                                        False ->
+                                            style "opacity" "1.0"
+                                    ]
+                                    [ div [ class "section" ]
+                                        [ Html.strong [] [ text tr ]
+                                        ]
+                                    ]
+                , div []
+                    (model.error
+                        |> List.map
+                            (\error ->
+                                div
+                                    [ class "card  fluid" ]
+                                    [ pre
+                                        []
+                                        [ text error
+                                        ]
+                                    ]
+                            )
+                    )
                 ]
             ]
         ]
@@ -369,10 +392,10 @@ decodeError x =
     in
     case result of
         Ok value ->
-            DisplayError (value |> List.head |> Maybe.withDefault "")
+            DisplayError value
 
         Err value ->
-            DisplayError (Decode.errorToString value)
+            DisplayError [ Decode.errorToString value ]
 
 
 decodeResults : Encode.Value -> Msg
@@ -410,5 +433,6 @@ subscriptions model =
         [ showResults decodeResults
         , showError decodeError
         , showCode decodeCode
-        , onAnimationFrame (\_ -> Frame)
+
+        --, onAnimationFrame (\_ -> Frame)
         ]
