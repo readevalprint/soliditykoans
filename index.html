@@ -126,31 +126,31 @@
         // The keys here are the "global" names of the source files,
         // imports can use other files via remappings (see below).
         "solidity_koans_test.sol": {
-          "content":`pragma solidity ^0.5.0;
+"content":`pragma solidity ^0.5.0;
 
-          import "tests.sol";
+import "tests.sol";
 
-          contract ReflectionsOnTruth {
+contract ReflectionsOnTruth {
 
-            function trueOrFalse() public {
+  function trueOrFalse() public {
 
-              // ======= Fix the following line so that value = true
-              bool value = false;
-              // =======
+    // ======= Fix the following line so that value = true
+    bool value = false;
+    // =======
 
-              Assert.equal(true, value, "The value should be true");
+    Assert.equal(true, value, "The value should be true");
 
-              // ===== Uncomment the following line so that value = false again
-              // value = false;
-              // =======
+    // ===== Uncomment the following line so that value = false again
+    // value = false;
+    // =======
 
-              Assert.equal(false, value, "The value should be false again");
+    Assert.equal(false, value, "The value should be false again");
 
-            }
+  }
 
-          }
+}
 
-          `
+`
 
         }
       },
@@ -200,43 +200,8 @@
     }
     importCallback=(url, cb) => { console.log("import", url, cb); cb(null,input["sources"][url]["content"]) }
     runningTest = {}
-    //runningTest["bar_test.sol"] = { content: "pragma solidity ^0.5.0; import \"remix_tests.sol\"; contract Foo {function lesson_01_bb() public view returns (bool) {return true;} function lesson_02_cc() public { Assert.equal(int(2), int(2), \"it should be 2\");}}" };
     runningTest["solidity_koans_test.sol"] = { content: content};
-    //runningTest["remix_tests.sol"] = { content: "" };
-    //RemixTests.runTestSources(runningTest ,testCallback,resultCallback,finalCallback,importCallback)
 
-
-    /*
-    contractBytecode = solc_out.contracts["bar_test.sol"]['Foo'].evm.bytecode.object
-    contractABI = solc_out.contracts["foo.sol"]['Foo'].abi
-
-
-    // web3.setProvider(new sim.Provider())
-    // eth = new Eth(new sim.Provider())
-    web3.eth.getAccounts().then((accounts) => {web3.eth.defaultAccount = accounts[0]
-
-      contract1 = new web3.eth.Contract(contractABI)
-
-
-      return contract1.deploy({data: contractBytecode}).send({from: web3.eth.defaultAccount, gas: 100000000000}).on('receipt', function(receipt){
-        // receipt example
-        console.log(receipt)
-      })
-      .then(function(newContractInstance){
-        console.log("new address", newContractInstance.options.address) // instance with the new contract address
-        contract1.options.address = newContractInstance.options.address
-
-
-
-        return contract1.methods.deposit(123).send({from: web3.eth.defaultAccount}).on('receipt', function(receipt){
-          // receipt example
-          console.log(receipt)
-        })
-      })
-
-    })
-
-    */
 
   </script>
 </html>
