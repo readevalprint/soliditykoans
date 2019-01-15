@@ -16,21 +16,19 @@ import Maybe.Extra exposing (..)
 import SyntaxHighlight as SH exposing (monokai, toBlockHtml, useTheme)
 
 
-functionDecoder : Decoder Function
-functionDecoder =
-    Decode.succeed Function
-        |> required "assertions" (list string)
-        |> required "notice" string
-        |> required "loc" int
-        |> required "fail" bool
+devDocFunctionDecoder : Decoder DevDocFunction
+devDocFunctionDecoder =
+    Decode.succeed DevDocFunction
+        |> optional "details" string ""
 
 
-contractDecoder : Decoder Contract
-contractDecoder =
-    Decode.succeed Contract
-        |> required "functions" (keyValuePairs functionDecoder)
-        |> required "notice" string
-        |> required "loc" int
+devDocDecoder : Decoder DevDoc
+devDocDecoder =
+    Decode.succeed DevDoc
+        |> optional "title" string "Untitled"
+        |> optional "author" string "Anonomous"
+        |> optional "details" string ""
+        |> required "methods" (dict devDocFunctionDecoder)
 
 
 main =
@@ -41,23 +39,21 @@ main =
 -- MODEL
 
 
-type alias Function =
-    { assertions : List String
-    , notice : String
-    , loc : Int
-    , fail : Bool
+type alias DevDocFunction =
+    { details : String
     }
 
 
-type alias Contract =
-    { functions : List ( String, Function )
-    , notice : String
-    , loc : Int
+type alias DevDoc =
+    { title : String
+    , author : String
+    , details : String
+    , methods : Dict String DevDocFunction
     }
 
 
 type alias Model =
-    { testResults : Maybe String
+    { testResults : Maybe TestResult
     , quietForOneSecond : Debouncer Msg
     , error : List String
     , scroll : Scroll
@@ -69,6 +65,7 @@ type alias Model =
     , highlight : HighlightModel
     , isTyping : Bool
     , isWaiting : Bool
+    , docs : Maybe DevDoc
     }
 
 
@@ -87,11 +84,10 @@ port showError : (Encode.Value -> msg) -> Sub msg
 port showCode : (Encode.Value -> msg) -> Sub msg
 
 
+port showDocs : (Encode.Value -> msg) -> Sub msg
+
+
 port toJs : String -> Cmd msg
-
-
-type alias TestResults =
-    List ( String, Contract )
 
 
 type alias ErrorResults =
@@ -153,12 +149,20 @@ initModel =
     , highlight = initHighlightModel
     , isTyping = False
     , isWaiting = True
+    , docs = Nothing
     }
 
 
 type alias LanguageModel =
     { code : String
     , scroll : Scroll
+    }
+
+
+type alias TestResult =
+    { context : String
+    , value : String
+    , message : String
     }
 
 
@@ -189,14 +193,14 @@ init _ =
 
 
 type Msg
-    = DisplayTestResults (Maybe String)
+    = DisplayTestResults (Maybe TestResult)
     | OnScroll Scroll
     | Run
     | Display String
-    | Decode String
     | DisplayError (List String)
     | MsgQuietForOneSecond (Debouncer.Msg Msg)
     | Frame
+    | SetDocs DevDoc
 
 
 updateDebouncer : Debouncer.UpdateConfig Msg Model
@@ -222,9 +226,6 @@ update msg ({ highlight } as model) =
         Run ->
             ( { model | error = [], isTyping = False, isWaiting = True }, getLangModel "Javascript" model |> .code |> toJs )
 
-        Decode value ->
-            ( { model | testResults = Just value }, Cmd.none )
-
         OnScroll scroll ->
             ( { model | scroll = scroll }
             , Cmd.none
@@ -241,6 +242,9 @@ update msg ({ highlight } as model) =
                 |> (\m -> { m | code = codeStr })
                 |> updateLangModel "Javascript" { model | isTyping = True }
                 |> (\m -> update (MsgQuietForOneSecond (provideInput Run)) m)
+
+        SetDocs docs ->
+            ( { model | docs = Just docs }, Cmd.none )
 
 
 updateLangModel : String -> Model -> LanguageModel -> Model
@@ -270,8 +274,40 @@ view model =
             , Html.section []
                 [ header []
                     [ a [ class "logo" ] [ text "Solidity Koans" ]
-                    , a [ class "button", href "https://twitter.com/soliditykoans" ] [ text "@soliditykoans" ]
+                    , a [ class "link", href "https://twitter.com/soliditykoans" ] [ text "@soliditykoans" ]
                     ]
+                , Html.section []
+                    (case model.docs of
+                        Just docs ->
+                            [ Html.h1 [] [ text docs.title, Html.small [] [ text ("Author: " ++ docs.author) ] ]
+                            , div []
+                                [ Html.p [] [ text docs.details ]
+                                , case model.isWaiting of
+                                    True ->
+                                        text ""
+
+                                    False ->
+                                        case model.testResults of
+                                            Nothing ->
+                                                div []
+                                                    [ Html.h2 [] [ text "Success!" ]
+                                                    , Html.p [] [ text "You have reached enlightenment. Or perhaps you have just deleted everything, which is a lesson in itself." ]
+                                                    , Html.p [] [ text "This is my first elm-lang project. Follow it on twitter as I add more features." ]
+                                                    ]
+
+                                            Just tr ->
+                                                case Dict.get (tr.value ++ "()") docs.methods of
+                                                    Just m ->
+                                                        Html.p [] [ text (m |> .details) ]
+
+                                                    Nothing ->
+                                                        text ""
+                                ]
+                            ]
+
+                        Nothing ->
+                            [ text "" ]
+                    )
                 , case model.isWaiting of
                     True ->
                         Html.div [ class "spinner" ] []
@@ -292,7 +328,7 @@ view model =
                                             style "opacity" "1.0"
                                     ]
                                     [ div [ class "section" ]
-                                        [ Html.strong [] [ text tr ]
+                                        [ Html.strong [] [ text tr.message ]
                                         ]
                                     ]
                 , div []
@@ -398,19 +434,27 @@ decodeError x =
             DisplayError [ Decode.errorToString value ]
 
 
+testResultDecoder : Decoder TestResult
+testResultDecoder =
+    Decode.succeed TestResult
+        |> required "context" string
+        |> required "value" string
+        |> required "message" string
+
+
 decodeResults : Encode.Value -> Msg
 decodeResults x =
     let
         result =
             -- Decode.decodeValue Decode.string x
-            Decode.decodeValue (Decode.list (Decode.at [ "message" ] Decode.string)) x
+            Decode.decodeValue (Decode.list testResultDecoder) x
     in
     case result of
         Ok value ->
             DisplayTestResults (value |> List.head)
 
         Err value ->
-            DisplayTestResults (Just (Decode.errorToString value))
+            DisplayError [ Decode.errorToString value ]
 
 
 decodeCode : Encode.Value -> Msg
@@ -427,12 +471,26 @@ decodeCode x =
             Display ("//" ++ Decode.errorToString value)
 
 
+decodeDocs : Encode.Value -> Msg
+decodeDocs x =
+    let
+        result =
+            Decode.decodeValue devDocDecoder x
+    in
+    case result of
+        Ok value ->
+            SetDocs value
+
+        Err value ->
+            DisplayError [ Decode.errorToString value ]
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ showResults decodeResults
         , showError decodeError
         , showCode decodeCode
-
-        --, onAnimationFrame (\_ -> Frame)
+        , showDocs decodeDocs
+        , onAnimationFrame (\_ -> Frame)
         ]

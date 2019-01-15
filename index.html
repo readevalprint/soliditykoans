@@ -123,6 +123,7 @@
       {
         "tests.sol": {"content": RemixTests.assertLibCode},
 
+
         // The keys here are the "global" names of the source files,
         // imports can use other files via remappings (see below).
         "solidity_koans_test.sol": {
@@ -130,8 +131,13 @@
 
 import "tests.sol";
 
+/// @title Reflections On Truth
+/// @author Tim Watts tim@readevalprint.com
+/// @dev This is a basic koan on things that are true and things that are false.
+
 contract ReflectionsOnTruth {
 
+  /// @dev Reflect on the following: \`(true==true) != false\` but also \`(false==false) == true\`
   function trueOrFalse() public {
 
     // ======= Fix the following line so that value = true
@@ -180,6 +186,8 @@ contract ReflectionsOnTruth {
       console.log("test:", result);
 
       if(result.type === "contract") {
+        app.ports.showDocs.send(result.contractDetails.devdoc)
+
       } 
       if (result.type === "testFailure" || result.type === "testPass"){
 
@@ -195,10 +203,20 @@ contract ReflectionsOnTruth {
       }
       else 
       {
-        app.ports.showError.send(error.filter(function (e) { return e.sourceLocation.file == 'solidity_koans_test.sol'}))
+        app.ports.showError.send(error.filter(function (e) { return ( (! e.sourceLocation) || (e.sourceLocation.file == 'solidity_koans_test.sol'))}))
       }
     }
-    importCallback=(url, cb) => { console.log("import", url, cb); cb(null,input["sources"][url]["content"]) }
+    importCallback=(path, cb) => { 
+      console.log("import", path);
+      if (path in input.sources){
+        cb(null,input.sources[path].content) 
+      } else 
+      {
+        
+        app.ports.showError.send([{formattedMessage: 'The import path "'+ path + '" was unfortunately, not found.'}])
+        return cb( "not found");
+      }
+    }
     runningTest = {}
     runningTest["solidity_koans_test.sol"] = { content: content};
 
