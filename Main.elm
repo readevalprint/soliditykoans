@@ -292,7 +292,11 @@ view model =
                                                 div []
                                                     [ Html.h2 [] [ text "Success!" ]
                                                     , Html.p [] [ text "You have reached enlightenment. Or perhaps you have just deleted everything, which is a lesson in itself." ]
-                                                    , Html.p [] [ text "This is my first elm-lang project. Follow it on twitter as I add more features." ]
+                                                    , Html.p [] [ text "This is my first elm-lang project. Follow it on twitter and GitHub as I add more features." ]
+                                                    , Html.p []
+                                                        [ text "GitHub: "
+                                                        , a [ class "link", href "https://github.com/readevalprint/soliditykoans" ] [ text "github.com/readevalprint/soliditykoans" ]
+                                                        ]
                                                     ]
 
                                             Just tr ->

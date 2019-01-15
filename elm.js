@@ -8423,7 +8423,25 @@ var author$project$Main$view = function (model) {
 																			_List_Nil,
 																			_List_fromArray(
 																				[
-																					elm$html$Html$text('This is my first elm-lang project. Follow it on twitter as I add more features.')
+																					elm$html$Html$text('This is my first elm-lang project. Follow it on twitter and GitHub as I add more features.')
+																				])),
+																			A2(
+																			elm$html$Html$p,
+																			_List_Nil,
+																			_List_fromArray(
+																				[
+																					elm$html$Html$text('GitHub: '),
+																					A2(
+																					elm$html$Html$a,
+																					_List_fromArray(
+																						[
+																							elm$html$Html$Attributes$class('link'),
+																							elm$html$Html$Attributes$href('https://github.com/readevalprint/soliditykoans')
+																						]),
+																					_List_fromArray(
+																						[
+																							elm$html$Html$text('github.com/readevalprint/soliditykoans')
+																						]))
 																				]))
 																		]));
 															} else {
