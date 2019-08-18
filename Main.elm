@@ -323,7 +323,7 @@ view model =
 
                             Just tr ->
                                 div
-                                    [ class "card fluid"
+                                    [ class "card fluid warning"
                                     , case model.isTyping of
                                         True ->
                                             style "opacity" "0.5"
@@ -340,7 +340,7 @@ view model =
                         |> List.map
                             (\error ->
                                 div
-                                    [ class "card  fluid" ]
+                                    [ class "card fluid" ]
                                     [ pre
                                         []
                                         [ text error

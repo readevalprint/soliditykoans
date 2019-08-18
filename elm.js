@@ -77,14 +77,14 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
   return fun.a === 9 ? fun.f(a, b, c, d, e, f, g, h, i) : fun(a)(b)(c)(d)(e)(f)(g)(h)(i);
 }
 
+console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.0/optimize for better performance and smaller assets.');
 
 
+var _List_Nil_UNUSED = { $: 0 };
+var _List_Nil = { $: '[]' };
 
-var _List_Nil = { $: 0 };
-var _List_Nil_UNUSED = { $: '[]' };
-
-function _List_Cons(hd, tl) { return { $: 1, a: hd, b: tl }; }
-function _List_Cons_UNUSED(hd, tl) { return { $: '::', a: hd, b: tl }; }
+function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
+function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
 
 
 var _List_cons = F2(_List_Cons);
@@ -194,7 +194,7 @@ function _Utils_eqHelp(x, y, depth, stack)
 		return false;
 	}
 
-	/**_UNUSED/
+	/**/
 	if (x.$ === 'Set_elm_builtin')
 	{
 		x = elm$core$Set$toList(x);
@@ -207,7 +207,7 @@ function _Utils_eqHelp(x, y, depth, stack)
 	}
 	//*/
 
-	/**/
+	/**_UNUSED/
 	if (x.$ < 0)
 	{
 		x = elm$core$Dict$toList(x);
@@ -242,7 +242,7 @@ function _Utils_cmp(x, y, ord)
 		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
 	}
 
-	/**_UNUSED/
+	/**/
 	if (x instanceof String)
 	{
 		var a = x.valueOf();
@@ -251,10 +251,10 @@ function _Utils_cmp(x, y, ord)
 	}
 	//*/
 
-	/**/
+	/**_UNUSED/
 	if (typeof x.$ === 'undefined')
 	//*/
-	/**_UNUSED/
+	/**/
 	if (x.$[0] === '#')
 	//*/
 	{
@@ -284,17 +284,17 @@ var _Utils_compare = F2(function(x, y)
 
 // COMMON VALUES
 
-var _Utils_Tuple0 = 0;
-var _Utils_Tuple0_UNUSED = { $: '#0' };
+var _Utils_Tuple0_UNUSED = 0;
+var _Utils_Tuple0 = { $: '#0' };
 
-function _Utils_Tuple2(a, b) { return { a: a, b: b }; }
-function _Utils_Tuple2_UNUSED(a, b) { return { $: '#2', a: a, b: b }; }
+function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
+function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
 
-function _Utils_Tuple3(a, b, c) { return { a: a, b: b, c: c }; }
-function _Utils_Tuple3_UNUSED(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
+function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
+function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
 
-function _Utils_chr(c) { return c; }
-function _Utils_chr_UNUSED(c) { return new String(c); }
+function _Utils_chr_UNUSED(c) { return c; }
+function _Utils_chr(c) { return new String(c); }
 
 
 // RECORDS
@@ -499,12 +499,12 @@ var _JsArray_appendN = F3(function(n, dest, source)
 
 // LOG
 
-var _Debug_log = F2(function(tag, value)
+var _Debug_log_UNUSED = F2(function(tag, value)
 {
 	return value;
 });
 
-var _Debug_log_UNUSED = F2(function(tag, value)
+var _Debug_log = F2(function(tag, value)
 {
 	console.log(tag + ': ' + _Debug_toString(value));
 	return value;
@@ -530,12 +530,12 @@ function _Debug_todoCase(moduleName, region, value)
 
 // TO STRING
 
-function _Debug_toString(value)
+function _Debug_toString_UNUSED(value)
 {
 	return '<internals>';
 }
 
-function _Debug_toString_UNUSED(value)
+function _Debug_toString(value)
 {
 	return _Debug_toAnsiString(false, value);
 }
@@ -720,13 +720,13 @@ function _Debug_toHexDigit(n)
 // CRASH
 
 
-function _Debug_crash(identifier)
+function _Debug_crash_UNUSED(identifier)
 {
 	throw new Error('https://github.com/elm/core/blob/1.0.0/hints/' + identifier + '.md');
 }
 
 
-function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
+function _Debug_crash(identifier, fact1, fact2, fact3, fact4)
 {
 	switch(identifier)
 	{
@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.as.W === region.ak.W)
+	if (region.start.line === region.end.line)
 	{
-		return 'on line ' + region.as.W;
+		return 'on line ' + region.start.line;
 	}
-	return 'on lines ' + region.as.W + ' through ' + region.ak.W;
+	return 'on lines ' + region.start.line + ' through ' + region.end.line;
 }
 
 
@@ -1212,7 +1212,7 @@ function _String_fromList(chars)
 
 
 
-/**_UNUSED/
+/**/
 function _Json_errorToString(error)
 {
 	return elm$json$Json$Decode$errorToString(error);
@@ -1616,11 +1616,11 @@ var _Json_encode = F2(function(indentLevel, value)
 	return JSON.stringify(_Json_unwrap(value), null, indentLevel) + '';
 });
 
-function _Json_wrap_UNUSED(value) { return { $: 0, a: value }; }
-function _Json_unwrap_UNUSED(value) { return value.a; }
+function _Json_wrap(value) { return { $: 0, a: value }; }
+function _Json_unwrap(value) { return value.a; }
 
-function _Json_wrap(value) { return value; }
-function _Json_unwrap(value) { return value; }
+function _Json_wrap_UNUSED(value) { return value; }
+function _Json_unwrap_UNUSED(value) { return value; }
 
 function _Json_emptyArray() { return []; }
 function _Json_emptyObject() { return {}; }
@@ -1857,9 +1857,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.bG,
-		impl.b2,
-		impl.b0,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
 		function() { return function() {} }
 	);
 });
@@ -1872,7 +1872,7 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 function _Platform_initialize(flagDecoder, args, init, update, subscriptions, stepperBuilder)
 {
 	var result = A2(_Json_run, flagDecoder, _Json_wrap(args ? args['flags'] : undefined));
-	elm$core$Result$isOk(result) || _Debug_crash(2 /**_UNUSED/, _Json_errorToString(result.a) /**/);
+	elm$core$Result$isOk(result) || _Debug_crash(2 /**/, _Json_errorToString(result.a) /**/);
 	var managers = {};
 	result = init(result.a);
 	var model = result.a;
@@ -2271,7 +2271,7 @@ function _Platform_setupIncomingPort(name, sendToApp)
 //
 
 
-function _Platform_export(exports)
+function _Platform_export_UNUSED(exports)
 {
 	scope['Elm']
 		? _Platform_mergeExportsProd(scope['Elm'], exports)
@@ -2292,7 +2292,7 @@ function _Platform_mergeExportsProd(obj, exports)
 }
 
 
-function _Platform_export_UNUSED(exports)
+function _Platform_export(exports)
 {
 	scope['Elm']
 		? _Platform_mergeExportsDebug('Elm', scope['Elm'], exports)
@@ -2332,10 +2332,10 @@ var _VirtualDom_init = F4(function(virtualNode, flagDecoder, debugMetadata, args
 {
 	// NOTE: this function needs _Platform_export available to work
 
-	/**/
+	/**_UNUSED/
 	var node = args['node'];
 	//*/
-	/**_UNUSED/
+	/**/
 	var node = args && args['node'] ? args['node'] : _Debug_crash(0);
 	//*/
 
@@ -2590,24 +2590,24 @@ function _VirtualDom_noInnerHtmlOrFormAction(key)
 	return key == 'innerHTML' || key == 'formAction' ? 'data-' + key : key;
 }
 
-function _VirtualDom_noJavaScriptUri(value)
+function _VirtualDom_noJavaScriptUri_UNUSED(value)
 {
 	return /^javascript:/i.test(value.replace(/\s/g,'')) ? '' : value;
 }
 
-function _VirtualDom_noJavaScriptUri_UNUSED(value)
+function _VirtualDom_noJavaScriptUri(value)
 {
 	return /^javascript:/i.test(value.replace(/\s/g,''))
 		? 'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'
 		: value;
 }
 
-function _VirtualDom_noJavaScriptOrHtmlUri(value)
+function _VirtualDom_noJavaScriptOrHtmlUri_UNUSED(value)
 {
 	return /^\s*(javascript:|data:text\/html)/i.test(value) ? '' : value;
 }
 
-function _VirtualDom_noJavaScriptOrHtmlUri_UNUSED(value)
+function _VirtualDom_noJavaScriptOrHtmlUri(value)
 {
 	return /^\s*(javascript:|data:text\/html)/i.test(value)
 		? 'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'
@@ -2659,9 +2659,9 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		aT: func(record.aT),
-		at: record.at,
-		ap: record.ap
+		message: func(record.message),
+		stopPropagation: record.stopPropagation,
+		preventDefault: record.preventDefault
 	}
 });
 
@@ -2929,11 +2929,11 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.aT;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.at;
+		var message = !tag ? value : tag < 3 ? value.a : value.message;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.stopPropagation;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.ap) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.preventDefault) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3883,15 +3883,15 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.bG,
-		impl.b2,
-		impl.b0,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
 		function(sendToApp, initialModel) {
-			var view = impl.b4;
-			/**/
+			var view = impl.view;
+			/**_UNUSED/
 			var domNode = args['node'];
 			//*/
-			/**_UNUSED/
+			/**/
 			var domNode = args && args['node'] ? args['node'] : _Debug_crash(0);
 			//*/
 			var currNode = _VirtualDom_virtualize(domNode);
@@ -3919,12 +3919,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.bG,
-		impl.b2,
-		impl.b0,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.X && impl.X(sendToApp)
-			var view = impl.b4;
+			var divertHrefToApp = impl.setup && impl.setup(sendToApp)
+			var view = impl.view;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3932,12 +3932,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.br);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.body);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.bi) && (_VirtualDom_doc.title = title = doc.bi);
+				(title !== doc.title) && (_VirtualDom_doc.title = title = doc.title);
 			});
 		}
 	);
@@ -3993,12 +3993,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.bL;
-	var onUrlRequest = impl.bM;
+	var onUrlChange = impl.onUrlChange;
+	var onUrlRequest = impl.onUrlRequest;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		X: function(sendToApp)
+		setup: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4014,9 +4014,9 @@ function _Browser_application(impl)
 					var next = elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.a2 === next.a2
-							&& curr.aI === next.aI
-							&& curr.a_.a === next.a_.a
+							&& curr.protocol === next.protocol
+							&& curr.host === next.host
+							&& curr.port_.a === next.port_.a
 						)
 							? elm$browser$Browser$Internal(next)
 							: elm$browser$Browser$External(href)
@@ -4024,13 +4024,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		bG: function(flags)
+		init: function(flags)
 		{
-			return A3(impl.bG, flags, _Browser_getUrl(), key);
+			return A3(impl.init, flags, _Browser_getUrl(), key);
 		},
-		b4: impl.b4,
-		b2: impl.b2,
-		b0: impl.b0
+		view: impl.view,
+		update: impl.update,
+		subscriptions: impl.subscriptions
 	});
 }
 
@@ -4096,17 +4096,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { bD: 'hidden', bs: 'visibilitychange' }
+		? { hidden: 'hidden', change: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { bD: 'mozHidden', bs: 'mozvisibilitychange' }
+		? { hidden: 'mozHidden', change: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { bD: 'msHidden', bs: 'msvisibilitychange' }
+		? { hidden: 'msHidden', change: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { bD: 'webkitHidden', bs: 'webkitvisibilitychange' }
-		: { bD: 'hidden', bs: 'visibilitychange' };
+		? { hidden: 'webkitHidden', change: 'webkitvisibilitychange' }
+		: { hidden: 'hidden', change: 'visibilitychange' };
 }
 
 
@@ -4187,12 +4187,12 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		ba: _Browser_getScene(),
-		bm: {
-			ai: _Browser_window.pageXOffset,
-			aj: _Browser_window.pageYOffset,
-			P: _Browser_doc.documentElement.clientWidth,
-			H: _Browser_doc.documentElement.clientHeight
+		scene: _Browser_getScene(),
+		viewport: {
+			x: _Browser_window.pageXOffset,
+			y: _Browser_window.pageYOffset,
+			width: _Browser_doc.documentElement.clientWidth,
+			height: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4202,8 +4202,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		P: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		H: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		width: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		height: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4226,15 +4226,15 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			ba: {
-				P: node.scrollWidth,
-				H: node.scrollHeight
+			scene: {
+				width: node.scrollWidth,
+				height: node.scrollHeight
 			},
-			bm: {
-				ai: node.scrollLeft,
-				aj: node.scrollTop,
-				P: node.clientWidth,
-				H: node.clientHeight
+			viewport: {
+				x: node.scrollLeft,
+				y: node.scrollTop,
+				width: node.clientWidth,
+				height: node.clientHeight
 			}
 		};
 	});
@@ -4264,18 +4264,18 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			ba: _Browser_getScene(),
-			bm: {
-				ai: x,
-				aj: y,
-				P: _Browser_doc.documentElement.clientWidth,
-				H: _Browser_doc.documentElement.clientHeight
+			scene: _Browser_getScene(),
+			viewport: {
+				x: x,
+				y: y,
+				width: _Browser_doc.documentElement.clientWidth,
+				height: _Browser_doc.documentElement.clientHeight
 			},
-			bz: {
-				ai: x + rect.left,
-				aj: y + rect.top,
-				P: rect.width,
-				H: rect.height
+			element: {
+				x: x + rect.left,
+				y: y + rect.top,
+				width: rect.width,
+				height: rect.height
 			}
 		};
 	});
@@ -4486,14 +4486,14 @@ var _Parser_findSubString = F5(function(smallString, offset, row, col, bigString
 
 	return _Utils_Tuple3(newOffset, row, col);
 });
-var elm$core$Basics$EQ = 1;
-var elm$core$Basics$GT = 2;
-var elm$core$Basics$LT = 0;
+var elm$core$Basics$EQ = {$: 'EQ'};
+var elm$core$Basics$GT = {$: 'GT'};
+var elm$core$Basics$LT = {$: 'LT'};
 var elm$core$Dict$foldr = F3(
 	function (func, acc, t) {
 		foldr:
 		while (true) {
-			if (t.$ === -2) {
+			if (t.$ === 'RBEmpty_elm_builtin') {
 				return acc;
 			} else {
 				var key = t.b;
@@ -4539,7 +4539,7 @@ var elm$core$Dict$keys = function (dict) {
 		dict);
 };
 var elm$core$Set$toList = function (_n0) {
-	var dict = _n0;
+	var dict = _n0.a;
 	return elm$core$Dict$keys(dict);
 };
 var elm$core$Elm$JsArray$foldr = _JsArray_foldr;
@@ -4549,7 +4549,7 @@ var elm$core$Array$foldr = F3(
 		var tail = _n0.d;
 		var helper = F2(
 			function (node, acc) {
-				if (!node.$) {
+				if (node.$ === 'SubTree') {
 					var subTree = node.a;
 					return A3(elm$core$Elm$JsArray$foldr, helper, acc, subTree);
 				} else {
@@ -4572,9 +4572,11 @@ var author$project$Debouncer$Internal$fromSeconds = function (s) {
 	return elm$core$Basics$round(s * 1000);
 };
 var author$project$Debouncer$Messages$fromSeconds = author$project$Debouncer$Internal$fromSeconds;
-var author$project$Debouncer$Internal$Config = elm$core$Basics$identity;
+var author$project$Debouncer$Internal$Config = function (a) {
+	return {$: 'Config', a: a};
+};
 var elm$core$Maybe$Just = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Just', a: a};
 };
 var author$project$Debouncer$Internal$lastInput = F2(
 	function (i, o) {
@@ -4583,28 +4585,30 @@ var author$project$Debouncer$Internal$lastInput = F2(
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
-var elm$core$Maybe$Nothing = {$: 1};
-var author$project$Debouncer$Internal$manual = {y: author$project$Debouncer$Internal$lastInput, p: elm$core$Maybe$Nothing, q: elm$core$Maybe$Nothing, s: elm$core$Maybe$Nothing};
+var elm$core$Maybe$Nothing = {$: 'Nothing'};
+var author$project$Debouncer$Internal$manual = author$project$Debouncer$Internal$Config(
+	{accumulator: author$project$Debouncer$Internal$lastInput, emitWhenUnsettled: elm$core$Maybe$Nothing, emitWhileUnsettled: elm$core$Maybe$Nothing, settleWhenQuietFor: elm$core$Maybe$Nothing});
 var author$project$Debouncer$Basic$manual = author$project$Debouncer$Internal$manual;
 var author$project$Debouncer$Messages$manual = author$project$Debouncer$Basic$manual;
 var author$project$Debouncer$Internal$settleWhenQuietFor = F2(
 	function (time, _n0) {
-		var config = _n0;
-		return _Utils_update(
-			config,
-			{s: time});
+		var config = _n0.a;
+		return author$project$Debouncer$Internal$Config(
+			_Utils_update(
+				config,
+				{settleWhenQuietFor: time}));
 	});
 var author$project$Debouncer$Basic$settleWhenQuietFor = author$project$Debouncer$Internal$settleWhenQuietFor;
 var author$project$Debouncer$Messages$settleWhenQuietFor = author$project$Debouncer$Basic$settleWhenQuietFor;
 var author$project$Debouncer$Internal$Debouncer = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'Debouncer', a: a, b: b};
 	});
-var author$project$Debouncer$Internal$Settled = {$: 0};
+var author$project$Debouncer$Internal$Settled = {$: 'Settled'};
 var elm$core$Basics$lt = _Utils_lt;
 var elm$core$Maybe$andThen = F2(
 	function (callback, maybeValue) {
-		if (!maybeValue.$) {
+		if (maybeValue.$ === 'Just') {
 			var value = maybeValue.a;
 			return callback(value);
 		} else {
@@ -4616,13 +4620,14 @@ var author$project$Debouncer$Internal$nothingIfNegative = elm$core$Maybe$andThen
 		return (num < 0) ? elm$core$Maybe$Nothing : elm$core$Maybe$Just(num);
 	});
 var author$project$Debouncer$Internal$sanitizeConfig = function (_n0) {
-	var config = _n0;
-	return {
-		y: config.y,
-		p: author$project$Debouncer$Internal$nothingIfNegative(config.p),
-		q: author$project$Debouncer$Internal$nothingIfNegative(config.q),
-		s: author$project$Debouncer$Internal$nothingIfNegative(config.s)
-	};
+	var config = _n0.a;
+	return author$project$Debouncer$Internal$Config(
+		{
+			accumulator: config.accumulator,
+			emitWhenUnsettled: author$project$Debouncer$Internal$nothingIfNegative(config.emitWhenUnsettled),
+			emitWhileUnsettled: author$project$Debouncer$Internal$nothingIfNegative(config.emitWhileUnsettled),
+			settleWhenQuietFor: author$project$Debouncer$Internal$nothingIfNegative(config.settleWhenQuietFor)
+		});
 };
 var author$project$Debouncer$Internal$toDebouncer = function (config) {
 	return A2(
@@ -4634,38 +4639,38 @@ var author$project$Debouncer$Basic$toDebouncer = author$project$Debouncer$Intern
 var author$project$Debouncer$Messages$toDebouncer = author$project$Debouncer$Basic$toDebouncer;
 var author$project$Main$Scroll = F2(
 	function (top, left) {
-		return {aQ: left, bj: top};
+		return {left: left, top: top};
 	});
-var author$project$SyntaxHighlight$Highlight = 0;
+var author$project$SyntaxHighlight$Highlight = {$: 'Highlight'};
 var author$project$Main$initHighlightModel = {
-	ak: 0,
-	an: elm$core$Maybe$Just(0),
-	as: 0
+	end: 0,
+	mode: elm$core$Maybe$Just(author$project$SyntaxHighlight$Highlight),
+	start: 0
 };
 var author$project$Main$initLanguageModel = function (codeStr) {
 	return {
-		F: codeStr,
-		u: A2(author$project$Main$Scroll, 0, 0)
+		code: codeStr,
+		scroll: A2(author$project$Main$Scroll, 0, 0)
 	};
 };
-var elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
+var elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var elm$core$Dict$empty = elm$core$Dict$RBEmpty_elm_builtin;
-var elm$core$Dict$Black = 1;
+var elm$core$Dict$Black = {$: 'Black'};
 var elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
-		return {$: -1, a: a, b: b, c: c, d: d, e: e};
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
 	});
 var elm$core$Basics$compare = _Utils_compare;
-var elm$core$Dict$Red = 0;
+var elm$core$Dict$Red = {$: 'Red'};
 var elm$core$Dict$balance = F5(
 	function (color, key, value, left, right) {
-		if ((right.$ === -1) && (!right.a)) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
 			var _n1 = right.a;
 			var rK = right.b;
 			var rV = right.c;
 			var rLeft = right.d;
 			var rRight = right.e;
-			if ((left.$ === -1) && (!left.a)) {
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
 				var _n3 = left.a;
 				var lK = left.b;
 				var lV = left.c;
@@ -4673,22 +4678,22 @@ var elm$core$Dict$balance = F5(
 				var lRight = left.e;
 				return A5(
 					elm$core$Dict$RBNode_elm_builtin,
-					0,
+					elm$core$Dict$Red,
 					key,
 					value,
-					A5(elm$core$Dict$RBNode_elm_builtin, 1, lK, lV, lLeft, lRight),
-					A5(elm$core$Dict$RBNode_elm_builtin, 1, rK, rV, rLeft, rRight));
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, rK, rV, rLeft, rRight));
 			} else {
 				return A5(
 					elm$core$Dict$RBNode_elm_builtin,
 					color,
 					rK,
 					rV,
-					A5(elm$core$Dict$RBNode_elm_builtin, 0, key, value, left, rLeft),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, left, rLeft),
 					rRight);
 			}
 		} else {
-			if ((((left.$ === -1) && (!left.a)) && (left.d.$ === -1)) && (!left.d.a)) {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
 				var _n5 = left.a;
 				var lK = left.b;
 				var lV = left.c;
@@ -4701,11 +4706,11 @@ var elm$core$Dict$balance = F5(
 				var lRight = left.e;
 				return A5(
 					elm$core$Dict$RBNode_elm_builtin,
-					0,
+					elm$core$Dict$Red,
 					lK,
 					lV,
-					A5(elm$core$Dict$RBNode_elm_builtin, 1, llK, llV, llLeft, llRight),
-					A5(elm$core$Dict$RBNode_elm_builtin, 1, key, value, lRight, right));
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, key, value, lRight, right));
 			} else {
 				return A5(elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
 			}
@@ -4713,8 +4718,8 @@ var elm$core$Dict$balance = F5(
 	});
 var elm$core$Dict$insertHelp = F3(
 	function (key, value, dict) {
-		if (dict.$ === -2) {
-			return A5(elm$core$Dict$RBNode_elm_builtin, 0, key, value, elm$core$Dict$RBEmpty_elm_builtin, elm$core$Dict$RBEmpty_elm_builtin);
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, elm$core$Dict$RBEmpty_elm_builtin, elm$core$Dict$RBEmpty_elm_builtin);
 		} else {
 			var nColor = dict.a;
 			var nKey = dict.b;
@@ -4722,8 +4727,8 @@ var elm$core$Dict$insertHelp = F3(
 			var nLeft = dict.d;
 			var nRight = dict.e;
 			var _n1 = A2(elm$core$Basics$compare, key, nKey);
-			switch (_n1) {
-				case 0:
+			switch (_n1.$) {
+				case 'LT':
 					return A5(
 						elm$core$Dict$balance,
 						nColor,
@@ -4731,7 +4736,7 @@ var elm$core$Dict$insertHelp = F3(
 						nValue,
 						A3(elm$core$Dict$insertHelp, key, value, nLeft),
 						nRight);
-				case 1:
+				case 'EQ':
 					return A5(elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
 				default:
 					return A5(
@@ -4747,13 +4752,13 @@ var elm$core$Dict$insertHelp = F3(
 var elm$core$Dict$insert = F3(
 	function (key, value, dict) {
 		var _n0 = A3(elm$core$Dict$insertHelp, key, value, dict);
-		if ((_n0.$ === -1) && (!_n0.a)) {
+		if ((_n0.$ === 'RBNode_elm_builtin') && (_n0.a.$ === 'Red')) {
 			var _n1 = _n0.a;
 			var k = _n0.b;
 			var v = _n0.c;
 			var l = _n0.d;
 			var r = _n0.e;
-			return A5(elm$core$Dict$RBNode_elm_builtin, 1, k, v, l, r);
+			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, k, v, l, r);
 		} else {
 			var x = _n0;
 			return x;
@@ -4797,8 +4802,8 @@ var author$project$Main$initLanguagesModel = elm$core$Dict$fromList(
 			'Javascript',
 			author$project$Main$initLanguageModel(''))
 		]));
-var elm$core$Basics$False = 1;
-var elm$core$Basics$True = 0;
+var elm$core$Basics$False = {$: 'False'};
+var elm$core$Basics$True = {$: 'True'};
 var elm$core$Basics$apL = F2(
 	function (f, x) {
 		return f(x);
@@ -4808,27 +4813,27 @@ var elm$core$Basics$apR = F2(
 		return f(x);
 	});
 var author$project$Main$initModel = {
-	ad: elm$core$Maybe$Nothing,
-	S: _List_Nil,
-	ae: author$project$Main$initHighlightModel,
-	T: false,
-	A: true,
-	V: author$project$Main$initLanguagesModel,
-	al: elm$core$Maybe$Just(1),
-	aR: 1,
-	ag: author$project$Debouncer$Messages$toDebouncer(
+	docs: elm$core$Maybe$Nothing,
+	error: _List_Nil,
+	highlight: author$project$Main$initHighlightModel,
+	isTyping: false,
+	isWaiting: true,
+	languagesModel: author$project$Main$initLanguagesModel,
+	lineCount: elm$core$Maybe$Just(1),
+	lineCountStart: 1,
+	quietForOneSecond: author$project$Debouncer$Messages$toDebouncer(
 		A2(
 			author$project$Debouncer$Messages$settleWhenQuietFor,
 			elm$core$Maybe$Just(
 				author$project$Debouncer$Messages$fromSeconds(1)),
 			author$project$Debouncer$Messages$manual)),
-	u: A2(author$project$Main$Scroll, 0, 0),
-	aq: true,
-	Z: elm$core$Maybe$Nothing,
-	bh: 'Monokai'
+	scroll: A2(author$project$Main$Scroll, 0, 0),
+	showLineCount: true,
+	testResults: elm$core$Maybe$Nothing,
+	theme: 'Monokai'
 };
 var elm$core$Result$isOk = function (result) {
-	if (!result.$) {
+	if (result.$ === 'Ok') {
 		return true;
 	} else {
 		return false;
@@ -4837,7 +4842,7 @@ var elm$core$Result$isOk = function (result) {
 var elm$core$Array$branchFactor = 32;
 var elm$core$Array$Array_elm_builtin = F4(
 	function (a, b, c, d) {
-		return {$: 0, a: a, b: b, c: c, d: d};
+		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
 	});
 var elm$core$Basics$ceiling = _Basics_ceiling;
 var elm$core$Basics$fdiv = _Basics_fdiv;
@@ -4851,10 +4856,10 @@ var elm$core$Array$shiftStep = elm$core$Basics$ceiling(
 var elm$core$Elm$JsArray$empty = _JsArray_empty;
 var elm$core$Array$empty = A4(elm$core$Array$Array_elm_builtin, 0, elm$core$Array$shiftStep, elm$core$Elm$JsArray$empty, elm$core$Elm$JsArray$empty);
 var elm$core$Array$Leaf = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Leaf', a: a};
 };
 var elm$core$Array$SubTree = function (a) {
-	return {$: 0, a: a};
+	return {$: 'SubTree', a: a};
 };
 var elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
 var elm$core$List$reverse = function (list) {
@@ -4914,25 +4919,25 @@ var elm$core$Basics$sub = _Basics_sub;
 var elm$core$Elm$JsArray$length = _JsArray_length;
 var elm$core$Array$builderToArray = F2(
 	function (reverseNodeList, builder) {
-		if (!builder.d) {
+		if (!builder.nodeListSize) {
 			return A4(
 				elm$core$Array$Array_elm_builtin,
-				elm$core$Elm$JsArray$length(builder.f),
+				elm$core$Elm$JsArray$length(builder.tail),
 				elm$core$Array$shiftStep,
 				elm$core$Elm$JsArray$empty,
-				builder.f);
+				builder.tail);
 		} else {
-			var treeLen = builder.d * elm$core$Array$branchFactor;
+			var treeLen = builder.nodeListSize * elm$core$Array$branchFactor;
 			var depth = elm$core$Basics$floor(
 				A2(elm$core$Basics$logBase, elm$core$Array$branchFactor, treeLen - 1));
-			var correctNodeList = reverseNodeList ? elm$core$List$reverse(builder.g) : builder.g;
-			var tree = A2(elm$core$Array$treeFromBuilder, correctNodeList, builder.d);
+			var correctNodeList = reverseNodeList ? elm$core$List$reverse(builder.nodeList) : builder.nodeList;
+			var tree = A2(elm$core$Array$treeFromBuilder, correctNodeList, builder.nodeListSize);
 			return A4(
 				elm$core$Array$Array_elm_builtin,
-				elm$core$Elm$JsArray$length(builder.f) + treeLen,
+				elm$core$Elm$JsArray$length(builder.tail) + treeLen,
 				A2(elm$core$Basics$max, 5, depth * elm$core$Array$shiftStep),
 				tree,
-				builder.f);
+				builder.tail);
 		}
 	});
 var elm$core$Basics$idiv = _Basics_idiv;
@@ -4945,7 +4950,7 @@ var elm$core$Array$initializeHelp = F5(
 				return A2(
 					elm$core$Array$builderToArray,
 					false,
-					{g: nodeList, d: (len / elm$core$Array$branchFactor) | 0, f: tail});
+					{nodeList: nodeList, nodeListSize: (len / elm$core$Array$branchFactor) | 0, tail: tail});
 			} else {
 				var leaf = elm$core$Array$Leaf(
 					A3(elm$core$Elm$JsArray$initialize, elm$core$Array$branchFactor, fromIndex, fn));
@@ -4977,25 +4982,25 @@ var elm$core$Array$initialize = F2(
 		}
 	});
 var elm$core$Result$Err = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Err', a: a};
 };
 var elm$core$Result$Ok = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Ok', a: a};
 };
 var elm$json$Json$Decode$Failure = F2(
 	function (a, b) {
-		return {$: 3, a: a, b: b};
+		return {$: 'Failure', a: a, b: b};
 	});
 var elm$json$Json$Decode$Field = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'Field', a: a, b: b};
 	});
 var elm$json$Json$Decode$Index = F2(
 	function (a, b) {
-		return {$: 1, a: a, b: b};
+		return {$: 'Index', a: a, b: b};
 	});
 var elm$json$Json$Decode$OneOf = function (a) {
-	return {$: 2, a: a};
+	return {$: 'OneOf', a: a};
 };
 var elm$core$Basics$and = _Basics_and;
 var elm$core$Basics$append = _Utils_append;
@@ -5097,12 +5102,12 @@ var elm$json$Json$Decode$errorToStringHelp = F2(
 		errorToStringHelp:
 		while (true) {
 			switch (error.$) {
-				case 0:
+				case 'Field':
 					var f = error.a;
 					var err = error.b;
 					var isSimple = function () {
 						var _n1 = elm$core$String$uncons(f);
-						if (_n1.$ === 1) {
+						if (_n1.$ === 'Nothing') {
 							return false;
 						} else {
 							var _n2 = _n1.a;
@@ -5117,7 +5122,7 @@ var elm$json$Json$Decode$errorToStringHelp = F2(
 					error = $temp$error;
 					context = $temp$context;
 					continue errorToStringHelp;
-				case 1:
+				case 'Index':
 					var i = error.a;
 					var err = error.b;
 					var indexName = '[' + (elm$core$String$fromInt(i) + ']');
@@ -5126,7 +5131,7 @@ var elm$json$Json$Decode$errorToStringHelp = F2(
 					error = $temp$error;
 					context = $temp$context;
 					continue errorToStringHelp;
-				case 2:
+				case 'OneOf':
 					var errors = error.a;
 					if (!errors.b) {
 						return 'Ran into a Json.Decode.oneOf with no possibilities' + function () {
@@ -5192,15 +5197,15 @@ var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(author$project$Main$initModel, elm$core$Platform$Cmd$none);
 };
-var author$project$Main$Frame = {$: 6};
+var author$project$Main$Frame = {$: 'Frame'};
 var author$project$Main$Display = function (a) {
-	return {$: 3, a: a};
+	return {$: 'Display', a: a};
 };
 var elm$json$Json$Decode$decodeValue = _Json_run;
 var elm$json$Json$Decode$string = _Json_decodeString;
 var author$project$Main$decodeCode = function (x) {
 	var result = A2(elm$json$Json$Decode$decodeValue, elm$json$Json$Decode$string, x);
-	if (!result.$) {
+	if (result.$ === 'Ok') {
 		var value = result.a;
 		return author$project$Main$Display(value);
 	} else {
@@ -5210,10 +5215,10 @@ var author$project$Main$decodeCode = function (x) {
 	}
 };
 var author$project$Main$DisplayError = function (a) {
-	return {$: 4, a: a};
+	return {$: 'DisplayError', a: a};
 };
 var author$project$Main$SetDocs = function (a) {
-	return {$: 7, a: a};
+	return {$: 'SetDocs', a: a};
 };
 var elm$json$Json$Decode$map2 = _Json_map2;
 var author$project$Json$Decode$Pipeline$custom = elm$json$Json$Decode$map2(elm$core$Basics$apR);
@@ -5235,13 +5240,13 @@ var author$project$Json$Decode$Pipeline$optionalDecoder = F3(
 		};
 		var handleResult = function (input) {
 			var _n0 = A2(elm$json$Json$Decode$decodeValue, pathDecoder, input);
-			if (!_n0.$) {
+			if (_n0.$ === 'Ok') {
 				var rawValue = _n0.a;
 				var _n1 = A2(
 					elm$json$Json$Decode$decodeValue,
 					nullOr(valDecoder),
 					rawValue);
-				if (!_n1.$) {
+				if (_n1.$ === 'Ok') {
 					var finalResult = _n1.a;
 					return elm$json$Json$Decode$succeed(finalResult);
 				} else {
@@ -5276,10 +5281,10 @@ var author$project$Json$Decode$Pipeline$required = F3(
 	});
 var author$project$Main$DevDoc = F4(
 	function (title, author, details, methods) {
-		return {av: author, ac: details, aU: methods, bi: title};
+		return {author: author, details: details, methods: methods, title: title};
 	});
 var author$project$Main$DevDocFunction = function (details) {
-	return {ac: details};
+	return {details: details};
 };
 var author$project$Main$devDocFunctionDecoder = A4(
 	author$project$Json$Decode$Pipeline$optional,
@@ -5317,7 +5322,7 @@ var author$project$Main$devDocDecoder = A3(
 				elm$json$Json$Decode$succeed(author$project$Main$DevDoc)))));
 var author$project$Main$decodeDocs = function (x) {
 	var result = A2(elm$json$Json$Decode$decodeValue, author$project$Main$devDocDecoder, x);
-	if (!result.$) {
+	if (result.$ === 'Ok') {
 		var value = result.a;
 		return author$project$Main$SetDocs(value);
 	} else {
@@ -5399,7 +5404,7 @@ var author$project$Main$decodeError = function (x) {
 					['formattedMessage']),
 				elm$json$Json$Decode$string)),
 		x);
-	if (!result.$) {
+	if (result.$ === 'Ok') {
 		var value = result.a;
 		return author$project$Main$DisplayError(value);
 	} else {
@@ -5412,11 +5417,11 @@ var author$project$Main$decodeError = function (x) {
 	}
 };
 var author$project$Main$DisplayTestResults = function (a) {
-	return {$: 0, a: a};
+	return {$: 'DisplayTestResults', a: a};
 };
 var author$project$Main$TestResult = F3(
 	function (context, value, message) {
-		return {bu: context, aT: message, bl: value};
+		return {context: context, message: message, value: value};
 	});
 var author$project$Main$testResultDecoder = A3(
 	author$project$Json$Decode$Pipeline$required,
@@ -5445,7 +5450,7 @@ var author$project$Main$decodeResults = function (x) {
 		elm$json$Json$Decode$decodeValue,
 		elm$json$Json$Decode$list(author$project$Main$testResultDecoder),
 		x);
-	if (!result.$) {
+	if (result.$ === 'Ok') {
 		var value = result.a;
 		return author$project$Main$DisplayTestResults(
 			elm$core$List$head(value));
@@ -5463,33 +5468,37 @@ var author$project$Main$showDocs = _Platform_incomingPort('showDocs', elm$json$J
 var author$project$Main$showError = _Platform_incomingPort('showError', elm$json$Json$Decode$value);
 var author$project$Main$showResults = _Platform_incomingPort('showResults', elm$json$Json$Decode$value);
 var elm$browser$Browser$AnimationManager$Time = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Time', a: a};
 };
 var elm$browser$Browser$AnimationManager$State = F3(
 	function (subs, request, oldTime) {
-		return {ao: oldTime, a6: request, bf: subs};
+		return {oldTime: oldTime, request: request, subs: subs};
 	});
 var elm$core$Task$succeed = _Scheduler_succeed;
 var elm$browser$Browser$AnimationManager$init = elm$core$Task$succeed(
 	A3(elm$browser$Browser$AnimationManager$State, _List_Nil, elm$core$Maybe$Nothing, 0));
 var elm$browser$Browser$External = function (a) {
-	return {$: 1, a: a};
+	return {$: 'External', a: a};
 };
 var elm$browser$Browser$Internal = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Internal', a: a};
 };
-var elm$browser$Browser$Dom$NotFound = elm$core$Basics$identity;
+var elm$browser$Browser$Dom$NotFound = function (a) {
+	return {$: 'NotFound', a: a};
+};
 var elm$core$Basics$never = function (_n0) {
 	never:
 	while (true) {
-		var nvr = _n0;
+		var nvr = _n0.a;
 		var $temp$_n0 = nvr;
 		_n0 = $temp$_n0;
 		continue never;
 	}
 };
-var elm$core$Task$Perform = elm$core$Basics$identity;
-var elm$core$Task$init = elm$core$Task$succeed(0);
+var elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
+var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
 var elm$core$List$map = F2(
 	function (f, xs) {
 		return A3(
@@ -5540,7 +5549,7 @@ var elm$core$Task$sequence = function (tasks) {
 var elm$core$Platform$sendToApp = _Platform_sendToApp;
 var elm$core$Task$spawnCmd = F2(
 	function (router, _n0) {
-		var task = _n0;
+		var task = _n0.a;
 		return _Scheduler_spawn(
 			A2(
 				elm$core$Task$andThen,
@@ -5552,7 +5561,7 @@ var elm$core$Task$onEffects = F3(
 		return A2(
 			elm$core$Task$map,
 			function (_n0) {
-				return 0;
+				return _Utils_Tuple0;
 			},
 			elm$core$Task$sequence(
 				A2(
@@ -5562,27 +5571,29 @@ var elm$core$Task$onEffects = F3(
 	});
 var elm$core$Task$onSelfMsg = F3(
 	function (_n0, _n1, _n2) {
-		return elm$core$Task$succeed(0);
+		return elm$core$Task$succeed(_Utils_Tuple0);
 	});
 var elm$core$Task$cmdMap = F2(
 	function (tagger, _n0) {
-		var task = _n0;
-		return A2(elm$core$Task$map, tagger, task);
+		var task = _n0.a;
+		return elm$core$Task$Perform(
+			A2(elm$core$Task$map, tagger, task));
 	});
 _Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
 var elm$core$Task$command = _Platform_leaf('Task');
 var elm$core$Task$perform = F2(
 	function (toMessage, task) {
 		return elm$core$Task$command(
-			A2(elm$core$Task$map, toMessage, task));
+			elm$core$Task$Perform(
+				A2(elm$core$Task$map, toMessage, task)));
 	});
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
-		case 0:
+		case 'Normal':
 			return 0;
-		case 1:
+		case 'MayStopPropagation':
 			return 1;
-		case 2:
+		case 'MayPreventDefault':
 			return 2;
 		default:
 			return 3;
@@ -5599,8 +5610,8 @@ var elm$core$String$dropLeft = F2(
 			string);
 	});
 var elm$core$String$startsWith = _String_startsWith;
-var elm$url$Url$Http = 0;
-var elm$url$Url$Https = 1;
+var elm$url$Url$Http = {$: 'Http'};
+var elm$url$Url$Https = {$: 'Https'};
 var elm$core$String$indexes = _String_indexes;
 var elm$core$String$isEmpty = function (string) {
 	return string === '';
@@ -5613,7 +5624,7 @@ var elm$core$String$contains = _String_contains;
 var elm$core$String$toInt = _String_toInt;
 var elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {aF: fragment, aI: host, aY: path, a_: port_, a2: protocol, a3: query};
+		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
 	});
 var elm$url$Url$chompBeforePath = F5(
 	function (protocol, path, params, frag, str) {
@@ -5629,7 +5640,7 @@ var elm$url$Url$chompBeforePath = F5(
 					var i = _n0.a;
 					var _n1 = elm$core$String$toInt(
 						A2(elm$core$String$dropLeft, i + 1, str));
-					if (_n1.$ === 1) {
+					if (_n1.$ === 'Nothing') {
 						return elm$core$Maybe$Nothing;
 					} else {
 						var port_ = _n1;
@@ -5711,23 +5722,23 @@ var elm$url$Url$chompAfterProtocol = F2(
 var elm$url$Url$fromString = function (str) {
 	return A2(elm$core$String$startsWith, 'http://', str) ? A2(
 		elm$url$Url$chompAfterProtocol,
-		0,
+		elm$url$Url$Http,
 		A2(elm$core$String$dropLeft, 7, str)) : (A2(elm$core$String$startsWith, 'https://', str) ? A2(
 		elm$url$Url$chompAfterProtocol,
-		1,
+		elm$url$Url$Https,
 		A2(elm$core$String$dropLeft, 8, str)) : elm$core$Maybe$Nothing);
 };
-var elm$browser$Browser$AnimationManager$now = _Browser_now(0);
-var elm$browser$Browser$AnimationManager$rAF = _Browser_rAF(0);
+var elm$browser$Browser$AnimationManager$now = _Browser_now(_Utils_Tuple0);
+var elm$browser$Browser$AnimationManager$rAF = _Browser_rAF(_Utils_Tuple0);
 var elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var elm$core$Process$kill = _Scheduler_kill;
 var elm$core$Process$spawn = _Scheduler_spawn;
 var elm$browser$Browser$AnimationManager$onEffects = F3(
 	function (router, subs, _n0) {
-		var request = _n0.a6;
-		var oldTime = _n0.ao;
+		var request = _n0.request;
+		var oldTime = _n0.oldTime;
 		var _n1 = _Utils_Tuple2(request, subs);
-		if (_n1.a.$ === 1) {
+		if (_n1.a.$ === 'Nothing') {
 			if (!_n1.b.b) {
 				var _n2 = _n1.a;
 				return elm$browser$Browser$AnimationManager$init;
@@ -5769,14 +5780,16 @@ var elm$browser$Browser$AnimationManager$onEffects = F3(
 			}
 		}
 	});
-var elm$time$Time$Posix = elm$core$Basics$identity;
-var elm$time$Time$millisToPosix = elm$core$Basics$identity;
+var elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var elm$time$Time$millisToPosix = elm$time$Time$Posix;
 var elm$browser$Browser$AnimationManager$onSelfMsg = F3(
 	function (router, newTime, _n0) {
-		var subs = _n0.bf;
-		var oldTime = _n0.ao;
+		var subs = _n0.subs;
+		var oldTime = _n0.oldTime;
 		var send = function (sub) {
-			if (!sub.$) {
+			if (sub.$ === 'Time') {
 				var tagger = sub.a;
 				return A2(
 					elm$core$Platform$sendToApp,
@@ -5814,7 +5827,7 @@ var elm$browser$Browser$AnimationManager$onSelfMsg = F3(
 					elm$browser$Browser$AnimationManager$rAF)));
 	});
 var elm$browser$Browser$AnimationManager$Delta = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Delta', a: a};
 };
 var elm$core$Basics$composeL = F3(
 	function (g, f, x) {
@@ -5823,7 +5836,7 @@ var elm$core$Basics$composeL = F3(
 	});
 var elm$browser$Browser$AnimationManager$subMap = F2(
 	function (func, sub) {
-		if (!sub.$) {
+		if (sub.$ === 'Time') {
 			var tagger = sub.a;
 			return elm$browser$Browser$AnimationManager$Time(
 				A2(elm$core$Basics$composeL, func, tagger));
@@ -5856,25 +5869,25 @@ var author$project$Main$subscriptions = function (model) {
 			]));
 };
 var author$project$Debouncer$Basic$ProvideInput = function (a) {
-	return {$: 0, a: a};
+	return {$: 'ProvideInput', a: a};
 };
 var author$project$Debouncer$Basic$provideInput = author$project$Debouncer$Basic$ProvideInput;
 var author$project$Debouncer$Messages$provideInput = author$project$Debouncer$Basic$provideInput;
 var author$project$Debouncer$Basic$MsgInternal = function (a) {
-	return {$: 2, a: a};
+	return {$: 'MsgInternal', a: a};
 };
 var author$project$Debouncer$Internal$Check = function (a) {
-	return {$: 4, a: a};
+	return {$: 'Check', a: a};
 };
 var author$project$Debouncer$Internal$InputProvidedAt = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'InputProvidedAt', a: a, b: b};
 	});
 var author$project$Debouncer$Internal$ManualEmitAt = function (a) {
-	return {$: 3, a: a};
+	return {$: 'ManualEmitAt', a: a};
 };
 var author$project$Debouncer$Internal$Unsettled = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Unsettled', a: a};
 };
 var author$project$Debouncer$Internal$cancel = function (_n0) {
 	var config = _n0.a;
@@ -5886,7 +5899,7 @@ var elm$core$Basics$not = _Basics_not;
 var elm$core$List$maybeCons = F3(
 	function (f, mx, xs) {
 		var _n0 = f(mx);
-		if (!_n0.$) {
+		if (_n0.$ === 'Just') {
 			var x = _n0.a;
 			return A2(elm$core$List$cons, x, xs);
 		} else {
@@ -5928,7 +5941,7 @@ var elm$core$List$partition = F2(
 	});
 var elm$core$Maybe$map = F2(
 	function (f, maybe) {
-		if (!maybe.$) {
+		if (maybe.$ === 'Just') {
 			var value = maybe.a;
 			return elm$core$Maybe$Just(
 				f(value));
@@ -5938,7 +5951,7 @@ var elm$core$Maybe$map = F2(
 	});
 var elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
-		if (!maybe.$) {
+		if (maybe.$ === 'Just') {
 			var value = maybe.a;
 			return value;
 		} else {
@@ -5953,18 +5966,21 @@ var elm$core$Tuple$mapFirst = F2(
 			func(x),
 			y);
 	});
-var elm$core$Set$Set_elm_builtin = elm$core$Basics$identity;
-var elm$core$Set$empty = elm$core$Dict$empty;
+var elm$core$Set$Set_elm_builtin = function (a) {
+	return {$: 'Set_elm_builtin', a: a};
+};
+var elm$core$Set$empty = elm$core$Set$Set_elm_builtin(elm$core$Dict$empty);
 var elm$core$Set$insert = F2(
 	function (key, _n0) {
-		var dict = _n0;
-		return A3(elm$core$Dict$insert, key, 0, dict);
+		var dict = _n0.a;
+		return elm$core$Set$Set_elm_builtin(
+			A3(elm$core$Dict$insert, key, _Utils_Tuple0, dict));
 	});
 var elm$core$Dict$get = F2(
 	function (targetKey, dict) {
 		get:
 		while (true) {
-			if (dict.$ === -2) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
 				return elm$core$Maybe$Nothing;
 			} else {
 				var key = dict.b;
@@ -5972,14 +5988,14 @@ var elm$core$Dict$get = F2(
 				var left = dict.d;
 				var right = dict.e;
 				var _n1 = A2(elm$core$Basics$compare, targetKey, key);
-				switch (_n1) {
-					case 0:
+				switch (_n1.$) {
+					case 'LT':
 						var $temp$targetKey = targetKey,
 							$temp$dict = left;
 						targetKey = $temp$targetKey;
 						dict = $temp$dict;
 						continue get;
-					case 1:
+					case 'EQ':
 						return elm$core$Maybe$Just(value);
 					default:
 						var $temp$targetKey = targetKey,
@@ -5994,7 +6010,7 @@ var elm$core$Dict$get = F2(
 var elm$core$Dict$member = F2(
 	function (key, dict) {
 		var _n0 = A2(elm$core$Dict$get, key, dict);
-		if (!_n0.$) {
+		if (_n0.$ === 'Just') {
 			return true;
 		} else {
 			return false;
@@ -6002,7 +6018,7 @@ var elm$core$Dict$member = F2(
 	});
 var elm$core$Set$member = F2(
 	function (key, _n0) {
-		var dict = _n0;
+		var dict = _n0.a;
 		return A2(elm$core$Dict$member, key, dict);
 	});
 var elm_community$list_extra$List$Extra$uniqueHelp = F4(
@@ -6045,20 +6061,20 @@ var elm_community$list_extra$List$Extra$unique = function (list) {
 var author$project$Debouncer$Internal$update = F2(
 	function (msg, debouncer) {
 		var wrappedConfig = debouncer.a;
-		var config = wrappedConfig;
+		var config = wrappedConfig.a;
 		var state = debouncer.b;
 		switch (msg.$) {
-			case 0:
+			case 'InputProvidedAt':
 				var input = msg.a;
 				var time = msg.b;
 				var newState = function () {
-					if (!state.$) {
+					if (state.$ === 'Settled') {
 						return author$project$Debouncer$Internal$Unsettled(
 							{
-								K: elm$core$Maybe$Nothing,
-								af: time,
-								n: A2(config.y, input, elm$core$Maybe$Nothing),
-								ah: time
+								lastEmittedAt: elm$core$Maybe$Nothing,
+								lastInputProvidedAt: time,
+								output: A2(config.accumulator, input, elm$core$Maybe$Nothing),
+								unsettledAt: time
 							});
 					} else {
 						var unsettled = state.a;
@@ -6066,26 +6082,26 @@ var author$project$Debouncer$Internal$update = F2(
 							_Utils_update(
 								unsettled,
 								{
-									af: time,
-									n: A2(config.y, input, unsettled.n)
+									lastInputProvidedAt: time,
+									output: A2(config.accumulator, input, unsettled.output)
 								}));
 					}
 				}();
 				var newDebouncer = A2(author$project$Debouncer$Internal$Debouncer, wrappedConfig, newState);
 				var checks = function () {
-					if (!state.$) {
+					if (state.$ === 'Settled') {
 						return elm_community$list_extra$List$Extra$unique(
 							A2(
 								elm$core$List$filterMap,
 								elm$core$Basics$identity,
 								_List_fromArray(
-									[config.p, config.q, config.s])));
+									[config.emitWhenUnsettled, config.emitWhileUnsettled, config.settleWhenQuietFor])));
 					} else {
 						return A2(
 							elm$core$List$filterMap,
 							elm$core$Basics$identity,
 							_List_fromArray(
-								[config.s]));
+								[config.settleWhenQuietFor]));
 					}
 				}();
 				var _n1 = A2(
@@ -6110,42 +6126,42 @@ var author$project$Debouncer$Internal$update = F2(
 					checkedDebouncer,
 					_Utils_ap(checkedIntervals, checkLater),
 					emit);
-			case 1:
+			case 'ManualCancel':
 				return _Utils_Tuple3(
 					author$project$Debouncer$Internal$cancel(debouncer),
 					_List_Nil,
 					elm$core$Maybe$Nothing);
-			case 2:
+			case 'ManualSettle':
 				var emit = function () {
-					if (!state.$) {
+					if (state.$ === 'Settled') {
 						return elm$core$Maybe$Nothing;
 					} else {
 						var unsettled = state.a;
-						return unsettled.n;
+						return unsettled.output;
 					}
 				}();
 				return _Utils_Tuple3(
 					author$project$Debouncer$Internal$cancel(debouncer),
 					_List_Nil,
 					emit);
-			case 3:
+			case 'ManualEmitAt':
 				var time = msg.a;
-				if (!state.$) {
+				if (state.$ === 'Settled') {
 					return _Utils_Tuple3(debouncer, _List_Nil, elm$core$Maybe$Nothing);
 				} else {
 					var unsettled = state.a;
-					var _n7 = unsettled.n;
-					if (!_n7.$) {
+					var _n7 = unsettled.output;
+					if (_n7.$ === 'Just') {
 						var newState = author$project$Debouncer$Internal$Unsettled(
 							_Utils_update(
 								unsettled,
 								{
-									K: elm$core$Maybe$Just(time),
-									n: elm$core$Maybe$Nothing
+									lastEmittedAt: elm$core$Maybe$Just(time),
+									output: elm$core$Maybe$Nothing
 								}));
 						var intervals = function () {
-							var _n8 = config.p;
-							if (!_n8.$) {
+							var _n8 = config.emitWhenUnsettled;
+							if (_n8.$ === 'Just') {
 								var emit = _n8.a;
 								return _List_fromArray(
 									[emit]);
@@ -6156,14 +6172,14 @@ var author$project$Debouncer$Internal$update = F2(
 						return _Utils_Tuple3(
 							A2(author$project$Debouncer$Internal$Debouncer, wrappedConfig, newState),
 							intervals,
-							unsettled.n);
+							unsettled.output);
 					} else {
 						return _Utils_Tuple3(debouncer, _List_Nil, elm$core$Maybe$Nothing);
 					}
 				}
 			default:
 				var time = msg.a;
-				if (!state.$) {
+				if (state.$ === 'Settled') {
 					return _Utils_Tuple3(debouncer, _List_Nil, elm$core$Maybe$Nothing);
 				} else {
 					var unsettled = state.a;
@@ -6173,44 +6189,44 @@ var author$project$Debouncer$Internal$update = F2(
 						A2(
 							elm$core$Maybe$map,
 							function (interval) {
-								return _Utils_cmp(unsettled.af + interval, time) < 1;
+								return _Utils_cmp(unsettled.lastInputProvidedAt + interval, time) < 1;
 							},
-							config.s));
+							config.settleWhenQuietFor));
 					var becauseEmitWhileUnsettled = function () {
-						var _n13 = config.q;
-						if (!_n13.$) {
+						var _n13 = config.emitWhileUnsettled;
+						if (_n13.$ === 'Just') {
 							var interval = _n13.a;
-							var _n14 = unsettled.K;
-							if (!_n14.$) {
+							var _n14 = unsettled.lastEmittedAt;
+							if (_n14.$ === 'Just') {
 								var lastEmittedAt = _n14.a;
 								return _Utils_cmp(lastEmittedAt + interval, time) < 1;
 							} else {
-								return _Utils_cmp(unsettled.ah + interval, time) < 1;
+								return _Utils_cmp(unsettled.unsettledAt + interval, time) < 1;
 							}
 						} else {
 							return false;
 						}
 					}();
 					var becauseEmitWhenUnsettled = function () {
-						var _n11 = config.p;
-						if (!_n11.$) {
+						var _n11 = config.emitWhenUnsettled;
+						if (_n11.$ === 'Just') {
 							var interval = _n11.a;
-							var _n12 = unsettled.K;
-							if (!_n12.$) {
+							var _n12 = unsettled.lastEmittedAt;
+							if (_n12.$ === 'Just') {
 								return false;
 							} else {
-								return _Utils_cmp(unsettled.ah + interval, time) < 1;
+								return _Utils_cmp(unsettled.unsettledAt + interval, time) < 1;
 							}
 						} else {
 							return false;
 						}
 					}();
-					var shouldEmit = (!_Utils_eq(unsettled.n, elm$core$Maybe$Nothing)) && (shouldSettle || (becauseEmitWhenUnsettled || becauseEmitWhileUnsettled));
-					var emit = shouldEmit ? unsettled.n : elm$core$Maybe$Nothing;
+					var shouldEmit = (!_Utils_eq(unsettled.output, elm$core$Maybe$Nothing)) && (shouldSettle || (becauseEmitWhenUnsettled || becauseEmitWhileUnsettled));
+					var emit = shouldEmit ? unsettled.output : elm$core$Maybe$Nothing;
 					var intervals = function () {
 						if (shouldEmit && (!shouldSettle)) {
-							var _n10 = config.q;
-							if (!_n10.$) {
+							var _n10 = config.emitWhileUnsettled;
+							if (_n10.$ === 'Just') {
 								var interval = _n10.a;
 								return _List_fromArray(
 									[interval]);
@@ -6225,8 +6241,8 @@ var author$project$Debouncer$Internal$update = F2(
 						_Utils_update(
 							unsettled,
 							{
-								K: elm$core$Maybe$Just(time),
-								n: elm$core$Maybe$Nothing
+								lastEmittedAt: elm$core$Maybe$Just(time),
+								output: elm$core$Maybe$Nothing
 							})) : state);
 					return _Utils_Tuple3(
 						A2(author$project$Debouncer$Internal$Debouncer, wrappedConfig, newState),
@@ -6241,25 +6257,25 @@ var elm$core$Basics$always = F2(
 	});
 var elm$core$Process$sleep = _Process_sleep;
 var elm$time$Time$Name = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Name', a: a};
 };
 var elm$time$Time$Offset = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Offset', a: a};
 };
 var elm$time$Time$Zone = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'Zone', a: a, b: b};
 	});
 var elm$time$Time$customZone = elm$time$Time$Zone;
 var elm$time$Time$now = _Time_now(elm$time$Time$millisToPosix);
 var elm$time$Time$posixToMillis = function (_n0) {
-	var millis = _n0;
+	var millis = _n0.a;
 	return millis;
 };
 var author$project$Debouncer$Basic$update = F2(
 	function (msg, debouncer) {
 		switch (msg.$) {
-			case 0:
+			case 'ProvideInput':
 				var input = msg.a;
 				return _Utils_Tuple3(
 					debouncer,
@@ -6274,7 +6290,7 @@ var author$project$Debouncer$Basic$update = F2(
 							elm$time$Time$posixToMillis),
 						elm$time$Time$now),
 					elm$core$Maybe$Nothing);
-			case 1:
+			case 'EmitNow':
 				return _Utils_Tuple3(
 					debouncer,
 					A2(
@@ -6324,12 +6340,12 @@ var author$project$Debouncer$Messages$update = F4(
 		var _n0 = A2(
 			author$project$Debouncer$Basic$update,
 			msg,
-			config.aG(model));
+			config.getDebouncer(model));
 		var updatedDebouncer = _n0.a;
 		var cmd = _n0.b;
 		var output = _n0.c;
-		var mappedCmd = A2(elm$core$Platform$Cmd$map, config.aS, cmd);
-		var newModel = A2(config.bc, updatedDebouncer, model);
+		var mappedCmd = A2(elm$core$Platform$Cmd$map, config.mapMsg, cmd);
+		var newModel = A2(config.setDebouncer, updatedDebouncer, model);
 		return A2(
 			elm$core$Maybe$withDefault,
 			_Utils_Tuple2(newModel, mappedCmd),
@@ -6348,28 +6364,28 @@ var author$project$Debouncer$Messages$update = F4(
 				output));
 	});
 var author$project$Main$MsgQuietForOneSecond = function (a) {
-	return {$: 5, a: a};
+	return {$: 'MsgQuietForOneSecond', a: a};
 };
-var author$project$Main$Run = {$: 2};
+var author$project$Main$Run = {$: 'Run'};
 var author$project$Main$getLangModel = F2(
 	function (lang, model) {
 		return A2(
 			elm$core$Maybe$withDefault,
 			author$project$Main$initLanguageModel(''),
-			A2(elm$core$Dict$get, lang, model.V));
+			A2(elm$core$Dict$get, lang, model.languagesModel));
 	});
 var elm$json$Json$Encode$string = _Json_wrap;
 var author$project$Main$toJs = _Platform_outgoingPort('toJs', elm$json$Json$Encode$string);
 var author$project$Main$updateDebouncer = {
-	aG: function ($) {
-		return $.ag;
+	getDebouncer: function ($) {
+		return $.quietForOneSecond;
 	},
-	aS: author$project$Main$MsgQuietForOneSecond,
-	bc: F2(
+	mapMsg: author$project$Main$MsgQuietForOneSecond,
+	setDebouncer: F2(
 		function (debouncer, model) {
 			return _Utils_update(
 				model,
-				{ag: debouncer});
+				{quietForOneSecond: debouncer});
 		})
 };
 var author$project$Main$updateLangModel = F3(
@@ -6377,46 +6393,46 @@ var author$project$Main$updateLangModel = F3(
 		return function (n) {
 			return _Utils_update(
 				model,
-				{V: n});
+				{languagesModel: n});
 		}(
-			A3(elm$core$Dict$insert, lang, langModel, model.V));
+			A3(elm$core$Dict$insert, lang, langModel, model.languagesModel));
 	});
 var author$project$Main$update = F2(
 	function (msg, model) {
-		var highlight = model.ae;
+		var highlight = model.highlight;
 		switch (msg.$) {
-			case 5:
+			case 'MsgQuietForOneSecond':
 				var subMsg = msg.a;
 				return A4(author$project$Debouncer$Messages$update, author$project$Main$update, author$project$Main$updateDebouncer, subMsg, model);
-			case 0:
+			case 'DisplayTestResults':
 				var newTestResults = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{A: false, Z: newTestResults}),
+						{isWaiting: false, testResults: newTestResults}),
 					elm$core$Platform$Cmd$none);
-			case 4:
+			case 'DisplayError':
 				var error = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{S: error, A: false}),
+						{error: error, isWaiting: false}),
 					elm$core$Platform$Cmd$none);
-			case 2:
+			case 'Run':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{S: _List_Nil, T: false, A: true}),
+						{error: _List_Nil, isTyping: false, isWaiting: true}),
 					author$project$Main$toJs(
-						A2(author$project$Main$getLangModel, 'Javascript', model).F));
-			case 1:
+						A2(author$project$Main$getLangModel, 'Javascript', model).code));
+			case 'OnScroll':
 				var scroll = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{u: scroll}),
+						{scroll: scroll}),
 					elm$core$Platform$Cmd$none);
-			case 6:
+			case 'Frame':
 				return function (a) {
 					return _Utils_Tuple2(a, elm$core$Platform$Cmd$none);
 				}(
@@ -6427,10 +6443,10 @@ var author$project$Main$update = F2(
 						function (m) {
 							return _Utils_update(
 								m,
-								{u: model.u});
+								{scroll: model.scroll});
 						}(
 							A2(author$project$Main$getLangModel, 'Javascript', model))));
-			case 3:
+			case 'Display':
 				var codeStr = msg.a;
 				return function (m) {
 					return A2(
@@ -6444,11 +6460,11 @@ var author$project$Main$update = F2(
 						'Javascript',
 						_Utils_update(
 							model,
-							{T: true}),
+							{isTyping: true}),
 						function (m) {
 							return _Utils_update(
 								m,
-								{F: codeStr});
+								{code: codeStr});
 						}(
 							A2(author$project$Main$getLangModel, 'Javascript', model))));
 			default:
@@ -6457,21 +6473,23 @@ var author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							ad: elm$core$Maybe$Just(docs)
+							docs: elm$core$Maybe$Just(docs)
 						}),
 					elm$core$Platform$Cmd$none);
 		}
 	});
-var author$project$SyntaxHighlight$HCode = elm$core$Basics$identity;
-var author$project$SyntaxHighlight$Line$Add = 1;
-var author$project$SyntaxHighlight$Line$Del = 2;
-var author$project$SyntaxHighlight$Line$Normal = 0;
+var author$project$SyntaxHighlight$HCode = function (a) {
+	return {$: 'HCode', a: a};
+};
+var author$project$SyntaxHighlight$Line$Add = {$: 'Add'};
+var author$project$SyntaxHighlight$Line$Del = {$: 'Del'};
+var author$project$SyntaxHighlight$Line$Normal = {$: 'Normal'};
 var elm$core$Basics$ge = _Utils_ge;
 var author$project$SyntaxHighlight$Line$highlightLinesHelp = F5(
 	function (maybeHighlight, start, end, index, line) {
 		return ((_Utils_cmp(index, start) > -1) && (_Utils_cmp(index, end) < 0)) ? _Utils_update(
 			line,
-			{ae: maybeHighlight}) : line;
+			{highlight: maybeHighlight}) : line;
 	});
 var author$project$SyntaxHighlight$Line$highlightLines = F4(
 	function (maybeHighlight, start, end, lines) {
@@ -6485,102 +6503,106 @@ var author$project$SyntaxHighlight$Line$highlightLines = F4(
 	});
 var author$project$SyntaxHighlight$highlightLines = F4(
 	function (maybeHighlight, start, end, _n0) {
-		var lines = _n0;
+		var lines = _n0.a;
 		var maybeHighlight_ = function () {
-			if (maybeHighlight.$ === 1) {
+			if (maybeHighlight.$ === 'Nothing') {
 				return elm$core$Maybe$Nothing;
 			} else {
-				switch (maybeHighlight.a) {
-					case 0:
+				switch (maybeHighlight.a.$) {
+					case 'Highlight':
 						var _n2 = maybeHighlight.a;
-						return elm$core$Maybe$Just(0);
-					case 1:
+						return elm$core$Maybe$Just(author$project$SyntaxHighlight$Line$Normal);
+					case 'Add':
 						var _n3 = maybeHighlight.a;
-						return elm$core$Maybe$Just(1);
+						return elm$core$Maybe$Just(author$project$SyntaxHighlight$Line$Add);
 					default:
 						var _n4 = maybeHighlight.a;
-						return elm$core$Maybe$Just(2);
+						return elm$core$Maybe$Just(author$project$SyntaxHighlight$Line$Del);
 				}
 			}
 		}();
-		return A4(author$project$SyntaxHighlight$Line$highlightLines, maybeHighlight_, start, end, lines);
+		return author$project$SyntaxHighlight$HCode(
+			A4(author$project$SyntaxHighlight$Line$highlightLines, maybeHighlight_, start, end, lines));
 	});
-var author$project$SyntaxHighlight$Style$Style1 = 2;
-var author$project$SyntaxHighlight$Style$Style2 = 3;
-var author$project$SyntaxHighlight$Style$Style3 = 4;
-var author$project$SyntaxHighlight$Style$Style4 = 5;
-var author$project$SyntaxHighlight$Style$Style5 = 6;
-var author$project$SyntaxHighlight$Style$Style6 = 7;
-var author$project$SyntaxHighlight$Style$Style7 = 8;
+var author$project$SyntaxHighlight$Style$Style1 = {$: 'Style1'};
+var author$project$SyntaxHighlight$Style$Style2 = {$: 'Style2'};
+var author$project$SyntaxHighlight$Style$Style3 = {$: 'Style3'};
+var author$project$SyntaxHighlight$Style$Style4 = {$: 'Style4'};
+var author$project$SyntaxHighlight$Style$Style5 = {$: 'Style5'};
+var author$project$SyntaxHighlight$Style$Style6 = {$: 'Style6'};
+var author$project$SyntaxHighlight$Style$Style7 = {$: 'Style7'};
 var author$project$SyntaxHighlight$Language$Javascript$syntaxToStyle = function (syntax) {
-	switch (syntax) {
-		case 0:
-			return _Utils_Tuple2(2, 'js-n');
-		case 1:
-			return _Utils_Tuple2(3, 'js-s');
-		case 2:
-			return _Utils_Tuple2(4, 'js-k');
-		case 3:
-			return _Utils_Tuple2(5, 'js-dk');
-		case 4:
-			return _Utils_Tuple2(5, 'js-fe');
-		case 5:
-			return _Utils_Tuple2(6, 'js-f');
-		case 6:
-			return _Utils_Tuple2(7, 'js-lk');
-		case 7:
-			return _Utils_Tuple2(8, 'js-p');
+	switch (syntax.$) {
+		case 'Number':
+			return _Utils_Tuple2(author$project$SyntaxHighlight$Style$Style1, 'js-n');
+		case 'String':
+			return _Utils_Tuple2(author$project$SyntaxHighlight$Style$Style2, 'js-s');
+		case 'Keyword':
+			return _Utils_Tuple2(author$project$SyntaxHighlight$Style$Style3, 'js-k');
+		case 'DeclarationKeyword':
+			return _Utils_Tuple2(author$project$SyntaxHighlight$Style$Style4, 'js-dk');
+		case 'FunctionEval':
+			return _Utils_Tuple2(author$project$SyntaxHighlight$Style$Style4, 'js-fe');
+		case 'Function':
+			return _Utils_Tuple2(author$project$SyntaxHighlight$Style$Style5, 'js-f');
+		case 'LiteralKeyword':
+			return _Utils_Tuple2(author$project$SyntaxHighlight$Style$Style6, 'js-lk');
+		case 'Param':
+			return _Utils_Tuple2(author$project$SyntaxHighlight$Style$Style7, 'js-p');
 		default:
-			return _Utils_Tuple2(6, 'js-ce');
+			return _Utils_Tuple2(author$project$SyntaxHighlight$Style$Style5, 'js-ce');
 	}
 };
-var elm$parser$Parser$UnexpectedChar = {$: 11};
+var elm$parser$Parser$UnexpectedChar = {$: 'UnexpectedChar'};
 var elm$core$Basics$negate = function (n) {
 	return -n;
 };
 var elm$parser$Parser$Advanced$Bad = F2(
 	function (a, b) {
-		return {$: 1, a: a, b: b};
+		return {$: 'Bad', a: a, b: b};
 	});
 var elm$parser$Parser$Advanced$Good = F3(
 	function (a, b, c) {
-		return {$: 0, a: a, b: b, c: c};
+		return {$: 'Good', a: a, b: b, c: c};
 	});
-var elm$parser$Parser$Advanced$Parser = elm$core$Basics$identity;
+var elm$parser$Parser$Advanced$Parser = function (a) {
+	return {$: 'Parser', a: a};
+};
 var elm$parser$Parser$Advanced$AddRight = F2(
 	function (a, b) {
-		return {$: 1, a: a, b: b};
+		return {$: 'AddRight', a: a, b: b};
 	});
 var elm$parser$Parser$Advanced$DeadEnd = F4(
 	function (row, col, problem, contextStack) {
-		return {az: col, bv: contextStack, a$: problem, a9: row};
+		return {col: col, contextStack: contextStack, problem: problem, row: row};
 	});
-var elm$parser$Parser$Advanced$Empty = {$: 0};
+var elm$parser$Parser$Advanced$Empty = {$: 'Empty'};
 var elm$parser$Parser$Advanced$fromState = F2(
 	function (s, x) {
 		return A2(
 			elm$parser$Parser$Advanced$AddRight,
 			elm$parser$Parser$Advanced$Empty,
-			A4(elm$parser$Parser$Advanced$DeadEnd, s.a9, s.az, x, s.bu));
+			A4(elm$parser$Parser$Advanced$DeadEnd, s.row, s.col, x, s.context));
 	});
 var elm$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
 var elm$parser$Parser$Advanced$chompIf = F2(
 	function (isGood, expecting) {
-		return function (s) {
-			var newOffset = A3(elm$parser$Parser$Advanced$isSubChar, isGood, s.b, s.a);
-			return _Utils_eq(newOffset, -1) ? A2(
-				elm$parser$Parser$Advanced$Bad,
-				false,
-				A2(elm$parser$Parser$Advanced$fromState, s, expecting)) : (_Utils_eq(newOffset, -2) ? A3(
-				elm$parser$Parser$Advanced$Good,
-				true,
-				0,
-				{az: 1, bu: s.bu, c: s.c, b: s.b + 1, a9: s.a9 + 1, a: s.a}) : A3(
-				elm$parser$Parser$Advanced$Good,
-				true,
-				0,
-				{az: s.az + 1, bu: s.bu, c: s.c, b: newOffset, a9: s.a9, a: s.a}));
-		};
+		return elm$parser$Parser$Advanced$Parser(
+			function (s) {
+				var newOffset = A3(elm$parser$Parser$Advanced$isSubChar, isGood, s.offset, s.src);
+				return _Utils_eq(newOffset, -1) ? A2(
+					elm$parser$Parser$Advanced$Bad,
+					false,
+					A2(elm$parser$Parser$Advanced$fromState, s, expecting)) : (_Utils_eq(newOffset, -2) ? A3(
+					elm$parser$Parser$Advanced$Good,
+					true,
+					_Utils_Tuple0,
+					{col: 1, context: s.context, indent: s.indent, offset: s.offset + 1, row: s.row + 1, src: s.src}) : A3(
+					elm$parser$Parser$Advanced$Good,
+					true,
+					_Utils_Tuple0,
+					{col: s.col + 1, context: s.context, indent: s.indent, offset: newOffset, row: s.row, src: s.src}));
+			});
 	});
 var elm$parser$Parser$chompIf = function (isGood) {
 	return A2(elm$parser$Parser$Advanced$chompIf, isGood, elm$parser$Parser$UnexpectedChar);
@@ -6589,13 +6611,13 @@ var elm$parser$Parser$Advanced$chompWhileHelp = F5(
 	function (isGood, offset, row, col, s0) {
 		chompWhileHelp:
 		while (true) {
-			var newOffset = A3(elm$parser$Parser$Advanced$isSubChar, isGood, offset, s0.a);
+			var newOffset = A3(elm$parser$Parser$Advanced$isSubChar, isGood, offset, s0.src);
 			if (_Utils_eq(newOffset, -1)) {
 				return A3(
 					elm$parser$Parser$Advanced$Good,
-					_Utils_cmp(s0.b, offset) < 0,
-					0,
-					{az: col, bu: s0.bu, c: s0.c, b: offset, a9: row, a: s0.a});
+					_Utils_cmp(s0.offset, offset) < 0,
+					_Utils_Tuple0,
+					{col: col, context: s0.context, indent: s0.indent, offset: offset, row: row, src: s0.src});
 			} else {
 				if (_Utils_eq(newOffset, -2)) {
 					var $temp$isGood = isGood,
@@ -6626,42 +6648,44 @@ var elm$parser$Parser$Advanced$chompWhileHelp = F5(
 		}
 	});
 var elm$parser$Parser$Advanced$chompWhile = function (isGood) {
-	return function (s) {
-		return A5(elm$parser$Parser$Advanced$chompWhileHelp, isGood, s.b, s.a9, s.az, s);
-	};
+	return elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A5(elm$parser$Parser$Advanced$chompWhileHelp, isGood, s.offset, s.row, s.col, s);
+		});
 };
 var elm$parser$Parser$chompWhile = elm$parser$Parser$Advanced$chompWhile;
 var elm$parser$Parser$Advanced$map2 = F3(
 	function (func, _n0, _n1) {
-		var parseA = _n0;
-		var parseB = _n1;
-		return function (s0) {
-			var _n2 = parseA(s0);
-			if (_n2.$ === 1) {
-				var p = _n2.a;
-				var x = _n2.b;
-				return A2(elm$parser$Parser$Advanced$Bad, p, x);
-			} else {
-				var p1 = _n2.a;
-				var a = _n2.b;
-				var s1 = _n2.c;
-				var _n3 = parseB(s1);
-				if (_n3.$ === 1) {
-					var p2 = _n3.a;
-					var x = _n3.b;
-					return A2(elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+		var parseA = _n0.a;
+		var parseB = _n1.a;
+		return elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _n2 = parseA(s0);
+				if (_n2.$ === 'Bad') {
+					var p = _n2.a;
+					var x = _n2.b;
+					return A2(elm$parser$Parser$Advanced$Bad, p, x);
 				} else {
-					var p2 = _n3.a;
-					var b = _n3.b;
-					var s2 = _n3.c;
-					return A3(
-						elm$parser$Parser$Advanced$Good,
-						p1 || p2,
-						A2(func, a, b),
-						s2);
+					var p1 = _n2.a;
+					var a = _n2.b;
+					var s1 = _n2.c;
+					var _n3 = parseB(s1);
+					if (_n3.$ === 'Bad') {
+						var p2 = _n3.a;
+						var x = _n3.b;
+						return A2(elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _n3.a;
+						var b = _n3.b;
+						var s2 = _n3.c;
+						return A3(
+							elm$parser$Parser$Advanced$Good,
+							p1 || p2,
+							A2(func, a, b),
+							s2);
+					}
 				}
-			}
-		};
+			});
 	});
 var elm$parser$Parser$Advanced$ignorer = F2(
 	function (keepParser, ignoreParser) {
@@ -6669,9 +6693,10 @@ var elm$parser$Parser$Advanced$ignorer = F2(
 	});
 var elm$parser$Parser$ignorer = elm$parser$Parser$Advanced$ignorer;
 var elm$parser$Parser$Advanced$succeed = function (a) {
-	return function (s) {
-		return A3(elm$parser$Parser$Advanced$Good, false, a, s);
-	};
+	return elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3(elm$parser$Parser$Advanced$Good, false, a, s);
+		});
 };
 var elm$parser$Parser$succeed = elm$parser$Parser$Advanced$succeed;
 var author$project$SyntaxHighlight$Language$Helpers$chompIfThenWhile = function (isNotRelevant) {
@@ -6679,7 +6704,7 @@ var author$project$SyntaxHighlight$Language$Helpers$chompIfThenWhile = function 
 		elm$parser$Parser$ignorer,
 		A2(
 			elm$parser$Parser$ignorer,
-			elm$parser$Parser$succeed(0),
+			elm$parser$Parser$succeed(_Utils_Tuple0),
 			elm$parser$Parser$chompIf(isNotRelevant)),
 		elm$parser$Parser$chompWhile(isNotRelevant));
 };
@@ -6688,34 +6713,44 @@ var elm$core$Set$fromList = function (list) {
 };
 var author$project$SyntaxHighlight$Language$Javascript$groupSet = elm$core$Set$fromList(
 	_List_fromArray(
-		['{', '}', '(', ')', '[', ']', ',', ';']));
+		[
+			_Utils_chr('{'),
+			_Utils_chr('}'),
+			_Utils_chr('('),
+			_Utils_chr(')'),
+			_Utils_chr('['),
+			_Utils_chr(']'),
+			_Utils_chr(','),
+			_Utils_chr(';')
+		]));
 var author$project$SyntaxHighlight$Language$Javascript$isGroupChar = function (c) {
 	return A2(elm$core$Set$member, c, author$project$SyntaxHighlight$Language$Javascript$groupSet);
 };
-var author$project$SyntaxHighlight$Language$Type$Normal = {$: 0};
+var author$project$SyntaxHighlight$Language$Type$Normal = {$: 'Normal'};
 var elm$parser$Parser$Advanced$mapChompedString = F2(
 	function (func, _n0) {
-		var parse = _n0;
-		return function (s0) {
-			var _n1 = parse(s0);
-			if (_n1.$ === 1) {
-				var p = _n1.a;
-				var x = _n1.b;
-				return A2(elm$parser$Parser$Advanced$Bad, p, x);
-			} else {
-				var p = _n1.a;
-				var a = _n1.b;
-				var s1 = _n1.c;
-				return A3(
-					elm$parser$Parser$Advanced$Good,
-					p,
-					A2(
-						func,
-						A3(elm$core$String$slice, s0.b, s1.b, s0.a),
-						a),
-					s1);
-			}
-		};
+		var parse = _n0.a;
+		return elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _n1 = parse(s0);
+				if (_n1.$ === 'Bad') {
+					var p = _n1.a;
+					var x = _n1.b;
+					return A2(elm$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p = _n1.a;
+					var a = _n1.b;
+					var s1 = _n1.c;
+					return A3(
+						elm$parser$Parser$Advanced$Good,
+						p,
+						A2(
+							func,
+							A3(elm$core$String$slice, s0.offset, s1.offset, s0.src),
+							a),
+						s1);
+				}
+			});
 	});
 var elm$parser$Parser$Advanced$getChompedString = function (parser) {
 	return A2(elm$parser$Parser$Advanced$mapChompedString, elm$core$Basics$always, parser);
@@ -6723,24 +6758,25 @@ var elm$parser$Parser$Advanced$getChompedString = function (parser) {
 var elm$parser$Parser$getChompedString = elm$parser$Parser$Advanced$getChompedString;
 var elm$parser$Parser$Advanced$map = F2(
 	function (func, _n0) {
-		var parse = _n0;
-		return function (s0) {
-			var _n1 = parse(s0);
-			if (!_n1.$) {
-				var p = _n1.a;
-				var a = _n1.b;
-				var s1 = _n1.c;
-				return A3(
-					elm$parser$Parser$Advanced$Good,
-					p,
-					func(a),
-					s1);
-			} else {
-				var p = _n1.a;
-				var x = _n1.b;
-				return A2(elm$parser$Parser$Advanced$Bad, p, x);
-			}
-		};
+		var parse = _n0.a;
+		return elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _n1 = parse(s0);
+				if (_n1.$ === 'Good') {
+					var p = _n1.a;
+					var a = _n1.b;
+					var s1 = _n1.c;
+					return A3(
+						elm$parser$Parser$Advanced$Good,
+						p,
+						func(a),
+						s1);
+				} else {
+					var p = _n1.a;
+					var x = _n1.b;
+					return A2(elm$parser$Parser$Advanced$Bad, p, x);
+				}
+			});
 	});
 var elm$parser$Parser$map = elm$parser$Parser$Advanced$map;
 var author$project$SyntaxHighlight$Language$Javascript$groupChar = A2(
@@ -6751,25 +6787,50 @@ var author$project$SyntaxHighlight$Language$Javascript$groupChar = A2(
 	elm$parser$Parser$getChompedString(
 		author$project$SyntaxHighlight$Language$Helpers$chompIfThenWhile(author$project$SyntaxHighlight$Language$Javascript$isGroupChar)));
 var author$project$SyntaxHighlight$Language$Helpers$isLineBreak = function (c) {
-	return c === '\n';
+	return _Utils_eq(
+		c,
+		_Utils_chr('\n'));
 };
 var author$project$SyntaxHighlight$Language$Helpers$isSpace = function (c) {
-	return (c === ' ') || (c === '\t');
+	return _Utils_eq(
+		c,
+		_Utils_chr(' ')) || _Utils_eq(
+		c,
+		_Utils_chr('\t'));
 };
 var author$project$SyntaxHighlight$Language$Helpers$isWhitespace = function (c) {
 	return author$project$SyntaxHighlight$Language$Helpers$isSpace(c) || author$project$SyntaxHighlight$Language$Helpers$isLineBreak(c);
 };
 var author$project$SyntaxHighlight$Language$Javascript$isCommentChar = function (c) {
-	return c === '/';
+	return _Utils_eq(
+		c,
+		_Utils_chr('/'));
 };
 var author$project$SyntaxHighlight$Language$Javascript$operatorSet = elm$core$Set$fromList(
 	_List_fromArray(
-		['+', '-', '*', '/', '=', '!', '<', '>', '&', '|', '?', '^', ':', '~', '%', '.']));
+		[
+			_Utils_chr('+'),
+			_Utils_chr('-'),
+			_Utils_chr('*'),
+			_Utils_chr('/'),
+			_Utils_chr('='),
+			_Utils_chr('!'),
+			_Utils_chr('<'),
+			_Utils_chr('>'),
+			_Utils_chr('&'),
+			_Utils_chr('|'),
+			_Utils_chr('?'),
+			_Utils_chr('^'),
+			_Utils_chr(':'),
+			_Utils_chr('~'),
+			_Utils_chr('%'),
+			_Utils_chr('.')
+		]));
 var elm$core$Dict$foldl = F3(
 	function (func, acc, dict) {
 		foldl:
 		while (true) {
-			if (dict.$ === -2) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
 				return acc;
 			} else {
 				var key = dict.b;
@@ -6796,26 +6857,33 @@ var elm$core$Dict$union = F2(
 	});
 var elm$core$Set$union = F2(
 	function (_n0, _n1) {
-		var dict1 = _n0;
-		var dict2 = _n1;
-		return A2(elm$core$Dict$union, dict1, dict2);
+		var dict1 = _n0.a;
+		var dict2 = _n1.a;
+		return elm$core$Set$Set_elm_builtin(
+			A2(elm$core$Dict$union, dict1, dict2));
 	});
 var author$project$SyntaxHighlight$Language$Javascript$punctuactorSet = A2(elm$core$Set$union, author$project$SyntaxHighlight$Language$Javascript$operatorSet, author$project$SyntaxHighlight$Language$Javascript$groupSet);
 var author$project$SyntaxHighlight$Language$Javascript$isPunctuaction = function (c) {
 	return A2(elm$core$Set$member, c, author$project$SyntaxHighlight$Language$Javascript$punctuactorSet);
 };
 var author$project$SyntaxHighlight$Language$Javascript$isStringLiteralChar = function (c) {
-	return (c === '\"') || ((c === '\'') || (c === '`'));
+	return _Utils_eq(
+		c,
+		_Utils_chr('\"')) || (_Utils_eq(
+		c,
+		_Utils_chr('\'')) || _Utils_eq(
+		c,
+		_Utils_chr('`')));
 };
 var author$project$SyntaxHighlight$Language$Javascript$isIdentifierNameChar = function (c) {
 	return !(author$project$SyntaxHighlight$Language$Javascript$isPunctuaction(c) || (author$project$SyntaxHighlight$Language$Javascript$isStringLiteralChar(c) || (author$project$SyntaxHighlight$Language$Javascript$isCommentChar(c) || author$project$SyntaxHighlight$Language$Helpers$isWhitespace(c))));
 };
-var author$project$SyntaxHighlight$Language$Javascript$DeclarationKeyword = 3;
-var author$project$SyntaxHighlight$Language$Javascript$Function = 5;
-var author$project$SyntaxHighlight$Language$Javascript$Keyword = 2;
-var author$project$SyntaxHighlight$Language$Javascript$LiteralKeyword = 6;
-var author$project$SyntaxHighlight$Language$Javascript$Param = 7;
-var author$project$SyntaxHighlight$Language$Javascript$ClassExtends = 8;
+var author$project$SyntaxHighlight$Language$Javascript$DeclarationKeyword = {$: 'DeclarationKeyword'};
+var author$project$SyntaxHighlight$Language$Javascript$Function = {$: 'Function'};
+var author$project$SyntaxHighlight$Language$Javascript$Keyword = {$: 'Keyword'};
+var author$project$SyntaxHighlight$Language$Javascript$LiteralKeyword = {$: 'LiteralKeyword'};
+var author$project$SyntaxHighlight$Language$Javascript$Param = {$: 'Param'};
+var author$project$SyntaxHighlight$Language$Javascript$ClassExtends = {$: 'ClassExtends'};
 var author$project$SyntaxHighlight$Language$Helpers$thenChompWhile = F2(
 	function (isNotRelevant, previousParser) {
 		return A2(
@@ -6823,33 +6891,34 @@ var author$project$SyntaxHighlight$Language$Helpers$thenChompWhile = F2(
 			previousParser,
 			elm$parser$Parser$chompWhile(isNotRelevant));
 	});
-var author$project$SyntaxHighlight$Language$Type$Comment = {$: 1};
+var author$project$SyntaxHighlight$Language$Type$Comment = {$: 'Comment'};
 var elm$parser$Parser$ExpectingSymbol = function (a) {
-	return {$: 8, a: a};
+	return {$: 'ExpectingSymbol', a: a};
 };
 var elm$parser$Parser$Advanced$Token = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'Token', a: a, b: b};
 	});
 var elm$parser$Parser$Advanced$isSubString = _Parser_isSubString;
 var elm$parser$Parser$Advanced$token = function (_n0) {
 	var str = _n0.a;
 	var expecting = _n0.b;
 	var progress = !elm$core$String$isEmpty(str);
-	return function (s) {
-		var _n1 = A5(elm$parser$Parser$Advanced$isSubString, str, s.b, s.a9, s.az, s.a);
-		var newOffset = _n1.a;
-		var newRow = _n1.b;
-		var newCol = _n1.c;
-		return _Utils_eq(newOffset, -1) ? A2(
-			elm$parser$Parser$Advanced$Bad,
-			false,
-			A2(elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
-			elm$parser$Parser$Advanced$Good,
-			progress,
-			0,
-			{az: newCol, bu: s.bu, c: s.c, b: newOffset, a9: newRow, a: s.a});
-	};
+	return elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _n1 = A5(elm$parser$Parser$Advanced$isSubString, str, s.offset, s.row, s.col, s.src);
+			var newOffset = _n1.a;
+			var newRow = _n1.b;
+			var newCol = _n1.c;
+			return _Utils_eq(newOffset, -1) ? A2(
+				elm$parser$Parser$Advanced$Bad,
+				false,
+				A2(elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
+				elm$parser$Parser$Advanced$Good,
+				progress,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+		});
 };
 var elm$parser$Parser$Advanced$symbol = elm$parser$Parser$Advanced$token;
 var elm$parser$Parser$symbol = function (str) {
@@ -6874,32 +6943,33 @@ var author$project$SyntaxHighlight$Language$Javascript$inlineComment = A2(
 			elm$parser$Parser$symbol('//'))));
 var elm$parser$Parser$Advanced$andThen = F2(
 	function (callback, _n0) {
-		var parseA = _n0;
-		return function (s0) {
-			var _n1 = parseA(s0);
-			if (_n1.$ === 1) {
-				var p = _n1.a;
-				var x = _n1.b;
-				return A2(elm$parser$Parser$Advanced$Bad, p, x);
-			} else {
-				var p1 = _n1.a;
-				var a = _n1.b;
-				var s1 = _n1.c;
-				var _n2 = callback(a);
-				var parseB = _n2;
-				var _n3 = parseB(s1);
-				if (_n3.$ === 1) {
-					var p2 = _n3.a;
-					var x = _n3.b;
-					return A2(elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+		var parseA = _n0.a;
+		return elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _n1 = parseA(s0);
+				if (_n1.$ === 'Bad') {
+					var p = _n1.a;
+					var x = _n1.b;
+					return A2(elm$parser$Parser$Advanced$Bad, p, x);
 				} else {
-					var p2 = _n3.a;
-					var b = _n3.b;
-					var s2 = _n3.c;
-					return A3(elm$parser$Parser$Advanced$Good, p1 || p2, b, s2);
+					var p1 = _n1.a;
+					var a = _n1.b;
+					var s1 = _n1.c;
+					var _n2 = callback(a);
+					var parseB = _n2.a;
+					var _n3 = parseB(s1);
+					if (_n3.$ === 'Bad') {
+						var p2 = _n3.a;
+						var x = _n3.b;
+						return A2(elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _n3.a;
+						var b = _n3.b;
+						var s2 = _n3.c;
+						return A3(elm$parser$Parser$Advanced$Good, p1 || p2, b, s2);
+					}
 				}
-			}
-		};
+			});
 	});
 var elm$parser$Parser$andThen = elm$parser$Parser$Advanced$andThen;
 var author$project$SyntaxHighlight$Language$Helpers$addThen = F3(
@@ -6922,21 +6992,22 @@ var author$project$SyntaxHighlight$Language$Helpers$consThen = F3(
 			},
 			pn);
 	});
-var elm$parser$Parser$ExpectingEnd = {$: 10};
+var elm$parser$Parser$ExpectingEnd = {$: 'ExpectingEnd'};
 var elm$parser$Parser$Advanced$end = function (x) {
-	return function (s) {
-		return _Utils_eq(
-			elm$core$String$length(s.a),
-			s.b) ? A3(elm$parser$Parser$Advanced$Good, false, 0, s) : A2(
-			elm$parser$Parser$Advanced$Bad,
-			false,
-			A2(elm$parser$Parser$Advanced$fromState, s, x));
-	};
+	return elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return _Utils_eq(
+				elm$core$String$length(s.src),
+				s.offset) ? A3(elm$parser$Parser$Advanced$Good, false, _Utils_Tuple0, s) : A2(
+				elm$parser$Parser$Advanced$Bad,
+				false,
+				A2(elm$parser$Parser$Advanced$fromState, s, x));
+		});
 };
 var elm$parser$Parser$end = elm$parser$Parser$Advanced$end(elm$parser$Parser$ExpectingEnd);
 var elm$parser$Parser$Advanced$Append = F2(
 	function (a, b) {
-		return {$: 2, a: a, b: b};
+		return {$: 'Append', a: a, b: b};
 	});
 var elm$parser$Parser$Advanced$oneOfHelp = F3(
 	function (s0, bag, parsers) {
@@ -6945,10 +7016,10 @@ var elm$parser$Parser$Advanced$oneOfHelp = F3(
 			if (!parsers.b) {
 				return A2(elm$parser$Parser$Advanced$Bad, false, bag);
 			} else {
-				var parse = parsers.a;
+				var parse = parsers.a.a;
 				var remainingParsers = parsers.b;
 				var _n1 = parse(s0);
-				if (!_n1.$) {
+				if (_n1.$ === 'Good') {
 					var step = _n1;
 					return step;
 				} else {
@@ -6971,17 +7042,18 @@ var elm$parser$Parser$Advanced$oneOfHelp = F3(
 		}
 	});
 var elm$parser$Parser$Advanced$oneOf = function (parsers) {
-	return function (s) {
-		return A3(elm$parser$Parser$Advanced$oneOfHelp, s, elm$parser$Parser$Advanced$Empty, parsers);
-	};
+	return elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3(elm$parser$Parser$Advanced$oneOfHelp, s, elm$parser$Parser$Advanced$Empty, parsers);
+		});
 };
 var elm$parser$Parser$oneOf = elm$parser$Parser$Advanced$oneOf;
 var author$project$SyntaxHighlight$Language$Helpers$delimitedUnnestable = F2(
 	function (options, revAList) {
-		var defaultMap = options.aB;
-		var isNotRelevant = options.aN;
-		var end = options.ak;
-		var innerParsers = options.aK;
+		var defaultMap = options.defaultMap;
+		var isNotRelevant = options.isNotRelevant;
+		var end = options.end;
+		var innerParsers = options.innerParsers;
 		return elm$parser$Parser$oneOf(
 			_List_fromArray(
 				[
@@ -7019,11 +7091,11 @@ var author$project$SyntaxHighlight$Language$Helpers$delimitedUnnestable = F2(
 	});
 var author$project$SyntaxHighlight$Language$Helpers$delimitedNestable = F3(
 	function (nestLevel, options, revAList) {
-		var defaultMap = options.aB;
-		var isNotRelevant = options.aN;
-		var start = options.as;
-		var end = options.ak;
-		var innerParsers = options.aK;
+		var defaultMap = options.defaultMap;
+		var isNotRelevant = options.isNotRelevant;
+		var start = options.start;
+		var end = options.end;
+		var innerParsers = options.innerParsers;
 		return elm$parser$Parser$oneOf(
 			_List_fromArray(
 				[
@@ -7077,15 +7149,16 @@ var author$project$SyntaxHighlight$Language$Helpers$delimitedNestable = F3(
 				]));
 	});
 var elm$parser$Parser$Problem = function (a) {
-	return {$: 12, a: a};
+	return {$: 'Problem', a: a};
 };
 var elm$parser$Parser$Advanced$problem = function (x) {
-	return function (s) {
-		return A2(
-			elm$parser$Parser$Advanced$Bad,
-			false,
-			A2(elm$parser$Parser$Advanced$fromState, s, x));
-	};
+	return elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A2(
+				elm$parser$Parser$Advanced$Bad,
+				false,
+				A2(elm$parser$Parser$Advanced$fromState, s, x));
+		});
 };
 var elm$parser$Parser$problem = function (msg) {
 	return elm$parser$Parser$Advanced$problem(
@@ -7093,17 +7166,17 @@ var elm$parser$Parser$problem = function (msg) {
 };
 var author$project$SyntaxHighlight$Language$Helpers$delimitedHelp = F2(
 	function (options, revAList) {
-		var start = options.as;
-		var end = options.ak;
-		var isNotRelevant = options.aN;
+		var start = options.start;
+		var end = options.end;
+		var isNotRelevant = options.isNotRelevant;
 		var _n0 = _Utils_Tuple2(
-			elm$core$String$uncons(options.as),
-			elm$core$String$uncons(options.ak));
-		if (_n0.a.$ === 1) {
+			elm$core$String$uncons(options.start),
+			elm$core$String$uncons(options.end));
+		if (_n0.a.$ === 'Nothing') {
 			var _n1 = _n0.a;
 			return elm$parser$Parser$problem('Trying to parse a delimited helper, but the start token cannot be an empty string!');
 		} else {
-			if (_n0.b.$ === 1) {
+			if (_n0.b.$ === 'Nothing') {
 				var _n2 = _n0.b;
 				return elm$parser$Parser$problem('Trying to parse a delimited helper, but the end token cannot be an empty string!');
 			} else {
@@ -7111,13 +7184,13 @@ var author$project$SyntaxHighlight$Language$Helpers$delimitedHelp = F2(
 				var startChar = _n3.a;
 				var _n4 = _n0.b.a;
 				var endChar = _n4.a;
-				return options.aM ? A3(
+				return options.isNestable ? A3(
 					author$project$SyntaxHighlight$Language$Helpers$delimitedNestable,
 					1,
 					_Utils_update(
 						options,
 						{
-							aN: function (c) {
+							isNotRelevant: function (c) {
 								return isNotRelevant(c) && ((!_Utils_eq(c, startChar)) && (!_Utils_eq(c, endChar)));
 							}
 						}),
@@ -7126,7 +7199,7 @@ var author$project$SyntaxHighlight$Language$Helpers$delimitedHelp = F2(
 					_Utils_update(
 						options,
 						{
-							aN: function (c) {
+							isNotRelevant: function (c) {
 								return isNotRelevant(c) && (!_Utils_eq(c, endChar));
 							}
 						}),
@@ -7135,9 +7208,9 @@ var author$project$SyntaxHighlight$Language$Helpers$delimitedHelp = F2(
 		}
 	});
 var author$project$SyntaxHighlight$Language$Helpers$delimited = function (options) {
-	var start = options.as;
-	var isNotRelevant = options.aN;
-	var defaultMap = options.aB;
+	var start = options.start;
+	var isNotRelevant = options.isNotRelevant;
+	var defaultMap = options.defaultMap;
 	return A2(
 		elm$parser$Parser$andThen,
 		function (n) {
@@ -7153,7 +7226,7 @@ var author$project$SyntaxHighlight$Language$Helpers$delimited = function (option
 				defaultMap(start)),
 			elm$parser$Parser$symbol(start)));
 };
-var author$project$SyntaxHighlight$Language$Type$LineBreak = {$: 2};
+var author$project$SyntaxHighlight$Language$Type$LineBreak = {$: 'LineBreak'};
 var author$project$SyntaxHighlight$Language$Javascript$lineBreakList = A2(
 	elm$parser$Parser$map,
 	function (_n0) {
@@ -7165,23 +7238,23 @@ var author$project$SyntaxHighlight$Language$Javascript$lineBreakList = A2(
 	elm$parser$Parser$symbol('\n'));
 var author$project$SyntaxHighlight$Language$Javascript$multilineComment = author$project$SyntaxHighlight$Language$Helpers$delimited(
 	{
-		aB: function (b) {
+		defaultMap: function (b) {
 			return _Utils_Tuple2(author$project$SyntaxHighlight$Language$Type$Comment, b);
 		},
-		ak: '*/',
-		aK: _List_fromArray(
+		end: '*/',
+		innerParsers: _List_fromArray(
 			[author$project$SyntaxHighlight$Language$Javascript$lineBreakList]),
-		aM: false,
-		aN: function (c) {
+		isNestable: false,
+		isNotRelevant: function (c) {
 			return !author$project$SyntaxHighlight$Language$Helpers$isLineBreak(c);
 		},
-		as: '/*'
+		start: '/*'
 	});
 var author$project$SyntaxHighlight$Language$Javascript$comment = elm$parser$Parser$oneOf(
 	_List_fromArray(
 		[author$project$SyntaxHighlight$Language$Javascript$inlineComment, author$project$SyntaxHighlight$Language$Javascript$multilineComment]));
 var elm$parser$Parser$Loop = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Loop', a: a};
 };
 var author$project$SyntaxHighlight$Language$Javascript$whitespaceOrCommentStep = function (revTokens) {
 	return elm$parser$Parser$oneOf(
@@ -7215,10 +7288,10 @@ var author$project$SyntaxHighlight$Language$Javascript$whitespaceOrCommentStep =
 			]));
 };
 var author$project$SyntaxHighlight$Language$Type$C = function (a) {
-	return {$: 3, a: a};
+	return {$: 'C', a: a};
 };
 var elm$parser$Parser$Done = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Done', a: a};
 };
 var author$project$SyntaxHighlight$Language$Javascript$classExtendsLoop = function (revTokens) {
 	return elm$parser$Parser$oneOf(
@@ -7232,7 +7305,7 @@ var author$project$SyntaxHighlight$Language$Javascript$classExtendsLoop = functi
 						A2(
 							elm$core$List$cons,
 							_Utils_Tuple2(
-								author$project$SyntaxHighlight$Language$Type$C(8),
+								author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$ClassExtends),
 								b),
 							revTokens));
 				},
@@ -7243,13 +7316,13 @@ var author$project$SyntaxHighlight$Language$Javascript$classExtendsLoop = functi
 			]));
 };
 var elm$parser$Parser$Advanced$Done = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Done', a: a};
 };
 var elm$parser$Parser$Advanced$Loop = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Loop', a: a};
 };
 var elm$parser$Parser$toAdvancedStep = function (step) {
-	if (!step.$) {
+	if (step.$ === 'Loop') {
 		var s = step.a;
 		return elm$parser$Parser$Advanced$Loop(s);
 	} else {
@@ -7262,13 +7335,13 @@ var elm$parser$Parser$Advanced$loopHelp = F4(
 		loopHelp:
 		while (true) {
 			var _n0 = callback(state);
-			var parse = _n0;
+			var parse = _n0.a;
 			var _n1 = parse(s0);
-			if (!_n1.$) {
+			if (_n1.$ === 'Good') {
 				var p1 = _n1.a;
 				var step = _n1.b;
 				var s1 = _n1.c;
-				if (!step.$) {
+				if (step.$ === 'Loop') {
 					var newState = step.a;
 					var $temp$p = p || p1,
 						$temp$state = newState,
@@ -7292,9 +7365,10 @@ var elm$parser$Parser$Advanced$loopHelp = F4(
 	});
 var elm$parser$Parser$Advanced$loop = F2(
 	function (state, callback) {
-		return function (s) {
-			return A4(elm$parser$Parser$Advanced$loopHelp, false, state, callback, s);
-		};
+		return elm$parser$Parser$Advanced$Parser(
+			function (s) {
+				return A4(elm$parser$Parser$Advanced$loopHelp, false, state, callback, s);
+			});
 	});
 var elm$parser$Parser$loop = F2(
 	function (state, callback) {
@@ -7324,7 +7398,7 @@ var author$project$SyntaxHighlight$Language$Javascript$classDeclarationLoop = fu
 							A2(
 								elm$core$List$cons,
 								_Utils_Tuple2(
-									author$project$SyntaxHighlight$Language$Type$C(2),
+									author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$Keyword),
 									n),
 								revTokens),
 							author$project$SyntaxHighlight$Language$Javascript$classExtendsLoop)) : elm$parser$Parser$succeed(
@@ -7332,7 +7406,7 @@ var author$project$SyntaxHighlight$Language$Javascript$classDeclarationLoop = fu
 							A2(
 								elm$core$List$cons,
 								_Utils_Tuple2(
-									author$project$SyntaxHighlight$Language$Type$C(5),
+									author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$Function),
 									n),
 								revTokens)));
 				},
@@ -7354,14 +7428,18 @@ var author$project$SyntaxHighlight$Language$Javascript$argLoop = function (revTo
 						A2(
 							elm$core$List$cons,
 							_Utils_Tuple2(
-								author$project$SyntaxHighlight$Language$Type$C(7),
+								author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$Param),
 								b),
 							revTokens));
 				},
 				elm$parser$Parser$getChompedString(
 					author$project$SyntaxHighlight$Language$Helpers$chompIfThenWhile(
 						function (c) {
-							return !(author$project$SyntaxHighlight$Language$Javascript$isCommentChar(c) || (author$project$SyntaxHighlight$Language$Helpers$isWhitespace(c) || ((c === ',') || (c === ')'))));
+							return !(author$project$SyntaxHighlight$Language$Javascript$isCommentChar(c) || (author$project$SyntaxHighlight$Language$Helpers$isWhitespace(c) || (_Utils_eq(
+								c,
+								_Utils_chr(',')) || _Utils_eq(
+								c,
+								_Utils_chr(')')))));
 						}))),
 				A2(
 				elm$parser$Parser$map,
@@ -7375,7 +7453,11 @@ var author$project$SyntaxHighlight$Language$Javascript$argLoop = function (revTo
 				elm$parser$Parser$getChompedString(
 					author$project$SyntaxHighlight$Language$Helpers$chompIfThenWhile(
 						function (c) {
-							return (c === '/') || (c === ',');
+							return _Utils_eq(
+								c,
+								_Utils_chr('/')) || _Utils_eq(
+								c,
+								_Utils_chr(','));
 						}))),
 				elm$parser$Parser$succeed(
 				elm$parser$Parser$Done(revTokens))
@@ -7393,7 +7475,7 @@ var author$project$SyntaxHighlight$Language$Javascript$functionDeclarationLoop =
 						A2(
 							elm$core$List$cons,
 							_Utils_Tuple2(
-								author$project$SyntaxHighlight$Language$Type$C(5),
+								author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$Function),
 								b),
 							revTokens));
 				},
@@ -7406,7 +7488,7 @@ var author$project$SyntaxHighlight$Language$Javascript$functionDeclarationLoop =
 						A2(
 							elm$core$List$cons,
 							_Utils_Tuple2(
-								author$project$SyntaxHighlight$Language$Type$C(2),
+								author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$Keyword),
 								'*'),
 							revTokens));
 				},
@@ -7430,7 +7512,7 @@ var author$project$SyntaxHighlight$Language$Javascript$functionDeclarationLoop =
 				elm$parser$Parser$Done(revTokens))
 			]));
 };
-var author$project$SyntaxHighlight$Language$Javascript$FunctionEval = 4;
+var author$project$SyntaxHighlight$Language$Javascript$FunctionEval = {$: 'FunctionEval'};
 var author$project$SyntaxHighlight$Language$Javascript$functionEvalLoop = F3(
 	function (identifier, revTokens, thisRevToken) {
 		return elm$parser$Parser$oneOf(
@@ -7449,7 +7531,7 @@ var author$project$SyntaxHighlight$Language$Javascript$functionEvalLoop = F3(
 								A2(
 									elm$core$List$cons,
 									_Utils_Tuple2(
-										author$project$SyntaxHighlight$Language$Type$C(4),
+										author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$FunctionEval),
 										identifier),
 									revTokens)));
 					},
@@ -7489,7 +7571,7 @@ var author$project$SyntaxHighlight$Language$Javascript$keywordParser = F2(
 			A2(
 				elm$core$List$cons,
 				_Utils_Tuple2(
-					author$project$SyntaxHighlight$Language$Type$C(3),
+					author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$DeclarationKeyword),
 					n),
 				revTokens),
 			author$project$SyntaxHighlight$Language$Javascript$functionDeclarationLoop) : ((n === 'class') ? A2(
@@ -7497,40 +7579,40 @@ var author$project$SyntaxHighlight$Language$Javascript$keywordParser = F2(
 			A2(
 				elm$core$List$cons,
 				_Utils_Tuple2(
-					author$project$SyntaxHighlight$Language$Type$C(3),
+					author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$DeclarationKeyword),
 					n),
 				revTokens),
 			author$project$SyntaxHighlight$Language$Javascript$classDeclarationLoop) : (((n === 'this') || (n === 'super')) ? elm$parser$Parser$succeed(
 			A2(
 				elm$core$List$cons,
 				_Utils_Tuple2(
-					author$project$SyntaxHighlight$Language$Type$C(7),
+					author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$Param),
 					n),
 				revTokens)) : ((n === 'constructor') ? A2(
 			elm$parser$Parser$loop,
 			A2(
 				elm$core$List$cons,
 				_Utils_Tuple2(
-					author$project$SyntaxHighlight$Language$Type$C(5),
+					author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$Function),
 					n),
 				revTokens),
 			author$project$SyntaxHighlight$Language$Javascript$functionDeclarationLoop) : (author$project$SyntaxHighlight$Language$Javascript$isKeyword(n) ? elm$parser$Parser$succeed(
 			A2(
 				elm$core$List$cons,
 				_Utils_Tuple2(
-					author$project$SyntaxHighlight$Language$Type$C(2),
+					author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$Keyword),
 					n),
 				revTokens)) : (author$project$SyntaxHighlight$Language$Javascript$isDeclarationKeyword(n) ? elm$parser$Parser$succeed(
 			A2(
 				elm$core$List$cons,
 				_Utils_Tuple2(
-					author$project$SyntaxHighlight$Language$Type$C(3),
+					author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$DeclarationKeyword),
 					n),
 				revTokens)) : (author$project$SyntaxHighlight$Language$Javascript$isLiteralKeyword(n) ? elm$parser$Parser$succeed(
 			A2(
 				elm$core$List$cons,
 				_Utils_Tuple2(
-					author$project$SyntaxHighlight$Language$Type$C(6),
+					author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$LiteralKeyword),
 					n),
 				revTokens)) : A2(
 			elm$parser$Parser$loop,
@@ -7538,47 +7620,50 @@ var author$project$SyntaxHighlight$Language$Javascript$keywordParser = F2(
 			A2(author$project$SyntaxHighlight$Language$Javascript$functionEvalLoop, n, revTokens))))))));
 	});
 var author$project$SyntaxHighlight$Language$Helpers$isNumber = function (c) {
-	return elm$core$Char$isDigit(c) || (c === '.');
+	return elm$core$Char$isDigit(c) || _Utils_eq(
+		c,
+		_Utils_chr('.'));
 };
 var author$project$SyntaxHighlight$Language$Helpers$positiveNumber = A2(
 	elm$parser$Parser$ignorer,
 	A2(
 		elm$parser$Parser$ignorer,
-		elm$parser$Parser$succeed(0),
+		elm$parser$Parser$succeed(_Utils_Tuple0),
 		elm$parser$Parser$chompIf(author$project$SyntaxHighlight$Language$Helpers$isNumber)),
 	elm$parser$Parser$chompWhile(author$project$SyntaxHighlight$Language$Helpers$isNumber));
 var elm$parser$Parser$Advanced$backtrackable = function (_n0) {
-	var parse = _n0;
-	return function (s0) {
-		var _n1 = parse(s0);
-		if (_n1.$ === 1) {
-			var x = _n1.b;
-			return A2(elm$parser$Parser$Advanced$Bad, false, x);
-		} else {
-			var a = _n1.b;
-			var s1 = _n1.c;
-			return A3(elm$parser$Parser$Advanced$Good, false, a, s1);
-		}
-	};
+	var parse = _n0.a;
+	return elm$parser$Parser$Advanced$Parser(
+		function (s0) {
+			var _n1 = parse(s0);
+			if (_n1.$ === 'Bad') {
+				var x = _n1.b;
+				return A2(elm$parser$Parser$Advanced$Bad, false, x);
+			} else {
+				var a = _n1.b;
+				var s1 = _n1.c;
+				return A3(elm$parser$Parser$Advanced$Good, false, a, s1);
+			}
+		});
 };
 var elm$parser$Parser$backtrackable = elm$parser$Parser$Advanced$backtrackable;
 var author$project$SyntaxHighlight$Language$Helpers$negativeNumber = A2(
 	elm$parser$Parser$ignorer,
 	A2(
 		elm$parser$Parser$ignorer,
-		elm$parser$Parser$succeed(0),
+		elm$parser$Parser$succeed(_Utils_Tuple0),
 		elm$parser$Parser$backtrackable(
 			elm$parser$Parser$symbol('-'))),
 	author$project$SyntaxHighlight$Language$Helpers$positiveNumber);
 var author$project$SyntaxHighlight$Language$Helpers$number = elm$parser$Parser$oneOf(
 	_List_fromArray(
 		[author$project$SyntaxHighlight$Language$Helpers$positiveNumber, author$project$SyntaxHighlight$Language$Helpers$negativeNumber]));
-var author$project$SyntaxHighlight$Language$Javascript$Number = 0;
+var author$project$SyntaxHighlight$Language$Javascript$Number = {$: 'Number'};
 var author$project$SyntaxHighlight$Language$Javascript$number = A2(
 	elm$parser$Parser$map,
 	function (b) {
 		return _Utils_Tuple2(
-			author$project$SyntaxHighlight$Language$Type$C(0),
+			author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$Number),
 			b);
 	},
 	elm$parser$Parser$getChompedString(author$project$SyntaxHighlight$Language$Helpers$number));
@@ -7589,18 +7674,30 @@ var author$project$SyntaxHighlight$Language$Javascript$operatorChar = A2(
 	elm$parser$Parser$map,
 	function (b) {
 		return _Utils_Tuple2(
-			author$project$SyntaxHighlight$Language$Type$C(2),
+			author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$Keyword),
 			b);
 	},
 	elm$parser$Parser$getChompedString(
 		author$project$SyntaxHighlight$Language$Helpers$chompIfThenWhile(author$project$SyntaxHighlight$Language$Javascript$isOperatorChar)));
 var author$project$SyntaxHighlight$Language$Helpers$isEscapable = function (c) {
-	return c === '\\';
+	return _Utils_eq(
+		c,
+		_Utils_chr('\\'));
 };
-var author$project$SyntaxHighlight$Language$Javascript$String = 1;
+var author$project$SyntaxHighlight$Language$Javascript$String = {$: 'String'};
 var author$project$SyntaxHighlight$Language$Helpers$escapableSet = elm$core$Set$fromList(
 	_List_fromArray(
-		['\'', '\"', '\\', 'n', 'r', 't', 'b', 'f', 'v']));
+		[
+			_Utils_chr('\''),
+			_Utils_chr('\"'),
+			_Utils_chr('\\'),
+			_Utils_chr('n'),
+			_Utils_chr('r'),
+			_Utils_chr('t'),
+			_Utils_chr('b'),
+			_Utils_chr('f'),
+			_Utils_chr('v')
+		]));
 var author$project$SyntaxHighlight$Language$Helpers$isEscapableChar = function (c) {
 	return A2(elm$core$Set$member, c, author$project$SyntaxHighlight$Language$Helpers$escapableSet);
 };
@@ -7608,7 +7705,7 @@ var author$project$SyntaxHighlight$Language$Helpers$escapable = A2(
 	elm$parser$Parser$ignorer,
 	A2(
 		elm$parser$Parser$ignorer,
-		elm$parser$Parser$succeed(0),
+		elm$parser$Parser$succeed(_Utils_Tuple0),
 		elm$parser$Parser$backtrackable(
 			elm$parser$Parser$symbol('\\'))),
 	elm$parser$Parser$chompIf(author$project$SyntaxHighlight$Language$Helpers$isEscapableChar));
@@ -7618,42 +7715,42 @@ var author$project$SyntaxHighlight$Language$Javascript$jsEscapable = A2(
 		return _List_fromArray(
 			[
 				_Utils_Tuple2(
-				author$project$SyntaxHighlight$Language$Type$C(6),
+				author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$LiteralKeyword),
 				b)
 			]);
 	},
 	elm$parser$Parser$getChompedString(author$project$SyntaxHighlight$Language$Helpers$escapable));
 var author$project$SyntaxHighlight$Language$Javascript$quoteDelimiter = {
-	aB: function (b) {
+	defaultMap: function (b) {
 		return _Utils_Tuple2(
-			author$project$SyntaxHighlight$Language$Type$C(1),
+			author$project$SyntaxHighlight$Language$Type$C(author$project$SyntaxHighlight$Language$Javascript$String),
 			b);
 	},
-	ak: '\'',
-	aK: _List_fromArray(
+	end: '\'',
+	innerParsers: _List_fromArray(
 		[author$project$SyntaxHighlight$Language$Javascript$lineBreakList, author$project$SyntaxHighlight$Language$Javascript$jsEscapable]),
-	aM: false,
-	aN: function (c) {
+	isNestable: false,
+	isNotRelevant: function (c) {
 		return !(author$project$SyntaxHighlight$Language$Helpers$isLineBreak(c) || author$project$SyntaxHighlight$Language$Helpers$isEscapable(c));
 	},
-	as: '\''
+	start: '\''
 };
 var author$project$SyntaxHighlight$Language$Javascript$doubleQuote = author$project$SyntaxHighlight$Language$Helpers$delimited(
 	_Utils_update(
 		author$project$SyntaxHighlight$Language$Javascript$quoteDelimiter,
-		{ak: '\"', as: '\"'}));
+		{end: '\"', start: '\"'}));
 var author$project$SyntaxHighlight$Language$Javascript$quote = author$project$SyntaxHighlight$Language$Helpers$delimited(author$project$SyntaxHighlight$Language$Javascript$quoteDelimiter);
 var author$project$SyntaxHighlight$Language$Javascript$templateString = author$project$SyntaxHighlight$Language$Helpers$delimited(
 	_Utils_update(
 		author$project$SyntaxHighlight$Language$Javascript$quoteDelimiter,
 		{
-			ak: '`',
-			aK: _List_fromArray(
+			end: '`',
+			innerParsers: _List_fromArray(
 				[author$project$SyntaxHighlight$Language$Javascript$lineBreakList, author$project$SyntaxHighlight$Language$Javascript$jsEscapable]),
-			aN: function (c) {
+			isNotRelevant: function (c) {
 				return !(author$project$SyntaxHighlight$Language$Helpers$isLineBreak(c) || author$project$SyntaxHighlight$Language$Helpers$isEscapable(c));
 			},
-			as: '`'
+			start: '`'
 		}));
 var author$project$SyntaxHighlight$Language$Javascript$stringLiteral = elm$parser$Parser$oneOf(
 	_List_fromArray(
@@ -7693,27 +7790,27 @@ var author$project$SyntaxHighlight$Language$Javascript$mainLoop = function (revT
 };
 var author$project$SyntaxHighlight$Language$Javascript$toRevTokens = A2(elm$parser$Parser$loop, _List_Nil, author$project$SyntaxHighlight$Language$Javascript$mainLoop);
 var author$project$SyntaxHighlight$Line$Helpers$newLine = function (fragments) {
-	return {bC: fragments, ae: elm$core$Maybe$Nothing};
+	return {fragments: fragments, highlight: elm$core$Maybe$Nothing};
 };
-var author$project$SyntaxHighlight$Style$Comment = 1;
-var author$project$SyntaxHighlight$Style$Default = 0;
+var author$project$SyntaxHighlight$Style$Comment = {$: 'Comment'};
+var author$project$SyntaxHighlight$Style$Default = {$: 'Default'};
 var author$project$SyntaxHighlight$Line$Helpers$toFragment = F2(
 	function (toStyle, _n0) {
 		var syntax = _n0.a;
 		var text = _n0.b;
 		switch (syntax.$) {
-			case 0:
-				return {bp: '', bP: 0, b1: text};
-			case 1:
-				return {bp: '', bP: 1, b1: text};
-			case 2:
-				return {bp: '', bP: 0, b1: text};
+			case 'Normal':
+				return {additionalClass: '', requiredStyle: author$project$SyntaxHighlight$Style$Default, text: text};
+			case 'Comment':
+				return {additionalClass: '', requiredStyle: author$project$SyntaxHighlight$Style$Comment, text: text};
+			case 'LineBreak':
+				return {additionalClass: '', requiredStyle: author$project$SyntaxHighlight$Style$Default, text: text};
 			default:
 				var c = syntax.a;
 				var _n2 = toStyle(c);
 				var requiredStyle = _n2.a;
 				var additionalClass = _n2.b;
-				return {bp: additionalClass, bP: requiredStyle, b1: text};
+				return {additionalClass: additionalClass, requiredStyle: requiredStyle, text: text};
 		}
 	});
 var author$project$SyntaxHighlight$Line$Helpers$toLinesHelp = F3(
@@ -7751,7 +7848,7 @@ var author$project$SyntaxHighlight$Line$Helpers$toLinesHelp = F3(
 							_Utils_update(
 								headFrag,
 								{
-									b1: _Utils_ap(text, headFrag.b1)
+									text: _Utils_ap(text, headFrag.text)
 								}),
 							tailFrags),
 						maybeLastSyntax);
@@ -7804,7 +7901,7 @@ var elm$core$Basics$composeR = F3(
 	});
 var elm$core$Result$map = F2(
 	function (func, ra) {
-		if (!ra.$) {
+		if (ra.$ === 'Ok') {
 			var a = ra.a;
 			return elm$core$Result$Ok(
 				func(a));
@@ -7815,19 +7912,19 @@ var elm$core$Result$map = F2(
 	});
 var elm$parser$Parser$DeadEnd = F3(
 	function (row, col, problem) {
-		return {az: col, a$: problem, a9: row};
+		return {col: col, problem: problem, row: row};
 	});
 var elm$parser$Parser$problemToDeadEnd = function (p) {
-	return A3(elm$parser$Parser$DeadEnd, p.a9, p.az, p.a$);
+	return A3(elm$parser$Parser$DeadEnd, p.row, p.col, p.problem);
 };
 var elm$parser$Parser$Advanced$bagToList = F2(
 	function (bag, list) {
 		bagToList:
 		while (true) {
 			switch (bag.$) {
-				case 0:
+				case 'Empty':
 					return list;
-				case 1:
+				case 'AddRight':
 					var bag1 = bag.a;
 					var x = bag.b;
 					var $temp$bag = bag1,
@@ -7848,10 +7945,10 @@ var elm$parser$Parser$Advanced$bagToList = F2(
 	});
 var elm$parser$Parser$Advanced$run = F2(
 	function (_n0, src) {
-		var parse = _n0;
+		var parse = _n0.a;
 		var _n1 = parse(
-			{az: 1, bu: _List_Nil, c: 1, b: 0, a9: 1, a: src});
-		if (!_n1.$) {
+			{col: 1, context: _List_Nil, indent: 1, offset: 0, row: 1, src: src});
+		if (_n1.$ === 'Good') {
 			var value = _n1.b;
 			return elm$core$Result$Ok(value);
 		} else {
@@ -7863,7 +7960,7 @@ var elm$parser$Parser$Advanced$run = F2(
 var elm$parser$Parser$run = F2(
 	function (parser, source) {
 		var _n0 = A2(elm$parser$Parser$Advanced$run, parser, source);
-		if (!_n0.$) {
+		if (_n0.$ === 'Ok') {
 			var a = _n0.a;
 			return elm$core$Result$Ok(a);
 		} else {
@@ -7880,25 +7977,25 @@ var author$project$SyntaxHighlight$Language$Javascript$toLines = A2(
 var author$project$SyntaxHighlight$javascript = A2(
 	elm$core$Basics$composeR,
 	author$project$SyntaxHighlight$Language$Javascript$toLines,
-	elm$core$Result$map(elm$core$Basics$identity));
+	elm$core$Result$map(author$project$SyntaxHighlight$HCode));
 var author$project$SyntaxHighlight$View$requiredStyleToString = function (required) {
 	return 'elmsh' + function () {
-		switch (required) {
-			case 0:
+		switch (required.$) {
+			case 'Default':
 				return '0';
-			case 1:
+			case 'Comment':
 				return '-comm';
-			case 2:
+			case 'Style1':
 				return '1';
-			case 3:
+			case 'Style2':
 				return '2';
-			case 4:
+			case 'Style3':
 				return '3';
-			case 5:
+			case 'Style4':
 				return '4';
-			case 6:
+			case 'Style5':
 				return '5';
-			case 7:
+			case 'Style6':
 				return '6';
 			default:
 				return '7';
@@ -7942,10 +8039,10 @@ var elm$html$Html$Attributes$classList = function (classes) {
 				A2(elm$core$List$filter, elm$core$Tuple$second, classes))));
 };
 var author$project$SyntaxHighlight$View$fragmentView = function (_n0) {
-	var text = _n0.b1;
-	var requiredStyle = _n0.bP;
-	var additionalClass = _n0.bp;
-	return ((!requiredStyle) && elm$core$String$isEmpty(additionalClass)) ? elm$html$Html$text(text) : A2(
+	var text = _n0.text;
+	var requiredStyle = _n0.requiredStyle;
+	var additionalClass = _n0.additionalClass;
+	return (_Utils_eq(requiredStyle, author$project$SyntaxHighlight$Style$Default) && elm$core$String$isEmpty(additionalClass)) ? elm$html$Html$text(text) : A2(
 		elm$html$Html$span,
 		_List_fromArray(
 			[
@@ -7954,7 +8051,7 @@ var author$project$SyntaxHighlight$View$fragmentView = function (_n0) {
 					[
 						_Utils_Tuple2(
 						author$project$SyntaxHighlight$View$requiredStyleToString(requiredStyle),
-						requiredStyle),
+						!_Utils_eq(requiredStyle, author$project$SyntaxHighlight$Style$Default)),
 						_Utils_Tuple2('elmsh-' + additionalClass, additionalClass !== '')
 					]))
 			]),
@@ -7974,8 +8071,8 @@ var elm$virtual_dom$VirtualDom$attribute = F2(
 var elm$html$Html$Attributes$attribute = elm$virtual_dom$VirtualDom$attribute;
 var author$project$SyntaxHighlight$View$lineView = F3(
 	function (start, index, _n0) {
-		var fragments = _n0.bC;
-		var highlight = _n0.ae;
+		var fragments = _n0.fragments;
+		var highlight = _n0.highlight;
 		return A2(
 			elm$html$Html$div,
 			_List_fromArray(
@@ -7988,17 +8085,17 @@ var author$project$SyntaxHighlight$View$lineView = F3(
 							'elmsh-hl',
 							_Utils_eq(
 								highlight,
-								elm$core$Maybe$Just(0))),
+								elm$core$Maybe$Just(author$project$SyntaxHighlight$Line$Normal))),
 							_Utils_Tuple2(
 							'elmsh-add',
 							_Utils_eq(
 								highlight,
-								elm$core$Maybe$Just(1))),
+								elm$core$Maybe$Just(author$project$SyntaxHighlight$Line$Add))),
 							_Utils_Tuple2(
 							'elmsh-del',
 							_Utils_eq(
 								highlight,
-								elm$core$Maybe$Just(2)))
+								elm$core$Maybe$Just(author$project$SyntaxHighlight$Line$Del)))
 						])),
 					A2(
 					elm$html$Html$Attributes$attribute,
@@ -8030,8 +8127,8 @@ var author$project$SyntaxHighlight$View$toInlineHtml = function (lines) {
 			A2(
 				elm$core$List$map,
 				function (_n0) {
-					var highlight = _n0.ae;
-					var fragments = _n0.bC;
+					var highlight = _n0.highlight;
+					var fragments = _n0.fragments;
 					return _Utils_eq(highlight, elm$core$Maybe$Nothing) ? A2(elm$core$List$map, author$project$SyntaxHighlight$View$fragmentView, fragments) : _List_fromArray(
 						[
 							A2(
@@ -8045,17 +8142,17 @@ var author$project$SyntaxHighlight$View$toInlineHtml = function (lines) {
 											'elmsh-hl',
 											_Utils_eq(
 												highlight,
-												elm$core$Maybe$Just(0))),
+												elm$core$Maybe$Just(author$project$SyntaxHighlight$Line$Normal))),
 											_Utils_Tuple2(
 											'elmsh-add',
 											_Utils_eq(
 												highlight,
-												elm$core$Maybe$Just(1))),
+												elm$core$Maybe$Just(author$project$SyntaxHighlight$Line$Add))),
 											_Utils_Tuple2(
 											'elmsh-del',
 											_Utils_eq(
 												highlight,
-												elm$core$Maybe$Just(2)))
+												elm$core$Maybe$Just(author$project$SyntaxHighlight$Line$Del)))
 										]))
 								]),
 							A2(elm$core$List$map, author$project$SyntaxHighlight$View$fragmentView, fragments))
@@ -8070,7 +8167,7 @@ var elm$core$List$singleton = function (value) {
 var elm$html$Html$pre = _VirtualDom_node('pre');
 var author$project$SyntaxHighlight$View$toBlockHtml = F2(
 	function (maybeStart, lines) {
-		if (maybeStart.$ === 1) {
+		if (maybeStart.$ === 'Nothing') {
 			return A2(
 				elm$html$Html$pre,
 				_List_fromArray(
@@ -8101,12 +8198,12 @@ var author$project$SyntaxHighlight$View$toBlockHtml = F2(
 	});
 var author$project$SyntaxHighlight$toBlockHtml = F2(
 	function (maybeStart, _n0) {
-		var lines = _n0;
+		var lines = _n0.a;
 		return A2(author$project$SyntaxHighlight$View$toBlockHtml, maybeStart, lines);
 	});
 var elm$core$Result$withDefault = F2(
 	function (def, result) {
-		if (!result.$) {
+		if (result.$ === 'Ok') {
 			var a = result.a;
 			return a;
 		} else {
@@ -8129,11 +8226,11 @@ var author$project$Main$toHtml = F3(
 				author$project$SyntaxHighlight$toBlockHtml(maybeStart),
 				A2(
 					elm$core$Result$map,
-					A3(author$project$SyntaxHighlight$highlightLines, hlModel.an, hlModel.as, hlModel.ak),
+					A3(author$project$SyntaxHighlight$highlightLines, hlModel.mode, hlModel.start, hlModel.end),
 					author$project$SyntaxHighlight$javascript(str))));
 	});
 var author$project$Main$OnScroll = function (a) {
-	return {$: 1, a: a};
+	return {$: 'OnScroll', a: a};
 };
 var elm$core$String$fromFloat = _String_fromNumber;
 var elm$virtual_dom$VirtualDom$node = function (tag) {
@@ -8153,7 +8250,7 @@ var elm$html$Html$Attributes$boolProperty = F2(
 var elm$html$Html$Attributes$spellcheck = elm$html$Html$Attributes$boolProperty('spellcheck');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Normal', a: a};
 };
 var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
 var elm$html$Html$Events$on = F2(
@@ -8167,7 +8264,7 @@ var elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
 var elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 1, a: a};
+	return {$: 'MayStopPropagation', a: a};
 };
 var elm$html$Html$Events$stopPropagationOn = F2(
 	function (event, decoder) {
@@ -8193,7 +8290,7 @@ var elm$html$Html$Events$onInput = function (tagger) {
 var elm$json$Json$Decode$int = _Json_decodeInt;
 var author$project$Main$viewTextarea = F3(
 	function (thisLang, codeStr, _n0) {
-		var showLineCount = _n0.aq;
+		var showLineCount = _n0.showLineCount;
 		return A2(
 			elm$html$Html$div,
 			_List_Nil,
@@ -8250,8 +8347,8 @@ var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var author$project$Main$viewLanguage = F3(
 	function (thisLang, parser, model) {
-		var lineCount = model.al;
-		var highlight = model.ae;
+		var lineCount = model.lineCount;
+		var highlight = model.highlight;
 		var langModel = A2(author$project$Main$getLangModel, thisLang, model);
 		return A2(
 			elm$html$Html$div,
@@ -8274,14 +8371,14 @@ var author$project$Main$viewLanguage = F3(
 							A2(
 							elm$html$Html$Attributes$style,
 							'transform',
-							'translate(' + (elm$core$String$fromInt(-langModel.u.aQ) + ('px, ' + (elm$core$String$fromInt(-langModel.u.bj) + 'px)')))),
+							'translate(' + (elm$core$String$fromInt(-langModel.scroll.left) + ('px, ' + (elm$core$String$fromInt(-langModel.scroll.top) + 'px)')))),
 							A2(elm$html$Html$Attributes$style, 'will-change', 'transform')
 						]),
 					_List_fromArray(
 						[
-							A3(parser, lineCount, langModel.F, highlight)
+							A3(parser, lineCount, langModel.code, highlight)
 						])),
-					A3(author$project$Main$viewTextarea, thisLang, langModel.F, model)
+					A3(author$project$Main$viewTextarea, thisLang, langModel.code, model)
 				]));
 	});
 var elm$html$Html$a = _VirtualDom_node('a');
@@ -8361,8 +8458,8 @@ var author$project$Main$view = function (model) {
 								elm$html$Html$section,
 								_List_Nil,
 								function () {
-									var _n0 = model.ad;
-									if (!_n0.$) {
+									var _n0 = model.docs;
+									if (_n0.$ === 'Just') {
 										var docs = _n0.a;
 										return _List_fromArray(
 											[
@@ -8371,13 +8468,13 @@ var author$project$Main$view = function (model) {
 												_List_Nil,
 												_List_fromArray(
 													[
-														elm$html$Html$text(docs.bi),
+														elm$html$Html$text(docs.title),
 														A2(
 														elm$html$Html$small,
 														_List_Nil,
 														_List_fromArray(
 															[
-																elm$html$Html$text('Author: ' + docs.av)
+																elm$html$Html$text('Author: ' + docs.author)
 															]))
 													])),
 												A2(
@@ -8390,15 +8487,15 @@ var author$project$Main$view = function (model) {
 														_List_Nil,
 														_List_fromArray(
 															[
-																elm$html$Html$text(docs.ac)
+																elm$html$Html$text(docs.details)
 															])),
 														function () {
-														var _n1 = model.A;
+														var _n1 = model.isWaiting;
 														if (_n1) {
 															return elm$html$Html$text('');
 														} else {
-															var _n2 = model.Z;
-															if (_n2.$ === 1) {
+															var _n2 = model.testResults;
+															if (_n2.$ === 'Nothing') {
 																return A2(
 																	elm$html$Html$div,
 																	_List_Nil,
@@ -8446,15 +8543,15 @@ var author$project$Main$view = function (model) {
 																		]));
 															} else {
 																var tr = _n2.a;
-																var _n3 = A2(elm$core$Dict$get, tr.bl + '()', docs.aU);
-																if (!_n3.$) {
+																var _n3 = A2(elm$core$Dict$get, tr.value + '()', docs.methods);
+																if (_n3.$ === 'Just') {
 																	var m = _n3.a;
 																	return A2(
 																		elm$html$Html$p,
 																		_List_Nil,
 																		_List_fromArray(
 																			[
-																				elm$html$Html$text(m.ac)
+																				elm$html$Html$text(m.details)
 																			]));
 																} else {
 																	return elm$html$Html$text('');
@@ -8472,7 +8569,7 @@ var author$project$Main$view = function (model) {
 									}
 								}()),
 								function () {
-								var _n4 = model.A;
+								var _n4 = model.isWaiting;
 								if (_n4) {
 									return A2(
 										elm$html$Html$div,
@@ -8482,8 +8579,8 @@ var author$project$Main$view = function (model) {
 											]),
 										_List_Nil);
 								} else {
-									var _n5 = model.Z;
-									if (_n5.$ === 1) {
+									var _n5 = model.testResults;
+									if (_n5.$ === 'Nothing') {
 										return elm$html$Html$text('');
 									} else {
 										var tr = _n5.a;
@@ -8491,9 +8588,9 @@ var author$project$Main$view = function (model) {
 											elm$html$Html$div,
 											_List_fromArray(
 												[
-													elm$html$Html$Attributes$class('card fluid'),
+													elm$html$Html$Attributes$class('card fluid warning'),
 													function () {
-													var _n6 = model.T;
+													var _n6 = model.isTyping;
 													if (_n6) {
 														return A2(elm$html$Html$Attributes$style, 'opacity', '0.5');
 													} else {
@@ -8516,7 +8613,7 @@ var author$project$Main$view = function (model) {
 															_List_Nil,
 															_List_fromArray(
 																[
-																	elm$html$Html$text(tr.aT)
+																	elm$html$Html$text(tr.message)
 																]))
 														]))
 												]));
@@ -8533,7 +8630,7 @@ var author$project$Main$view = function (model) {
 											elm$html$Html$div,
 											_List_fromArray(
 												[
-													elm$html$Html$Attributes$class('card  fluid')
+													elm$html$Html$Attributes$class('card fluid')
 												]),
 											_List_fromArray(
 												[
@@ -8546,13 +8643,13 @@ var author$project$Main$view = function (model) {
 														]))
 												]));
 									},
-									model.S))
+									model.error))
 							]))
 					]))
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;
 var author$project$Main$main = elm$browser$Browser$element(
-	{bG: author$project$Main$init, b0: author$project$Main$subscriptions, b2: author$project$Main$update, b4: author$project$Main$view});
+	{init: author$project$Main$init, subscriptions: author$project$Main$subscriptions, update: author$project$Main$update, view: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(
-	elm$json$Json$Decode$succeed(0))(0)}});}(this));
+	elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));
