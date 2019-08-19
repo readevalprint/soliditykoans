@@ -1,5 +1,5 @@
 # Solidity Koans
-Learn Solidity through TDD
+Learn [Solidity](https://solidity.readthedocs.io/) through TDD
 
 # To do
 
@@ -12,5 +12,5 @@ Learn Solidity through TDD
 
 ## Motvation 
 This project had dual purposes
-1. To create a project in (elm)[https://elm-lang.org] that was bigger than a toy
-2. To help people learn Solidity 
+1. To create a project in [elm](https://elm-lang.org) that was bigger than a toy
+2. To help people learn [Solidity](https://solidity.readthedocs.io/) 
