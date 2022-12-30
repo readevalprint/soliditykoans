@@ -7,7 +7,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "remix-simulator": "0.0.8",
+    "remix-simulator": "0.1.9-beta.6",
     "remix-tests": "file:../remix/remix-tests",
     "solc": "^0.5.0"
   },
